@@ -52,10 +52,12 @@ CREATE TABLE parejas (
     id INT PRIMARY KEY AUTO_INCREMENT,
     jugador1_id INT NOT NULL,
     jugador2_id INT NOT NULL,
-    torneo_id INT NOT NULL,
+    ranking INT NOT NULL,
+    rama ENUM('masculina', 'femenina', 'mixta') NOT NULL,
+    categoria ENUM('A', 'B+', 'B', 'C+', 'C', 'D') NOT NULL,   
     FOREIGN KEY (jugador1_id) REFERENCES jugadores(id),
     FOREIGN KEY (jugador2_id) REFERENCES jugadores(id),
-    FOREIGN KEY (torneo_id) REFERENCES torneos(id)
+   
 );
 
 

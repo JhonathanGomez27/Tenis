@@ -5,13 +5,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Torneo } from './entities/torneo.entity';
 import { Repository } from 'typeorm';
 import { handleDbError } from 'src/utils/error.message';
-import { rama } from '../jugadores/entities/jugadore.entity';
+
 
 @Injectable()
 export class TorneosService {
 
   constructor(
-    @InjectRepository(Torneo) private torneoRepository: Repository<Torneo>
+    @InjectRepository(Torneo) private torneoRepository: Repository<Torneo> 
   ) { }
 
 
@@ -34,10 +34,7 @@ export class TorneosService {
   }
 
 
-  // obtenerRamas(): { nombre: string, descripcion: string }[] {
-  //   const enumKeys = Object.keys(rama);
-  //   return enumKeys.map(key => ({ nombre: rama[key], descripcion: rama[key] }));
-  // }
+  
 
 
 

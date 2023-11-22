@@ -10,7 +10,7 @@ import { JugadoresService } from '../jugadores/jugadores.service';
 
 @Injectable()
 export class UsuariosService {
-
+ 
 
 
   constructor(
@@ -21,18 +21,14 @@ export class UsuariosService {
 
 
 
-
+ 
 
 
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario | { /*error: any;*/ message: string }> {
     try {
 
-
-
       createUsuarioDto.contrasena = await this.hashingService.hash(createUsuarioDto.contrasena.trim());
-
-
       const usuario = this.usuarioRepository.create(createUsuarioDto);
       const usuarioGuardado = await this.usuarioRepository.save(usuario);
 
@@ -44,13 +40,9 @@ export class UsuariosService {
           categoria: createUsuarioDto.categoria,
           userid: usuarioGuardado
 
-
         }
         const jugador = await this.jugadoresService.create(jugadorDto)       
       }
-
-
-
       usuarioGuardado.contrasena = undefined
       return usuarioGuardado;
     } catch (error) {

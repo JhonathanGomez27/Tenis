@@ -4,7 +4,7 @@ import { CreateTorneoDto } from './dto/create-torneo.dto';
 import { UpdateTorneoDto } from './dto/update-torneo.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { categoria, rama } from '../jugadores/entities/jugadore.entity';
-import { Fases, Modalidad, Tipo } from './entities/torneo.entity';
+import { Estado, Fases, Modalidad, Tipo } from './entities/torneo.entity';
 import { JwtAuthAccessGuard } from '../iam/guards/jwt-auth.guard';
 import { RolesGuard } from '../iam/guards/roles.guard';
 import { Roles } from '../iam/decorators';
@@ -53,6 +53,12 @@ export class TorneosController {
   @Get('ObtenerFases')
   obtenerFases() {
     return this.torneosService.enumToJsonArray(Fases);
+  }
+
+
+  @Get('ObtenerEstados')
+  obtenerEstados() {
+    return this.torneosService.enumToJsonArray(Estado);
   }
 
   

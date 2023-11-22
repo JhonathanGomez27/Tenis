@@ -1,4 +1,5 @@
 // usuario.entity.ts
+import { Exclude } from 'class-transformer';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 
@@ -23,7 +24,7 @@ export class Usuario {
   })
   rol: 'admin' | 'user'; 
 
-  @Column()
+  @Column() 
   contrasena: string;
 
   @Column({ unique: true })

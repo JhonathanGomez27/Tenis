@@ -5,7 +5,7 @@ import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedCo
 export enum rama {
     MASCULINA = 'masculina',
     FEMENINA = 'femenina',
-    MIXTA = 'mixta'  
+    MIXTA = 'mixta'
 }
 
 
@@ -15,12 +15,12 @@ export enum categoria {
     B = 'B',
     CMAS = 'C+',
     C = 'C',
-    D = 'D', 
+    D = 'D',
 }
 
 
 
-@Entity({ name: 'jugadores'})
+@Entity({ name: 'jugadores' })
 export class Jugador {
 
     @PrimaryGeneratedColumn()
@@ -29,12 +29,12 @@ export class Jugador {
     @Column()
     nombre: string;
 
-    @Column({default: 0})
-    ranking: number; 
+    @Column({ default: 0 })
+    ranking: number;
 
     @Column({
         type: 'enum',
-        enum: rama        
+        enum: rama
     })
     rama: 'masculina' | 'femenina'
 
@@ -43,9 +43,14 @@ export class Jugador {
         enum: categoria,
         default: categoria.D
     })
-    categoria: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D' 
+    categoria: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D'
+
+    // @OneToOne(() => Usuario)
+    // @JoinColumn({ name: 'useridId' })
+    // userid: Usuario
+
 
     @OneToOne(() => Usuario)
-    @JoinColumn()
-    userid: Usuario
+    @JoinColumn({ name: 'useridId' })
+    userid: Usuario;
 }

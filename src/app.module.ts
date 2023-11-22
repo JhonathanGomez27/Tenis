@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { IamModule } from './modules/iam/iam.module';
 import { JugadoresModule } from './modules/jugadores/jugadores.module';
 import { TorneosModule } from './modules/torneos/torneos.module';
+import { ParejasModule } from './modules/parejas/parejas.module';
 
 
 @Module({
@@ -39,7 +40,8 @@ import { TorneosModule } from './modules/torneos/torneos.module';
     UsuariosModule,
     IamModule,
     JugadoresModule,
-    TorneosModule
+    TorneosModule,
+    ParejasModule
    
     
   ],

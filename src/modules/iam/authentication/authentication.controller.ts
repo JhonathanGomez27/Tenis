@@ -25,7 +25,7 @@ export class AuthenticationController {
     @Post("signin")
     async signIn(@Req() req: Request) {
       const user = req.user as Usuario;
-      console.log('user', user)
+      
       //const tfaCode = req.body.tfaCode || null;  
       return await this.authService.signIn(user/*, tfaCode*/);      
     }

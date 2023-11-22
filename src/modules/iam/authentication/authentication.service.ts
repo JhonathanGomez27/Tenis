@@ -21,6 +21,8 @@ export class AuthenticationService {
                 this.authcommonService.generateJwtRefreshoken(data)
             ]);
 
+            payload.contrasena = undefined;
+
             return {
                 message: "Acceso autorizado",
                 accessToken,
