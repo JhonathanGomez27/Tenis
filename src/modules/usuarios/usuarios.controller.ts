@@ -36,13 +36,10 @@ export class UsuariosController {
     name: 'userId',
     required: true,
     type: Number
-  })
-  @ApiBody({
-    
-  })
+  })  
   @Patch('/editar/:userId')
-  editarInfo(@Param('id') id: number, @Body() editUsuarioDto: UpdateUsuarioDto){
-    return this.usuariosService.editarInfo(id, editUsuarioDto)
+  editarInfo(@Param('userId') userId: number, @Body() editUsuarioDto: UpdateUsuarioDto){
+    return this.usuariosService.editarInfo(userId, editUsuarioDto)
 
   }
  

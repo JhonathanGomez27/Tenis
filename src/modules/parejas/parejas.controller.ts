@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { ParejasService } from './parejas.service';
 import { CreateParejaDto } from './dto/create-pareja.dto';
 import { UpdateParejaDto } from './dto/update-pareja.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../iam/decorators';
 import { JwtAuthAccessGuard } from '../iam/guards/jwt-auth.guard';
 import { RolesGuard } from '../iam/guards/roles.guard';
@@ -18,6 +18,19 @@ export class ParejasController {
   @Post()
   create(@Body() createParejaDto: CreateParejaDto) {
     return this.parejasService.create(createParejaDto);
+  }
+
+
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthAccessGuard, RolesGuard)
+  @ApiParam({
+    name: 'parejaId',
+    required: true,
+    type: Number
+  }) 
+  @Patch('editar/:parejaId')
+  update(@Param('parejaId') parejaId: number, @Body() updateParejaDto: UpdateParejaDto) {
+    return this.parejasService.update(parejaId, updateParejaDto);
   }
 
  

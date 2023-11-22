@@ -20,12 +20,6 @@ export class UsuariosService {
     private readonly jugadoresService: JugadoresService
   ) { }
 
-
-
-
-
-
-
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario | { /*error: any;*/ message: string }> {
     try {
 
@@ -58,56 +52,56 @@ export class UsuariosService {
 
     try {
       //buscar si existe
-    const userFound = await this.usuarioRepository.findOneBy({ id: id })
+      const userFound = await this.usuarioRepository.findOneBy({ id: id })
 
-    if (!userFound) {
-      throw new NotFoundException('Usuario no encontrado, por favor verifique');
-    }
-
-    if (userFound.rol === rolEnum.USER) {
-      const jugador = await this.jugadoresService.getJugadorByUserId(userFound);
-
-      if (!jugador) {
-        throw new NotFoundException('Jugador no encontrado, por favor verifique');
-      }
-      if (editUsuarioDto.categoria)
-        jugador.categoria = editUsuarioDto.categoria
-
-      if (editUsuarioDto.rama)
-        jugador.rama = editUsuarioDto.rama
-
-
-      if (editUsuarioDto.ranking)
-        jugador.ranking = editUsuarioDto.ranking
-
-
-      if (editUsuarioDto.nombre) {
-        jugador.nombre = editUsuarioDto.nombre
-        userFound.nombre = editUsuarioDto.nombre
+      if (!userFound) {
+        throw new NotFoundException('Usuario no encontrado, por favor verifique');
       }
 
-      if (editUsuarioDto.correo)
-        userFound.correo = editUsuarioDto.correo
+      if (userFound.rol === rolEnum.USER) {
+        const jugador = await this.jugadoresService.getJugadorByUserId(userFound);
+
+        if (!jugador) {
+          throw new NotFoundException('Jugador no encontrado, por favor verifique');
+        }
+        if (editUsuarioDto.categoria)
+          jugador.categoria = editUsuarioDto.categoria
+
+        if (editUsuarioDto.rama)
+          jugador.rama = editUsuarioDto.rama
 
 
-      //hacer el update de jugador
-      await this.jugadoresService.actualizarJugador(jugador);
+        if (editUsuarioDto.ranking)
+          jugador.ranking = editUsuarioDto.ranking
 
-      //hacer el update de usuario
-      await this.usuarioRepository.save(userFound);
 
-      return {
-        message: 'Jugador actualizado Correctamente'
+        if (editUsuarioDto.nombre) {
+          jugador.nombre = editUsuarioDto.nombre
+          userFound.nombre = editUsuarioDto.nombre
+        }
+
+        if (editUsuarioDto.correo)
+          userFound.correo = editUsuarioDto.correo
+
+
+        //hacer el update de jugador
+        await this.jugadoresService.actualizarJugador(jugador);
+
+        //hacer el update de usuario
+        await this.usuarioRepository.save(userFound);
+
+        return {
+          message: 'Jugador actualizado Correctamente'
+        }
+
+
+
       }
 
-      
-
-    }
-      
     } catch (error) {
       const message = handleDbError(error)
       return { message }
-      
+
     }
   }
 
