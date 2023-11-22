@@ -28,8 +28,6 @@ export class JugadoresController {
     return this.jugadoresService.findAll();
   }
 
-
-
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
   @Get('filters')

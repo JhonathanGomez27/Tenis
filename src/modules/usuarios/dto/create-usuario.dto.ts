@@ -1,4 +1,5 @@
-import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from "class-validator";
+import { IsEmail, IsEnum, IsIn, IsOptional, IsString, MinLength } from "class-validator";
+import { categoria, rama } from "src/modules/jugadores/entities/jugadore.entity";
 
 export class CreateUsuarioDto {
 
@@ -16,12 +17,14 @@ export class CreateUsuarioDto {
         
 
     @IsOptional()
-    @IsEnum(['masculina', 'femenina'])
+    //@IsEnum(['masculina', 'femenina'])
+    @IsIn(Object.values(rama))
     readonly rama?: 'masculina' | 'femenina'
 
 
     @IsOptional()
-    @IsEnum(['A', 'B+', 'B', 'C+', 'C', 'D'])
+    //@IsEnum(['A', 'B+', 'B', 'C+', 'C', 'D'])
+    @IsIn(Object.values(categoria))
     readonly categoria?: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D'  
 
 

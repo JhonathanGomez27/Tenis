@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request }
 import { UsuariosService } from './usuarios.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 import { JwtAuthAccessGuard } from '../iam/guards/jwt-auth.guard';
 
 @Controller('usuarios')
@@ -23,5 +23,27 @@ export class UsuariosController {
     return this.usuariosService.getMisDatos(req.user)
   }
 
+
+
+
+  // @Get('cliente/:id')
+  // findOneCliente(@Param('id', MongoIdPipe) id: string) {
+  //   return this.usersService.findOneCliente(id);
+  // }
+
+
+  @ApiParam({
+    name: 'userId',
+    required: true,
+    type: Number
+  })
+  @ApiBody({
+    
+  })
+  @Patch('/editar/:userId')
+  editarInfo(@Param('id') id: number, @Body() editUsuarioDto: UpdateUsuarioDto){
+    return this.usuariosService.editarInfo(id, editUsuarioDto)
+
+  }
  
 }

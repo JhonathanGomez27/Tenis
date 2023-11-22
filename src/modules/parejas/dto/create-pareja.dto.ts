@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { IsEnum, IsNotEmpty, NotEquals, Validate, ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface, registerDecorator } from "class-validator"
-import { Jugador } from "src/modules/jugadores/entities/jugadore.entity"
+import { IsEnum, IsIn, IsNotEmpty, NotEquals, Validate, ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface, registerDecorator } from "class-validator"
+import { Jugador, categoria, rama } from "src/modules/jugadores/entities/jugadore.entity"
 
 
 
@@ -32,14 +32,14 @@ export function JugadoresDiferentes(validationOptions?: ValidationOptions) {
 export class CreateParejaDto {    
   
 
-    // @IsNumber()
-    // @IsPositive()
-    // ranking: number
+ 
 
-    @IsEnum(['masculina', 'femenina'])
-    readonly rama: 'masculina' | 'femenina'
+    //@IsEnum(['masculina', 'femenina'])
+    @IsIn(Object.values(rama))
+    readonly rama: 'masculina' | 'femenina' | 'mixta'
 
-    @IsEnum(['A', 'B+', 'B', 'C+', 'C', 'D'])
+    //@IsEnum(['A', 'B+', 'B', 'C+', 'C', 'D'])
+    @IsIn(Object.values(categoria))
     readonly categoria: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D' 
     
     @IsNotEmpty()

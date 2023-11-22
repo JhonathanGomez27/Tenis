@@ -24,6 +24,12 @@ export class JugadoresService {
   }
 
 
+  async actualizarJugador(updateJugadorDto: UpdateJugadorDto){
+    const jugador = await this.jugadorRepository.save(updateJugadorDto)
+    return jugador
+  }
+
+
   async getJugadorByUserId(usuario: Usuario) {
     const jugador = await this.jugadorRepository.findOneBy({ userid: usuario })
     return jugador
