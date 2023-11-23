@@ -12,6 +12,9 @@ import { IamModule } from './modules/iam/iam.module';
 import { JugadoresModule } from './modules/jugadores/jugadores.module';
 import { TorneosModule } from './modules/torneos/torneos.module';
 import { ParejasModule } from './modules/parejas/parejas.module';
+import { PartidosModule } from './modules/partidos/partidos.module';
+import { InscripcionesModule } from './modules/inscripciones/inscripciones.module';
+
 
 
 @Module({
@@ -41,7 +44,9 @@ import { ParejasModule } from './modules/parejas/parejas.module';
     IamModule,
     JugadoresModule,
     TorneosModule,
-    ParejasModule
+    ParejasModule,
+    PartidosModule,
+    InscripcionesModule
    
     
   ],

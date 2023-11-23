@@ -24,14 +24,6 @@ export class UsuariosController {
   }
 
 
-
-
-  // @Get('cliente/:id')
-  // findOneCliente(@Param('id', MongoIdPipe) id: string) {
-  //   return this.usersService.findOneCliente(id);
-  // }
-
-
   @ApiParam({
     name: 'userId',
     required: true,

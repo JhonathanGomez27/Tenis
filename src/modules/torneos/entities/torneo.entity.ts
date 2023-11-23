@@ -1,5 +1,7 @@
+import { Inscripcion } from "src/modules/inscripciones/entities/inscripcione.entity";
 import { categoria, rama } from "src/modules/jugadores/entities/jugadore.entity";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Partido } from "src/modules/partidos/entities/partido.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 
 
@@ -28,9 +30,6 @@ export enum Fases {
     FINAL = 'final',
     OTRA = 'otra'
 }
-
-
-
 
 @Entity({ name: 'torneos' })
 export class Torneo {
@@ -61,7 +60,11 @@ export class Torneo {
     })
     modalidad: 'singles' | 'dobles';
 
-    @Column()
+
+    //@Column({ default: 4 })
+    // cantidad_grupos: number;
+
+    @Column({ default: 4 })
     cantidad_grupos: number;
 
     @Column({
@@ -81,7 +84,7 @@ export class Torneo {
             },
         },
     })
-    configuracion_sets: any; 
+    configuracion_sets: any;
 
 
     @Column({
@@ -102,6 +105,14 @@ export class Torneo {
         default: Estado.INICIAL
     })
     estado: 'Inicial' | 'En Proceso' | 'Finalizado';
+
+
+    @OneToMany(() => Partido, partido => partido.torneo)
+    partidos: Partido[];
+
+
+    @OneToMany(() => Inscripcion, inscripcion => inscripcion.torneo)
+    inscripciones: Inscripcion[];
 
 
 }

@@ -98,6 +98,8 @@ export class ParejasService {
       rama: pareja.rama,
       ranking: pareja.ranking,
       categoria: pareja.categoria,
+      jugador1: pareja.jugador1.nombre,
+      jugador2: pareja.jugador2.nombre,
       juagador1: {
         id: pareja.jugador1.id,
         nombre: pareja.jugador1.nombre,
@@ -156,6 +158,8 @@ export class ParejasService {
       rama: pareja.rama,
       ranking: pareja.ranking,
       categoria: pareja.categoria,
+      jugador1: pareja.jugador1.nombre,
+      jugador2: pareja.jugador2.nombre,
       juagador1: {
         id: pareja.jugador1.id,
         nombre: pareja.jugador1.nombre,
@@ -225,6 +229,8 @@ export class ParejasService {
       rama: pareja.rama,
       ranking: pareja.ranking,
       categoria: pareja.categoria,
+      jugador1: pareja.jugador1.nombre,
+      jugador2: pareja.jugador2.nombre,
       juagador1: {
         id: pareja.jugador1.id,
         nombre: pareja.jugador1.nombre,

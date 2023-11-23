@@ -8,25 +8,17 @@ export class CreateJugadorDto {
   
 
     @IsString()
-    readonly nombre: string 
-
-    // @IsNumber()
-    // @IsPositive()
-    // ranking: number
+    readonly nombre: string    
 
     @IsEnum(['masculina', 'femenina'])
     readonly rama: 'masculina' | 'femenina'
-
 
     @IsEnum(['A', 'B+', 'B', 'C+', 'C', 'D'])
     readonly categoria: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D'  
 
     @IsEnum(['A', 'B+', 'B', 'C+', 'C', 'D'])
     readonly categoria_dobles: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D'  
-
-
-    // @IsNumber()
-    // @IsPositive()
+  
     readonly userid: Usuario
 
 

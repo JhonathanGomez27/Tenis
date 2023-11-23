@@ -1,7 +1,7 @@
 import { IsDate, IsIn, IsJSON, IsNotEmpty, IsNumber, IsObject, IsString } from "class-validator";
 import { Fases, Modalidad, Tipo } from "../entities/torneo.entity";
 import { categoria, rama } from "src/modules/jugadores/entities/jugadore.entity";
-import { Type } from "class-transformer";
+import { Type } from "class-transformer"; 
 
 export class CreateTorneoDto {
 

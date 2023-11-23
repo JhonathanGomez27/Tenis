@@ -157,8 +157,6 @@ export class JugadoresService {
 
 
 
-
-
   async getJugadorById(id: number) {
     
     const jugador = await this.jugadorRepository.findOne({
