@@ -36,45 +36,45 @@ export class ParejasService {
 
       //buscar si existe
 
-      const parejaFound = await this.parejaRepository.findOneBy({id: id})
+      const parejaFound = await this.parejaRepository.findOneBy({ id: id })
 
       if (!parejaFound) {
         throw new NotFoundException('Pareja no encontrada, por favor verifique');
       }
 
 
-      if(parejaFound.jugador1 === updateParejaDto.jugador2 || parejaFound.jugador2 === updateParejaDto.jugador1 ){
-        throw new MiExcepcionPersonalizada('Los jugadores deben ser diferentes', 430); 
+      if (parejaFound.jugador1 === updateParejaDto.jugador2 || parejaFound.jugador2 === updateParejaDto.jugador1) {
+        throw new MiExcepcionPersonalizada('Los jugadores deben ser diferentes', 430);
 
       }
 
       if (updateParejaDto.categoria)
-      parejaFound.categoria = updateParejaDto.categoria
+        parejaFound.categoria = updateParejaDto.categoria
 
       if (updateParejaDto.rama)
-      parejaFound.rama = updateParejaDto.rama
+        parejaFound.rama = updateParejaDto.rama
 
 
       if (updateParejaDto.ranking)
-      parejaFound.ranking = updateParejaDto.ranking
+        parejaFound.ranking = updateParejaDto.ranking
 
-      if(updateParejaDto.jugador1)
-      parejaFound.jugador1 = updateParejaDto.jugador1
+      if (updateParejaDto.jugador1)
+        parejaFound.jugador1 = updateParejaDto.jugador1
 
-      if(updateParejaDto.jugador2)
-      parejaFound.jugador2 = updateParejaDto.jugador2
+      if (updateParejaDto.jugador2)
+        parejaFound.jugador2 = updateParejaDto.jugador2
 
 
       await this.parejaRepository.save(parejaFound)
 
-      return{
+      return {
         message: 'Pareja Actuzalizada correctamente'
       }
 
     } catch (error) {
       //console.log('error', error)
 
-      
+
 
       //return error
       const message = handleDbError(error)
@@ -83,6 +83,194 @@ export class ParejasService {
     }
 
 
+
+  }
+
+
+  async findAll() {
+    const parejas = await this.parejaRepository.find({
+      //relations: ['jugador1', 'jugador2']
+      relations: ['jugador1', 'jugador1.userid', 'jugador2', 'jugador2.userid'],
+    });    
+
+    const parejaResponse = parejas.map(pareja => ({
+      id: pareja.id,
+      rama: pareja.rama,
+      ranking: pareja.ranking,
+      categoria: pareja.categoria,
+      juagador1: {
+        id: pareja.jugador1.id,
+        nombre: pareja.jugador1.nombre,
+        ranking: pareja.jugador1.ranking,
+        rama: pareja.jugador1.rama,
+        categoria: pareja.jugador1.categoria,
+        categoria_dobles: pareja.jugador1.categoria_dobles,
+        userid: pareja.jugador1.userid.id,
+        correo: pareja.jugador1.userid.correo
+      },
+      juagador2: {
+        id: pareja.jugador2.id,
+        nombre: pareja.jugador2.nombre,
+        ranking: pareja.jugador2.ranking,
+        rama: pareja.jugador2.rama,
+        categoria: pareja.jugador2.categoria,
+        categoria_dobles: pareja.jugador2.categoria_dobles,
+        userid: pareja.jugador2.userid.id,
+        correo: pareja.jugador2.userid.correo
+      }
+
+    }));
+    return parejaResponse
+  }
+
+
+  async findParejasByFilters(
+    ranking?: number,
+    rama?: string,
+    categoria?: string   
+  ){
+
+    const whereConditions: Record<string, any> = {};
+
+
+    if (ranking) {
+      whereConditions.ranking = ranking;
+    }
+
+    if (rama) {
+      whereConditions.rama = rama;
+    }
+
+    if (categoria) {
+      whereConditions.categoria = categoria;
+    }
+
+    const parejas = await this.parejaRepository.find({
+      where: whereConditions,
+      relations: ['jugador1', 'jugador1.userid', 'jugador2', 'jugador2.userid'],
+    });
+
+
+    const parejaResponse = parejas.map(pareja => ({
+      id: pareja.id,
+      rama: pareja.rama,
+      ranking: pareja.ranking,
+      categoria: pareja.categoria,
+      juagador1: {
+        id: pareja.jugador1.id,
+        nombre: pareja.jugador1.nombre,
+        ranking: pareja.jugador1.ranking,
+        rama: pareja.jugador1.rama,
+        categoria: pareja.jugador1.categoria,
+        categoria_dobles: pareja.jugador1.categoria_dobles,
+        userid: pareja.jugador1.userid.id,
+        correo: pareja.jugador1.userid.correo
+      },
+      juagador2: {
+        id: pareja.jugador2.id,
+        nombre: pareja.jugador2.nombre,
+        ranking: pareja.jugador2.ranking,
+        rama: pareja.jugador2.rama,
+        categoria: pareja.jugador2.categoria,
+        categoria_dobles: pareja.jugador2.categoria_dobles,
+        userid: pareja.jugador2.userid.id,
+        correo: pareja.jugador2.userid.correo
+      }
+
+    }));
+
+
+    return {
+      parejas: parejaResponse,
+      total: parejaResponse.length
+    }
+
+
+  }
+
+
+  async findParejasByFiltersPaginated(
+    page: number,
+    limit: number,
+    ranking?: number,
+    rama?: string,
+    categoria?: string   
+  ){
+
+    const whereConditions: Record<string, any> = {};
+
+
+    if (ranking) {
+      whereConditions.ranking = ranking;
+    }
+
+    if (rama) {
+      whereConditions.rama = rama;
+    }
+
+    if (categoria) {
+      whereConditions.categoria = categoria;
+    }   
+
+    const [parejas, total] = await this.parejaRepository.findAndCount({
+        where: whereConditions,
+        relations: ['jugador1', 'jugador1.userid', 'jugador2', 'jugador2.userid'],
+        skip: (page - 1) * limit,
+        take: limit
+      }); 
+
+
+    const parejaResponse = parejas.map(pareja => ({
+      id: pareja.id,
+      rama: pareja.rama,
+      ranking: pareja.ranking,
+      categoria: pareja.categoria,
+      juagador1: {
+        id: pareja.jugador1.id,
+        nombre: pareja.jugador1.nombre,
+        ranking: pareja.jugador1.ranking,
+        rama: pareja.jugador1.rama,
+        categoria: pareja.jugador1.categoria,
+        categoria_dobles: pareja.jugador1.categoria_dobles,
+        userid: pareja.jugador1.userid.id,
+        correo: pareja.jugador1.userid.correo
+      },
+      juagador2: {
+        id: pareja.jugador2.id,
+        nombre: pareja.jugador2.nombre,
+        ranking: pareja.jugador2.ranking,
+        rama: pareja.jugador2.rama,
+        categoria: pareja.jugador2.categoria,
+        categoria_dobles: pareja.jugador2.categoria_dobles,
+        userid: pareja.jugador2.userid.id,
+        correo: pareja.jugador2.userid.correo
+      }
+
+    }));
+
+
+    return {
+      parejas: parejaResponse,
+      total
+    }
+
+
+  }
+
+
+  async getParejaById(id: number){
+    const pareja = await this.parejaRepository.findOne({
+      where: { id: id },
+      relations: ['jugador1', 'jugador1.userid', 'jugador2', 'jugador2.userid'],
+    });
+
+    if (!pareja)
+      throw new NotFoundException('La Pareja buscado no existe')
+
+    pareja.jugador1.userid.contrasena = undefined
+    pareja.jugador2.userid.contrasena = undefined
+
+    return pareja;
 
   }
 

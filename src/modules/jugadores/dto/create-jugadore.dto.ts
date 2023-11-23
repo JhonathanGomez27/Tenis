@@ -21,6 +21,9 @@ export class CreateJugadorDto {
     @IsEnum(['A', 'B+', 'B', 'C+', 'C', 'D'])
     readonly categoria: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D'  
 
+    @IsEnum(['A', 'B+', 'B', 'C+', 'C', 'D'])
+    readonly categoria_dobles: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D'  
+
 
     // @IsNumber()
     // @IsPositive()

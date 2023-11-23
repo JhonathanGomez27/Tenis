@@ -33,7 +33,9 @@ export class UsuariosService {
           //ranking: createUsuarioDto.ranking,
           rama: createUsuarioDto.rama,
           categoria: createUsuarioDto.categoria,
-          userid: usuarioGuardado
+          categoria_dobles: createUsuarioDto.categoria_dobles,
+          userid: usuarioGuardado,
+
 
         }
         const jugador = await this.jugadoresService.create(jugadorDto)
@@ -49,6 +51,9 @@ export class UsuariosService {
 
 
   async editarInfo(id: number, editUsuarioDto: UpdateUsuarioDto) {
+
+
+    console.log('editUsuarioDto', editUsuarioDto)
 
     try {
       //buscar si existe
@@ -66,6 +71,9 @@ export class UsuariosService {
         }
         if (editUsuarioDto.categoria)
           jugador.categoria = editUsuarioDto.categoria
+
+        if (editUsuarioDto.categoria_dobles)
+          jugador.categoria_dobles = editUsuarioDto.categoria_dobles
 
         if (editUsuarioDto.rama)
           jugador.rama = editUsuarioDto.rama

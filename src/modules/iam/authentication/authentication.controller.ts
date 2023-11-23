@@ -1,11 +1,12 @@
 import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthenticationCommonService } from './authentication.common.service';
 import { Request } from 'express';
 import { AuthenticationService } from './authentication.service';
 import { Usuario } from 'src/modules/usuarios/entities/usuario.entity';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
 import { JwtAuthRefreshGuard } from '../guards/jwt-auth-refresh.guard';
+import { SignInDto } from './dto/signin.dto';
 
 
 @ApiTags("Auth")
@@ -21,8 +22,12 @@ export class AuthenticationController {
 
 
 
+    @ApiBody({
+      type: SignInDto,
+      required: true
+    })
     @UseGuards(LocalAuthGuard)
-    @Post("signin")
+    @Post("signin")    
     async signIn(@Req() req: Request) {
       const user = req.user as Usuario;
       
@@ -31,6 +36,11 @@ export class AuthenticationController {
     }
 
 
+    @ApiQuery({
+      name: 'correo',
+      required: true,
+      description: 'Verifica si un correo ya esta registrado en el sistema'
+    })
     @Get('existUser')
     async existUser(@Query('correo') correo: string) {
       return await this.authenticationCommonService.existUser(correo);

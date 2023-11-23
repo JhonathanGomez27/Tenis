@@ -24,7 +24,7 @@ export class JugadoresService {
   }
 
 
-  async actualizarJugador(updateJugadorDto: UpdateJugadorDto){
+  async actualizarJugador(updateJugadorDto: UpdateJugadorDto) {
     const jugador = await this.jugadorRepository.save(updateJugadorDto)
     return jugador
   }
@@ -45,6 +45,7 @@ export class JugadoresService {
       ranking: jugador.ranking,
       rama: jugador.rama,
       categoria: jugador.categoria,
+      categoria_dobles: jugador.categoria_dobles,
       userid: {
         id: jugador.userid.id,
         //nombre: jugador.userid.nombre,
@@ -61,8 +62,8 @@ export class JugadoresService {
   async findJugadoresByFilters(
     nombre?: string,
     rama?: string,
-    categoria?: string    
-  ){
+    categoria?: string
+  ) {
     const whereConditions: Record<string, any> = {};
 
     if (rama) {
@@ -78,7 +79,7 @@ export class JugadoresService {
       whereConditions.nombre = ILike(`%${nombre}%`);
     }
 
-   
+
 
     const jugadores = await this.jugadorRepository.find({
       where: whereConditions,
@@ -92,6 +93,7 @@ export class JugadoresService {
       ranking: jugador.ranking,
       rama: jugador.rama,
       categoria: jugador.categoria,
+      categoria_dobles: jugador.categoria_dobles,
       userid: {
         id: jugador.userid.id,
         //nombre: jugador.userid.nombre,
@@ -111,8 +113,8 @@ export class JugadoresService {
     limit: number,
     nombre?: string,
     rama?: string,
-    categoria?: string    
-  ){
+    categoria?: string
+  ) {
     const whereConditions: Record<string, any> = {};
 
     if (rama) {
@@ -128,11 +130,11 @@ export class JugadoresService {
       whereConditions.nombre = ILike(`%${nombre}%`);
     }
 
-    const [jugadores, total]  = await this.jugadorRepository.findAndCount({
+    const [jugadores, total] = await this.jugadorRepository.findAndCount({
       where: whereConditions,
       relations: ['userid'],
       skip: (page - 1) * limit,
-       take: limit,
+      take: limit
     });
 
 
@@ -142,14 +144,15 @@ export class JugadoresService {
       ranking: jugador.ranking,
       rama: jugador.rama,
       categoria: jugador.categoria,
+      categoria_dobles: jugador.categoria_dobles,
       userid: {
-        id: jugador.userid.id,        
+        id: jugador.userid.id,
         rol: jugador.userid.rol,
         correo: jugador.userid.correo
       },
     }));
 
-    return{jugadores: jugadoresResponse, total}
+    return { jugadores: jugadoresResponse, total }
   }
 
 
@@ -157,14 +160,14 @@ export class JugadoresService {
 
 
   async getJugadorById(id: number) {
-    console.log(id)
+    
     const jugador = await this.jugadorRepository.findOne({
       where: { id: id },
       relations: ['userid']
     });
 
-    if(!jugador)
-    throw new NotFoundException('El jugador buscado no existe')
+    if (!jugador)
+      throw new NotFoundException('El jugador buscado no existe')
 
     jugador.userid.contrasena = undefined
     jugador.userid.nombre = undefined
@@ -178,13 +181,15 @@ export class JugadoresService {
       relations: ['userid']
     });
 
-    if(!jugador)
-    throw new NotFoundException('El jugador buscado no existe')
+    if (!jugador)
+      throw new NotFoundException('El jugador buscado no existe')
 
     jugador.userid.contrasena = undefined
     jugador.userid.nombre = undefined
 
     return jugador
   }
+
+
 
 }

@@ -45,9 +45,12 @@ export class Jugador {
     })
     categoria: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D'
 
-    // @OneToOne(() => Usuario)
-    // @JoinColumn({ name: 'useridId' })
-    // userid: Usuario
+    @Column({
+        type: 'enum',
+        enum: categoria,
+        default: categoria.D
+    })
+    categoria_dobles: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D'
 
 
     @OneToOne(() => Usuario)

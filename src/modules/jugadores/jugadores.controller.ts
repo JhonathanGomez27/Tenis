@@ -3,7 +3,6 @@ import { JugadoresService } from './jugadores.service';
 import { CreateJugadorDto } from './dto/create-jugadore.dto';
 import { UpdateJugadorDto } from './dto/update-jugadore.dto';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
-import { number } from 'joi';
 import { JwtAuthAccessGuard } from '../iam/guards/jwt-auth.guard';
 import { RolesGuard } from '../iam/guards/roles.guard';
 import { Roles } from '../iam/decorators';
@@ -59,7 +58,7 @@ export class JugadoresController {
   @Get('byId')
   @ApiQuery({
     name: 'id',
-    type: number,
+    type: Number,
     required: true
   })
   getById(@Query('id') id) {
@@ -72,7 +71,7 @@ export class JugadoresController {
   @Get('byUserId')
   @ApiQuery({
     name: 'userId',
-    type: number,
+    type: Number,
     required: true
   })
   getByUserId(@Query('userId') userId) {

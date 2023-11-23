@@ -26,11 +26,11 @@ export class Pareja {
     ranking: number; 
 
     @OneToOne(() => Jugador)
-    @JoinColumn()
+    @JoinColumn({ name: 'jugador1Id' })
     jugador1: Jugador
 
     @OneToOne(() => Jugador)
-    @JoinColumn()
+    @JoinColumn({ name: 'jugador2Id' })
     jugador2: Jugador
 
 }

@@ -12,8 +12,7 @@ export function handleDbError(error: any): string {
     throw new ConflictException('Por favor ingrese un email y/o contraseña válida.')
   }
   if (error.status == '430') {    
-    throw new MiExcepcionPersonalizada(error.response.mensaje, 400); 
-    return 
+    throw new MiExcepcionPersonalizada(error.response.mensaje, 400);    
   }
   if (error.code === 'ER_NO_REFERENCED_ROW_2') {
     throw new NotFoundException('El registro que intentas insertar hace referencia a una llave foranea que no existe ')
