@@ -20,11 +20,7 @@ export class Inscripcion {
 
     @ManyToOne(() => Jugador, { nullable: true })
     @JoinColumn({ name: 'jugadorId' })
-    jugador: Jugador;
-
-   
-    // @Column()
-    // fechaInscripcion: Date;
+    jugador: Jugador;  
 
     
 }

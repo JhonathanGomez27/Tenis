@@ -9,28 +9,16 @@ import { ApiTags } from '@nestjs/swagger';
 export class InscripcionesController {
   constructor(private readonly inscripcionesService: InscripcionesService) {}
 
-  @Post()
-  create(@Body() createInscripcioneDto: CreateInscripcioneDto) {
-    return this.inscripcionesService.create(createInscripcioneDto);
+  @Post('inscribirJugador')
+  createInscripcionJugador(@Body() createInscripcioneDto: CreateInscripcioneDto) {
+    return this.inscripcionesService.inscribirJugadorATorneo(createInscripcioneDto);
   }
 
-  @Get()
-  findAll() {
-    return this.inscripcionesService.findAll();
+
+  @Post('inscribirPareja')
+  createInscripcionPareja(@Body() createInscripcioneDto: CreateInscripcioneDto) {
+    return this.inscripcionesService.inscribirParejaATorneo(createInscripcioneDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.inscripcionesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateInscripcioneDto: UpdateInscripcioneDto) {
-    return this.inscripcionesService.update(+id, updateInscripcioneDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.inscripcionesService.remove(+id);
-  }
+ 
 }

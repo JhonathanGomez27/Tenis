@@ -20,7 +20,7 @@ export class UsuariosService {
     private readonly jugadoresService: JugadoresService
   ) { }
 
-  async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario | { /*error: any;*/ message: string }> {
+  async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario | { message: string }> {
     try {
 
       createUsuarioDto.contrasena = await this.hashingService.hash(createUsuarioDto.contrasena.trim());

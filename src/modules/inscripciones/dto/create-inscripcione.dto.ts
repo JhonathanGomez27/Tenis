@@ -10,17 +10,26 @@ export class CreateInscripcioneDto {
 
 
     @IsNotEmpty()
-    readonly torneo: Torneo
+    torneo: Torneo
+
+
+    // @IsOptional()
+    // @ParejaOJugador()
+    // jugador: Jugador
 
 
     @IsOptional()
     @ParejaOJugador()
-    readonly jugador: Jugador
+    jugador: number
+
+    // @IsOptional()
+    // @ParejaOJugador()
+    // pareja: Pareja
 
 
     @IsOptional()
     @ParejaOJugador()
-    readonly pareja: Pareja
+    pareja: number
 
 
     @ParejaOJugadorObligatorio()
