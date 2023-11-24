@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { TorneosService } from './torneos.service';
 import { CreateTorneoDto } from './dto/create-torneo.dto';
 import { UpdateTorneoDto } from './dto/update-torneo.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { categoria, rama } from '../jugadores/entities/jugadore.entity';
 import { Estado, Fases, Modalidad, Tipo } from './entities/torneo.entity';
 import { JwtAuthAccessGuard } from '../iam/guards/jwt-auth.guard';
@@ -61,5 +61,54 @@ export class TorneosController {
     return this.torneosService.enumToJsonArray(Estado);
   }
 
+
+  @ApiQuery({
+    name: 'torneoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  })
+  @Patch('FinalizarInscripciones')
+  FinalizarInscripcion(@Query('torneoId') torneoId : number) {
+    return this.torneosService.finalizarInscripciones(torneoId);
+  }
+
+
+
+  @ApiQuery({
+    name: 'torneoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  })
+  @Get('FormarGrupos')
+  formarGrupos(@Query('torneoId') torneoId : number){
+    return this.torneosService.formarGrupos(torneoId)
+
+  }
+
+
+  @ApiQuery({
+    name: 'torneoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  })
+  @Get('programarPartidosFaseGrupos')
+  programarPartidosFaseGrupos(@Query('torneoId') torneoId : number){
+    return this.torneosService.programarPartidosFaseGrupos(torneoId)
+
+  }
+
+
+
+  
+
+
+
+ 
   
 }

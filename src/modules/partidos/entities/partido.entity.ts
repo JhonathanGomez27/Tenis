@@ -1,3 +1,4 @@
+import { Grupo } from "src/modules/grupos/entities/grupo.entity";
 import { Jugador } from "src/modules/jugadores/entities/jugadore.entity";
 import { Pareja } from "src/modules/parejas/entities/pareja.entity";
 import { Fases, Torneo } from "src/modules/torneos/entities/torneo.entity";
@@ -54,5 +55,9 @@ export class Partido {
     @JoinColumn({ name: 'jugador2Id' })
     jugador2: Jugador;
 
+
+    @ManyToOne(() => Grupo, { nullable: true })
+    @JoinColumn({ name: 'grupoId' })
+    grupo: Grupo;
    
 }

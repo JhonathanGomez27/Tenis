@@ -1,36 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { PartidosService } from './partidos.service';
 import { CreatePartidoDto } from './dto/create-partido.dto';
 import { UpdatePartidoDto } from './dto/update-partido.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('partidos')
 @Controller('partidos')
 export class PartidosController {
   constructor(private readonly partidosService: PartidosService) {}
 
-  @Post()
-  create(@Body() createPartidoDto: CreatePartidoDto) {
-    return this.partidosService.create(createPartidoDto);
+  @ApiQuery({
+    name: 'torneoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  })
+  @Get('ObtenerPartidosTorneo')
+  obtenerPartidosFaseTorneo(@Query('torneoId') torneoId : number){
+    return this.partidosService.obtenerPartidosTorneo(torneoId)
+
   }
 
-  @Get()
-  findAll() {
-    return this.partidosService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.partidosService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePartidoDto: UpdatePartidoDto) {
-    return this.partidosService.update(+id, updatePartidoDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.partidosService.remove(+id);
-  }
+  
 }

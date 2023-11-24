@@ -9,8 +9,12 @@ import { ParejaOJugador, ParejaOJugadorObligatorio } from "./validators.inscripc
 export class CreateInscripcioneDto {
 
 
+    // @IsNotEmpty()
+    // torneo: Torneo
+
+
     @IsNotEmpty()
-    torneo: Torneo
+    torneo: number
 
 
     // @IsOptional()

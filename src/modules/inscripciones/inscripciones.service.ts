@@ -18,12 +18,15 @@ export class InscripcionesService {
     @InjectRepository(Inscripcion) private readonly inscripcionRepository: Repository<Inscripcion>,
     @InjectRepository(Jugador) private readonly jugadorRepository: Repository<Jugador>,
     @InjectRepository(Pareja) private parejaRepository: Repository<Pareja>,
+    @InjectRepository(Torneo) private torneoRepository: Repository<Torneo>,
   ) { }
 
 
-  async inscribirJugadorATorneo(inscripcionDto: CreateInscripcioneDto)/*: Promise<Inscripcion | { message: string }> */ {
+  async inscribirJugadorATorneo(inscripcionDto: CreateInscripcioneDto): Promise<Inscripcion | { message: string }> {
 
     try {
+
+      //TODO: Verificar que el jugador tenga la misma categoria y rama del torne, que el torneo este en fase inicial, que aun hayan cupos(ver como se hace esto) que la modalidad sea singles, tambien validar estas cosas en inscribirParejaATorneo
 
       const jugadorId = inscripcionDto.jugador
       const jugador = await this.jugadorRepository.findOne({
@@ -34,15 +37,26 @@ export class InscripcionesService {
         throw new MiExcepcionPersonalizada('No se encontro al jugador', 430);
       }
 
-      // Verifica si el jugador ya está inscrito     
-      const jugadorInscrito = await this.inscripcionRepository.findOneBy({ torneo: inscripcionDto.torneo, jugador: jugador });
+
+      //verificar si el torneo exite
+      const torneoId = inscripcionDto.torneo
+      const torneo = await this.torneoRepository.findOne({
+        where: { id: torneoId }
+      });
+      if (!torneo) {
+        throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
+      }
+
+      const jugadorInscrito = await this.inscripcionRepository.findOne({
+        where: { jugador: { id: jugadorId }, torneo: { id: torneoId } },
+      });
+
       if (jugadorInscrito) {
         throw new MiExcepcionPersonalizada('El Jugador ya esta inscrito en este Torneo', 430);
       }
-
       // Crea la inscripción
       const inscripcion = this.inscripcionRepository.create({
-        torneo: inscripcionDto.torneo,
+        torneo: torneo,
         jugador: jugador,
         pareja: null,
       });
@@ -71,8 +85,18 @@ export class InscripcionesService {
         throw new MiExcepcionPersonalizada('No se encontro la Pareja', 430);
       }
 
-      // Verifica si la pareja ya está inscrita
-      const parejaInscrita = await this.inscripcionRepository.findOneBy({ torneo: inscripcionDto.torneo, pareja: pareja });
+      const torneoId = inscripcionDto.torneo
+      const torneo = await this.torneoRepository.findOne({
+        where: { id: torneoId }
+      });
+      if (!torneo) {
+        throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
+      }
+
+      const parejaInscrita = await this.inscripcionRepository.findOne(
+        {
+          where: { torneo: { id: torneoId }, pareja: { id: parejaId } }
+        });
 
       if (parejaInscrita) {
         throw new MiExcepcionPersonalizada('La Pareja ya esta inscrita en este Torneo', 430);
@@ -80,9 +104,9 @@ export class InscripcionesService {
 
       // Crea la inscripción
       const inscripcion = this.inscripcionRepository.create({
-        torneo: inscripcionDto.torneo,
+        torneo: torneo,
         pareja: pareja,
-        jugador: null, // Asegúrate de que el jugador sea null si estás inscribiendo una pareja
+        jugador: null, 
       });
 
 
@@ -96,6 +120,28 @@ export class InscripcionesService {
 
     }
   }
+
+
+  async obtenerTodasLasInscripcionesPorTorneo(id: number){
+
+    if(!id){
+      throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 430);
+    }
+    const torneo = await this.torneoRepository.findOneBy({id})
+    if (!torneo) {
+      throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
+    }
+
+    const inscripciones = await this.inscripcionRepository.find({ 
+      where: {torneo: { id: torneo.id } },
+      relations: ['jugador', 'pareja'],
+    })
+    return inscripciones
+  }
+
+ 
+
+
 
 
 

@@ -1,3 +1,4 @@
+import { Grupo } from "src/modules/grupos/entities/grupo.entity";
 import { Inscripcion } from "src/modules/inscripciones/entities/inscripcione.entity";
 import { categoria, rama } from "src/modules/jugadores/entities/jugadore.entity";
 import { Partido } from "src/modules/partidos/entities/partido.entity";
@@ -17,6 +18,8 @@ export enum Modalidad {
 
 export enum Estado {
     INICIAL = 'Inicial',
+    SORTEO = 'Sorteo',
+    PROGRAMACION = 'Programacion',
     PROCESO = 'En Proceso',
     FINALIZADO = 'Finalizado'
 }
@@ -104,7 +107,7 @@ export class Torneo {
         enum: Estado,
         default: Estado.INICIAL
     })
-    estado: 'Inicial' | 'En Proceso' | 'Finalizado';
+    estado: 'Inicial' | 'En Proceso' | 'Finalizado' | 'Sorteo' | 'Programacion'
 
 
     @OneToMany(() => Partido, partido => partido.torneo)
@@ -113,6 +116,10 @@ export class Torneo {
 
     @OneToMany(() => Inscripcion, inscripcion => inscripcion.torneo)
     inscripciones: Inscripcion[];
+
+    @OneToMany(() => Grupo, grupo => grupo.torneo)
+    grupos: Grupo[];
+
 
 
 }
