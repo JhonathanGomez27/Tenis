@@ -52,6 +52,16 @@ export class Partido {
         ganador: {
             tipo: 'jugador' | 'pareja'; 
             id: number; 
+            setsGanados: number;
+            setsPerdidos: number;
+            puntosSets: number
+        } | null,
+        perdedor: {
+            tipo: 'jugador' | 'pareja'; 
+            id: number; 
+            setsGanados: number;
+            setsPerdidos: number;
+            puntosSets: number
         } | null;
     }; 
    

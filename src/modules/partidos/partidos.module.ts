@@ -4,9 +4,10 @@ import { PartidosController } from './partidos.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Partido } from './entities/partido.entity';
 import { Torneo } from '../torneos/entities/torneo.entity';
+import { Grupo } from '../grupos/entities/grupo.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Partido, Torneo])],
+  imports: [TypeOrmModule.forFeature([Partido, Torneo, Grupo])],
   controllers: [PartidosController],
   providers: [PartidosService],
   exports: [PartidosService]

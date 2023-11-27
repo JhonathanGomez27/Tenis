@@ -6,5 +6,17 @@ export class ResultadoPartidoDTO {
     ganador: {
         tipo: 'jugador' | 'pareja';
         id: number;
+        setsGanados: number;
+        setsPerdidos: number;
+        puntosSets: number;
+    };
+
+
+    perdedor: {
+        tipo: 'jugador' | 'pareja';
+        id: number;
+        setsGanados: number;
+        setsPerdidos: number;
+        puntosSets: number;
     };
 }
