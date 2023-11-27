@@ -38,6 +38,21 @@ export class TorneosService {
     }
   }
 
+  async findAll() {
+    const torneos = await this.torneoRepository.find();
+
+    // const torneosResponse = torneos.map(torneo => ({
+    // }));
+
+
+    return torneos;
+  }
+
+  async getTorneoById(id: number) {
+    const torneo = await this.torneoRepository.findOneBy({ id: id })
+    return torneo
+  }
+
   enumToJsonArray(enumObj: any): { nombre: string, descripcion: string }[] {
     const enumKeys = Object.keys(enumObj);
     return enumKeys.map(key => ({ nombre: enumObj[key], descripcion: enumObj[key] }));

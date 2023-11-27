@@ -25,6 +25,25 @@ export class TorneosController {
     return this.torneosService.create(createTorneoDto);
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthAccessGuard, RolesGuard)
+  @Get()
+  findAll() {
+    return this.torneosService.findAll();
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthAccessGuard, RolesGuard)
+  @Get('byId')
+  @ApiQuery({
+    name: 'id',
+    type: Number,
+    required: true
+  })
+  getById(@Query('id') id) {
+    return this.torneosService.getTorneoById(id)
+  }
+
 
   @Get('ObtenerRamas')
   obtenerRamas() {
