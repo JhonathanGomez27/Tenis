@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Torneo } from '../torneos/entities/torneo.entity';
 import { MiExcepcionPersonalizada } from 'src/utils/exception';
+import { ResultadoPartidoDTO } from './dto/resultado.dto';
 
 @Injectable()
 export class PartidosService {
@@ -84,4 +85,41 @@ export class PartidosService {
 
 
   }
+
+
+
+
+  async actualizarResultado(id: number, nuevoResultado: ResultadoPartidoDTO){
+
+
+    //return nuevoResultado
+
+    if (!id) {
+      throw new MiExcepcionPersonalizada('No se Proporciono un id del partido', 400);
+    }
+
+
+    const partido = await this.partidoRepository.findOne({
+      where: { id: id }
+    });
+    
+
+    if (!partido) {
+      throw new MiExcepcionPersonalizada('No se encontro el partido', 404);
+    }
+
+    // partido.resultado.sets = nuevoResultado.sets
+    // partido.resultado.ganador = nuevoResultado.ganador
+
+    partido.resultado = nuevoResultado
+    
+    
+    const partidoActualizado = await this.partidoRepository.save(partido);
+
+    return partidoActualizado;
+  }
+
+
+
+
 }

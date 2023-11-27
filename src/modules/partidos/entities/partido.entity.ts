@@ -23,17 +23,37 @@ export class Partido {
 
     @Column({
         type: 'json',
-        nullable: true, 
+        nullable: true,
         transformer: {
-            to(value: any): string {
-                return JSON.stringify(value);
-            },
-            from(value: string): any {
-                return JSON.parse(value);
-            },
-        },
-    })
-    resultado: any;    
+          to(value: any): string {
+              if (typeof value === 'object') {
+                  value = JSON.stringify(value);
+              }
+          
+              return value;
+          },
+          from(value: string): any {
+              if (typeof value === 'string') {
+                  try {
+                    return JSON.parse(value);
+                  } catch (e) {
+                    return value;
+                  }
+              }
+    
+              return value;
+          },
+          },
+      })
+    resultado: {
+        sets: Array<{
+            marcador: string; 
+        }>,
+        ganador: {
+            tipo: 'jugador' | 'pareja'; 
+            id: number; 
+        } | null;
+    }; 
    
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
