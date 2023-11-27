@@ -24,12 +24,12 @@ export class PartidosService {
     }
 
 
-
     // const torneo = await manager.findOneOrFail(Torneo, idTorneo, { relations: ['grupos'] });
 
     const torneo = await this.torneoRepository.findOne({
       where: { id: idTorneo }
     });
+    
 
     if (!torneo) {
       throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);

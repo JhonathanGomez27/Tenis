@@ -36,12 +36,24 @@ export class Grupo {
     nullable: true,
     transformer: {
       to(value: any): string {
-        return JSON.stringify(value);
+          if (typeof value === 'object') {
+              value = JSON.stringify(value);
+          }
+      
+          return value;
       },
       from(value: string): any {
-        return JSON.parse(value);
+          if (typeof value === 'string') {
+              try {
+                return JSON.parse(value);
+              } catch (e) {
+                return value;
+              }
+          }
+
+          return value;
       },
-    },
+      },
   })
   posiciones: any
 
@@ -50,10 +62,22 @@ export class Grupo {
     type: 'json',
     transformer: {
       to(value: any): string {
-        return JSON.stringify(value);
+        if (typeof value === 'object') {
+            value = JSON.stringify(value);
+        }
+    
+        return value;
       },
       from(value: string): any {
-        return JSON.parse(value);
+          if (typeof value === 'string') {
+              try {
+                return JSON.parse(value);
+              } catch (e) {
+                return value;
+              }
+          }
+
+          return value;
       },
     },
   })
