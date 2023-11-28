@@ -33,6 +33,20 @@ export class PartidosController {
   @Patch('actualizarResultadoPartido/:id')
   actualizarResultado(@Param('id') id: number, @Body() resultadoDto: ResultadoPartidoDTO){
     return this.partidosService.actualizarResultado(id, resultadoDto)
+  }
+
+
+
+  @ApiQuery({
+    name: 'torneoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  })
+  @Get('SortearSiguienteLlaveFaseGrupos')
+  SortearSiguienteLlaveFaseGrupos(@Query('torneoId') torneoId : number){
+    return this.partidosService.sortearSiguienteFase(torneoId)
 
   }
 

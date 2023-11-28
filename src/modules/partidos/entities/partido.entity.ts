@@ -64,6 +64,10 @@ export class Partido {
             puntosSets: number
         } | null;
     }; 
+
+
+    @Column({type: 'boolean', default: false})
+    finalizado: boolean
    
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
