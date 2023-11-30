@@ -118,10 +118,8 @@ export class TorneosService {
 
 
       if (torneo.estado != Estado.SORTEO) {
-
         const message = `este torneo esta en estado ${torneo.estado} por lo cual es imposible realizar esta accion`
-        throw new MiExcepcionPersonalizada(message, 430);
-
+        throw new MiExcepcionPersonalizada(message, 403);
       }
 
 
@@ -163,12 +161,8 @@ export class TorneosService {
       if (grupoIndex < cantidadGrupos) {
         await this.grupoRepository.save(grupos[grupoIndex]);
       }
-
       torneo.estado = Estado.PROGRAMACION
-
       await this.torneoRepository.save(torneo)
-
-
       for (const grupo of gruposResponse) {
         grupo['torneo'] = undefined
       }

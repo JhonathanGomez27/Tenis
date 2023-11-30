@@ -8,7 +8,6 @@ import { Torneo } from '../torneos/entities/torneo.entity';
 import { MiExcepcionPersonalizada } from 'src/utils/exception';
 import { ResultadoPartidoDTO } from './dto/resultado.dto';
 import { Grupo } from '../grupos/entities/grupo.entity';
-import { group } from 'console';
 import { Llave } from '../llaves/entities/llave.entity';
 
 @Injectable()
@@ -27,7 +26,7 @@ export class PartidosService {
 
   async obtenerPartidosTorneo(idTorneo: number) {
     if (!idTorneo) {
-      throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 430);
+      throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 400);
     }
 
 
@@ -39,21 +38,13 @@ export class PartidosService {
 
 
     if (!torneo) {
-      throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
+      throw new MiExcepcionPersonalizada('No se encontro el Torneo', 404);
     }
-
-
     const partidos = await this.partidoRepository.find({
       where: { torneo: { id: idTorneo } },
       relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2', 'grupo'],
     });
-
-
-    //return partidos
-
-
     const partidosFormateados = []
-
     for (const partido of partidos) {
 
       let partidoFormateado = {
@@ -89,10 +80,7 @@ export class PartidosService {
       partidosFormateados.push(partidoFormateado)
 
     }
-
     return partidosFormateados
-
-
   }
 
 
@@ -104,12 +92,23 @@ export class PartidosService {
     }
     const partido = await this.partidoRepository.findOne({
       where: { id: id },
-      relations: ['grupo'],
+      relations: ['grupo', 'torneo'],
     });
 
     if (!partido) {
       throw new MiExcepcionPersonalizada('No se encontro el partido', 404);
+    }    
+    
+
+    
+
+    if(partido.torneo.estado === 'Finalizado'){
+      throw new MiExcepcionPersonalizada('No Se puede actualizar un partido de un Torneo Finalizado', 403);
     }
+
+
+
+
     const { sets, ganador, perdedor } = nuevoResultado;
 
 
@@ -230,18 +229,18 @@ export class PartidosService {
     // Verificar que todos los partidos de la fase de grupos estén finalizados
 
     if (!torneoId) {
-      throw new MiExcepcionPersonalizada('No se Proporciono un id del Torneo', 400);
+      throw new MiExcepcionPersonalizada('No se Proporciono un id del Torneo', 404);
     }
     const torneo = await this.torneoRepository.findOne({
       where: { id: torneoId }
     })
 
     if (!torneo) {
-      throw new MiExcepcionPersonalizada('El torneo buscado No existe', 400);
+      throw new MiExcepcionPersonalizada('El torneo buscado No existe', 404);
     }
 
-    if(torneo.estado === 'Finalizado'){
-      throw new MiExcepcionPersonalizada('El torneo buscado Ya finalizo, consultelo para obtener los resultados', 400);
+    if (torneo.estado !== 'En Proceso') {
+      throw new MiExcepcionPersonalizada(`El torneo buscado esta en estado ${torneo.estado} por lo cual no se puede sortear la siguiente fase`, 409);
     }
 
 
@@ -260,12 +259,9 @@ export class PartidosService {
         throw new MiExcepcionPersonalizada('No todos los partidos de la fase de grupos han finalizado.', 400);
 
       }
-
       // return todosFinalizados
-
       // Obtener los dos mejores participantes de cada grupo
-      const participantesOrdenados/*: Participante[]*/ = [];
-
+      const participantesOrdenados = [];
       for (const grupo of grupos) {
         //const participantesGrupo = grupo.participantes || [];
         const participantesGrupo = grupo.posiciones || [];
@@ -309,22 +305,11 @@ export class PartidosService {
         return a.setsPerdidos - b.setsPerdidos;
       });
       // Organizar la fase de llaves
-      const llaves = this.organizarLlaves(participantesOrdenadosGlobal);
-
-
-      //return llaves.length
-
-
-
-
-      const llavesReturn = []
-      //const llaves = this.organizarLlaves(ejemplo)
-
+      const llaves = this.organizarLlaves(participantesOrdenadosGlobal);     
+      const llavesReturn = [] 
       // guardar las llaves en la bd
       const modalidad = torneo.modalidad
       const fase = this.obtenerEtapa(llaves.length)
-
-
       for (const llave of llaves) {
 
         let jugador1: any
@@ -343,9 +328,7 @@ export class PartidosService {
             jugador1: jugador1,
             jugador2: jugador2
           })
-
           const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-
           const partidoCreado = await this.partidoRepository.create({
             fase: fase,
             torneo: torneo,
@@ -354,14 +337,9 @@ export class PartidosService {
           })
           const partidoGuardado = await this.partidoRepository.save(partidoCreado)
           llavesReturn.push(llaveGuardada)
-
-
-
         } else {
           pareja1 = llave.participante1.id
           pareja2 = llave.participante2.id
-          //fase = this.obtenerEtapa(llaves.length)
-
           const llaveCreada = await this.llaveRepository.create({
             torneo: torneo,
             fase: fase,
@@ -379,57 +357,28 @@ export class PartidosService {
           const partidoGuardado = await this.partidoRepository.save(partidoCreado)
           llavesReturn.push(llaveGuardada)
         }
-
-
-
-
       }
-
-      //const faseActual  = this.obtenerEtapa(llaves.length)
-
       torneo.fase_actual = fase
       await this.torneoRepository.save(torneo)
-
       return llavesReturn;
     } else if (torneo.fase_actual === 'octavos' || torneo.fase_actual === 'cuartos' || torneo.fase_actual === 'semifinales') {
-
       const llavesJugadas = await this.llaveRepository.find({
-        where: { torneo: torneo },
-        //relations: ['torneo'],
+        where: { torneo: torneo }       
       })
-
-
       const partidosJugadosLlaves = await this.partidoRepository.find({
         where: { torneo: torneo, fase: torneo.fase_actual }
       })
-
-      //return partidosJugadosLlaves
-
-
-
-
-
-
       const todosFinalizados = partidosJugadosLlaves.every(
         (partido) => partido.finalizado
-
       );
-
       if (!todosFinalizados) {
         throw new MiExcepcionPersonalizada(`No todos los partidos de la fase ${torneo.fase_actual} han finalizado.`, 400);
-
       }
-
       const participantesOrdenados = []
-
       for (const partido of partidosJugadosLlaves) {
         let participante = partido.resultado.ganador
         participantesOrdenados.push(participante)
       }
-
-      //return participantesOrdenados
-
-
       const participantesOrdenadosGlobal = participantesOrdenados.sort((a, b) => {
         // Lógica de ordenación basada en los resultados de la fase de grupos
         if (b.puntos !== a.puntos) {
@@ -443,22 +392,11 @@ export class PartidosService {
         }
         return a.setsPerdidos - b.setsPerdidos;
       });
-
-
-      //return participantesOrdenadosGlobal
-
       const llaves = this.organizarLlaves(participantesOrdenadosGlobal);
-
-      //return llaves
-
       const llavesReturn = []
-      //const llaves = this.organizarLlaves(ejemplo)
-
       // guardar las llaves en la bd
       const modalidad = torneo.modalidad
       const fase = this.obtenerEtapa(llaves.length)
-
-
       for (const llave of llaves) {
 
         let jugador1: any
@@ -537,16 +475,9 @@ export class PartidosService {
         return {
           message: `No se ha jugado la final, por favor actualizar resultados`
         }
-        // throw new MiExcepcionPersonalizada(`No se ha jugado la final, por favor actualizar resultados`, 400);
-
       } else {
-
-
         const partido = partidosJugadosLlaves[0]
-
-
         let ganadorNombre = '';
-
         if (partido.resultado.ganador.tipo === "jugador") {
           if (partido.jugador1 && partido.jugador1.id === partido.resultado.ganador.id) {
             ganadorNombre = partido.jugador1.nombre;
@@ -555,34 +486,19 @@ export class PartidosService {
           }
         } else if (partido.resultado.ganador.tipo === "pareja") {
           if (partido.pareja1 && partido.pareja1.id === partido.resultado.ganador.id) {
-            ganadorNombre = partido.pareja1.jugador1.nombre +  ' - ' +  partido.pareja1.jugador2.nombre
+            ganadorNombre = partido.pareja1.jugador1.nombre + ' - ' + partido.pareja1.jugador2.nombre
           } else if (partido.pareja2 && partido.pareja2.id === partido.resultado.ganador.id) {
             ganadorNombre = partido.pareja2.jugador1.nombre + ' - ' + partido.pareja2.jugador2.nombre
           }
         }
-
-
-
-
-
         torneo.estado = 'Finalizado';
-
         await this.torneoRepository.save(torneo)
-
-
         return {
           message: `EL TORNEO YA FINALIZO`,
           ganador: ganadorNombre
-
         }
-
-
       }
-
     }
-
-
-
   }
 
 

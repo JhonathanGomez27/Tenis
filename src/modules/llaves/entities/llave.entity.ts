@@ -39,9 +39,6 @@ export class Llave {
     jugador2: Jugador;
 
 
-    // @OneToOne(() => Partido)
-    // @JoinColumn({ name: 'partido' })
-    // userid: Usuario;
-
+    
 
 }

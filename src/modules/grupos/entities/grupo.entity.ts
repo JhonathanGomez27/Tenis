@@ -1,4 +1,3 @@
-import { boolean } from "joi";
 import { Partido } from "src/modules/partidos/entities/partido.entity";
 import { Torneo } from "src/modules/torneos/entities/torneo.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
@@ -60,6 +59,7 @@ export class Grupo {
 
   @Column({
     type: 'json',
+    nullable: true,
     transformer: {
       to(value: any): string {
         if (typeof value === 'object') {

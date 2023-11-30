@@ -26,7 +26,7 @@ export class InscripcionesService {
 
     try {
 
-      //TODO: Verificar que el jugador tenga la misma categoria y rama del torne, que el torneo este en fase inicial, que aun hayan cupos(ver como se hace esto) que la modalidad sea singles, tambien validar estas cosas en inscribirParejaATorneo
+      //TODO: Verificar que el jugador tenga la misma categoria y rama del torneo, que el torneo este en fase inicial, que aun hayan cupos(ver como se hace esto) que la modalidad sea singles, tambien validar estas cosas en inscribirParejaATorneo
 
       const jugadorId = inscripcionDto.jugador
       const jugador = await this.jugadorRepository.findOne({
@@ -47,6 +47,15 @@ export class InscripcionesService {
         throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
       }
 
+
+      if(torneo.estado != 'Inicial'){
+        throw new MiExcepcionPersonalizada(`el torneo esta en estado ${torneo.estado} por lo cual ya no se admiten nuevas inscripciones`, 430);
+      }
+
+      if(torneo.categoria != jugador.categoria){
+        throw new MiExcepcionPersonalizada(`el torneoes de categoria ${torneo.categoria} y el jugador es de categoria ${jugador.categoria} por lo cual no se admite en este torneo`, 430);
+
+      }
       const jugadorInscrito = await this.inscripcionRepository.findOne({
         where: { jugador: { id: jugadorId }, torneo: { id: torneoId } },
       });
@@ -93,6 +102,15 @@ export class InscripcionesService {
         throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
       }
 
+      if(torneo.estado != 'Inicial'){
+        throw new MiExcepcionPersonalizada(`el torneo esta en estado ${torneo.estado} por lo cual ya no se admiten nuevas inscripciones`, 430);
+      }
+
+      if(torneo.categoria != pareja.categoria){
+        throw new MiExcepcionPersonalizada(`el torneo es de categoria ${torneo.categoria} y la pareja es de categoria ${pareja.categoria} por lo cual no se admite en este torneo`, 430);
+
+      }
+
       const parejaInscrita = await this.inscripcionRepository.findOne(
         {
           where: { torneo: { id: torneoId }, pareja: { id: parejaId } }
@@ -125,11 +143,11 @@ export class InscripcionesService {
   async obtenerTodasLasInscripcionesPorTorneo(id: number){
 
     if(!id){
-      throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 430);
+      throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 400);
     }
     const torneo = await this.torneoRepository.findOneBy({id})
     if (!torneo) {
-      throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
+      throw new MiExcepcionPersonalizada('No se encontro el Torneo', 404);
     }
 
     const inscripciones = await this.inscripcionRepository.find({ 
