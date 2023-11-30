@@ -15,29 +15,57 @@ export class GruposService {
   constructor(
     @InjectRepository(Grupo) private readonly grupoRepository: Repository<Grupo>,
     @InjectRepository(Torneo) private torneoRepository: Repository<Torneo>,
-   
+
   ) { }
 
 
-  async obtenerTodosLosGruposPorTorneo(id: number){
+  async obtenerTodosLosGruposPorTorneo(id: number) {
 
-    if(!id){
+    if (!id) {
       throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 430);
     }
-    const torneo = await this.torneoRepository.findOneBy({id})
+    const torneo = await this.torneoRepository.findOneBy({ id })
     if (!torneo) {
       throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
     }
- 
-    const grupos = await this.grupoRepository.find({ 
-        where: {torneo: { id: torneo.id } }
-    });   
+
+    const grupos = await this.grupoRepository.find({
+      where: { torneo: { id: torneo.id } }
+    });
     return grupos
   }
 
 
-//TODO: finalizar Grupo
-  
+  //TODO: finalizar Grupo
+
+
+  async finalizarGruposPorTorneo(id: number){
+
+    if (!id) {
+      throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 430);
+    }
+    const torneo = await this.torneoRepository.findOneBy({ id })
+    if (!torneo) {
+      throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
+    }
+
+    const grupos = await this.grupoRepository.find({
+      where: { torneo: { id: torneo.id } }
+    });
+
+    for (const grupo of grupos) {
+      grupo.completado = true
+      await this.grupoRepository.save(grupo)      
+    }
+
+    return{
+      message: 'Se ha finalizado la fase de grupos, por favor sortear la siguiente fase'
+    }
+
+
+
+  }
+
 
 
 

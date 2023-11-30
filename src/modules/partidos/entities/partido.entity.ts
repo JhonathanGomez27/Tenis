@@ -73,7 +73,7 @@ export class Partido {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     date: Date;
     
-    @ManyToOne(() => Pareja, { nullable: true })  // Puedes ajustar esta relación según tu lógica de negocio
+    @ManyToOne(() => Pareja, { nullable: true })  
     @JoinColumn({ name: 'pareja1Id' })
     pareja1: Pareja;
 

@@ -21,5 +21,17 @@ export class GruposController {
     return this.gruposService.obtenerTodosLosGruposPorTorneo(torneoId)
   }
 
+  @ApiQuery({
+    name: 'torneoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  }) 
+  @Patch('finalizarGruposPorTorneo')
+  finalizarGruposPorTorneo(@Query('torneoId') torneoId : number ){
+    return this.gruposService.finalizarGruposPorTorneo(torneoId)
+  }
+
   
 }

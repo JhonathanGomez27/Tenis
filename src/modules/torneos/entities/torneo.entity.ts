@@ -1,6 +1,7 @@
 import { Grupo } from "src/modules/grupos/entities/grupo.entity";
 import { Inscripcion } from "src/modules/inscripciones/entities/inscripcione.entity";
 import { categoria, rama } from "src/modules/jugadores/entities/jugadore.entity";
+import { Llave } from "src/modules/llaves/entities/llave.entity";
 import { Partido } from "src/modules/partidos/entities/partido.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -131,6 +132,10 @@ export class Torneo {
 
     @OneToMany(() => Grupo, grupo => grupo.torneo)
     grupos: Grupo[];
+
+
+    @OneToMany(() => Llave, llave => llave.torneo)
+    llaves: Llave[];
 
 
 
