@@ -91,21 +91,7 @@ export class GruposService {
         const message = `Ya existe un grupo con el nombre ${grupo.nombre_grupo} intentalo con otro`
         throw new MiExcepcionPersonalizada(message, 403);
       }
-    }
-
-
-    // for (const otrogrupo of torneo.grupos) {
-    //   //console.log(otrogrupo)
-    //   for (const partGrupo of otrogrupo.participantes) {
-    //    // console.log('second',partGrupo)
-    //    console.log(participante.id, partGrupo.id)
-    //     if(participante.id == partGrupo.id && participante.id != undefined){            
-    //       const message = `El participante ${participante.id} esta inscrito en este torneo en el grupo ${otrogrupo.nombre_grupo} por lo cual no puede estar inscrito dos veces`
-    //       throw new MiExcepcionPersonalizada(message, 403);
-    //     }                   
-    //   }
-    // }
-
+    } 
 
     let ids = []
     for (const participante of createGrupoDto.participantes) {      
@@ -119,13 +105,7 @@ export class GruposService {
     if (hayRepetidos) {
       const message = `Hay  participantes repetidos para este grupo, por favor verificar, no se ha creado el grupo`
       throw new MiExcepcionPersonalizada(message, 403);
-
     }
-
-
-
-
-
     let repetidos = 0
     if (createGrupoDto.participantes) {
       for (const grupo of torneo.grupos) {
@@ -193,9 +173,6 @@ export class GruposService {
 
     }
 
-    
-
-   //let repetidos = 0
     if (participante &&  participante != undefined) {
       console.log(participante.id)
       for (const otrogrupo of torneo.grupos) {
@@ -211,15 +188,142 @@ export class GruposService {
       }
       grupo.participantes.push(participante);
       return await this.grupoRepository.save(grupo)
-    }   
-
-
-
-
-
-
-
+    }
   }
+
+
+  async borrarParticipanteDeGrupo(idtorneo: number, idgrupo: number, idparticipante: number) {
+    if (!idtorneo || !idgrupo || !idparticipante) {
+      throw new MiExcepcionPersonalizada('No se proporcionó un id de Torneo, Grupo o Participante', 400);
+    }
+  
+    const torneo = await this.torneoRepository.findOne({
+      where: { id: idtorneo },
+      relations: ['grupos', 'inscripciones', 'inscripciones.jugador', 'inscripciones.pareja'],
+    });
+  
+    if (!torneo) {
+      throw new MiExcepcionPersonalizada('No se encontró el Torneo', 404);
+    }
+
+    if (torneo.estado != Estado.SORTEO) {
+      const message = `este torneo esta en estado ${torneo.estado} por lo cual es imposible realizar esta accion`
+      throw new MiExcepcionPersonalizada(message, 403);
+    }
+
+    const grupo = await this.grupoRepository.findOne({
+      where: { id: idgrupo },
+      relations: ['partidos', 'partidos.jugador1', 'partidos.jugador2', 'partidos.pareja1', 'partidos.pareja2'],
+    });
+
+
+    const inscripciones = torneo.inscripciones
+
+    const idsJugadoresOParejasInscripcion = []
+    for (const inscripcion of inscripciones) {
+      if(inscripcion.id == idparticipante){
+        idsJugadoresOParejasInscripcion.push(inscripcion)        
+      }      
+    }
+
+   
+
+   // return idsJugadoresOParejasInscripcion
+  
+    if (!grupo) {
+      throw new MiExcepcionPersonalizada('No se encontró el Grupo', 404);
+    }
+
+    if(torneo.modalidad == 'singles'){
+      for (const partido of  grupo.partidos) {
+        for (const ids of idsJugadoresOParejasInscripcion) {
+         
+          if(ids.jugador.id == partido.jugador1.id || ids.jugador.id == partido.jugador2.id ){
+            throw new MiExcepcionPersonalizada(`El jugador que quieres eliminar del grupo ${grupo.nombre_grupo} ya tiene partidos asignados, por lo cual es imposible eliminarlo`, 409);
+          }          
+        } 
+      }
+    }
+    if(torneo.modalidad == 'dobles'){
+      for (const partido of  grupo.partidos) {
+        for (const ids of idsJugadoresOParejasInscripcion) {
+         
+          if(ids.pareja.id == partido.pareja1.id || ids.pareja.id == partido.pareja2.id ){
+            throw new MiExcepcionPersonalizada(`La pareja que quieres eliminar del grupo ${grupo.nombre_grupo} ya tiene partidos asignados, por lo cual es imposible eliminarlo`, 409);
+          }          
+        } 
+      }
+    }
+
+
+    //return grupo.partidos
+
+    
+  
+    const participanteIndex = grupo.participantes.findIndex(participante => participante.id == idparticipante);
+
+    //return participanteIndex
+  
+    if (participanteIndex === -1) {
+      const message = `No se encontró al participante con id ${idparticipante} en el Grupo`;
+      throw new MiExcepcionPersonalizada(message, 404);
+    }
+  
+    grupo.participantes.splice(participanteIndex, 1);
+  
+    await this.grupoRepository.save(grupo);
+    return { message: `Participante con id ${idparticipante} eliminado del Grupo ${grupo.nombre_grupo}` };
+  }
+
+
+
+  async borrarGrupo(idtorneo: number, idgrupo: number) {
+    if (!idtorneo || !idgrupo) {
+      throw new MiExcepcionPersonalizada('No se proporcionó un id de Torneo o Grupo', 400);
+    }
+  
+    const torneo = await this.torneoRepository.findOne({
+      where: { id: idtorneo },
+      relations: ['grupos']
+    });
+
+
+    const grupo = await this.grupoRepository.findOne({
+      where: { id: idgrupo },
+      relations: ['partidos']
+    });
+
+
+    //return grupo
+
+
+  
+    if (!torneo) {
+      throw new MiExcepcionPersonalizada('No se encontró el Torneo', 404);
+    }
+
+    if (!grupo) {
+      throw new MiExcepcionPersonalizada('No se encontró el Grupo', 404);
+    }
+
+    if(grupo.partidos.length >0){
+      throw new MiExcepcionPersonalizada('No se Puede eliminar este grupo ya que tiene partidos asignados entre sus participantes', 409);
+    }
+  
+    const grupoIndex = torneo.grupos.findIndex(grupo => grupo.id == idgrupo);
+  
+    if (grupoIndex === -1) {
+      const message = `No se encontró el Grupo con id ${idgrupo}`;
+      throw new MiExcepcionPersonalizada(message, 404);
+    }
+  
+    torneo.grupos.splice(grupoIndex, 1);
+  
+    await this.torneoRepository.save(torneo);
+    return { message: `Grupo con id ${idgrupo} eliminado del Torneo ${torneo.nombre}` };
+  }
+  
+  
 
 
 

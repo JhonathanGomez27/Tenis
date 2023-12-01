@@ -181,22 +181,10 @@ export class TorneosService {
     if (!idTorneo) {
       throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 430);
     }
-
-
-
-    // const torneo = await manager.findOneOrFail(Torneo, idTorneo, { relations: ['grupos'] });
-
     const torneo = await this.torneoRepository.findOne({
       where: { id: idTorneo },
       relations: ['grupos'],
     });
-
-    //return torneo
-
-
-
-
-
     if (!torneo) {
       throw new MiExcepcionPersonalizada('No se encontró el Torneo', 430);
     }
@@ -205,8 +193,6 @@ export class TorneosService {
       const message = `Este torneo está en estado ${torneo.estado}, por lo cual es imposible realizar esta acción`;
       throw new MiExcepcionPersonalizada(message, 430);
     }
-
-
     //const partidos = []
     let contador = 0;
     for (const grupo of torneo.grupos) {
@@ -233,15 +219,13 @@ export class TorneosService {
             partido.pareja2 = participantes[j].pareja;
           }
           //partidos.push(partido)
-          contador ++
+          contador++
 
           // Puedes ajustar el manejo de fechas y otros campos según tus necesidades
           await this.partidoRepository.save(partido);
         }
       }
     }
-
-   
 
     // Actualizar el estado del torneo
     torneo.estado = Estado.PROCESO;
@@ -251,16 +235,6 @@ export class TorneosService {
       message: `se han creado un total de  ${contador} partidos, por favor dijita la fecha en la que se realizaran cada uno de ellos`
     }
   }
-
-
-
-
-
-
-
-
 }
-// function TransactionManager(): (target: TorneosService, propertyKey: "programarPartidosFaseGrupos", parameterIndex: 1) => void {
-//   throw new Error('Function not implemented.');
-// }
+
 

@@ -79,6 +79,54 @@ export class GruposController {
   }
 
 
+  @ApiQuery({
+    name: 'torneoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  })
+  @ApiQuery({
+    name: 'grupoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  })
+  @ApiQuery({
+    name: 'inscripcionId',
+    type: Number,
+    description: 'Id dela inscripcion del jugador o pareja',
+    required: true
+
+  })
+  @Delete('eliminarParticipanteGrupo')
+  eliminarParticipante(@Query('torneoId') torneoId : number, @Query('grupoId') grupoId : number, @Query('inscripcionId') inscripcionId : number ){
+    return this.gruposService.borrarParticipanteDeGrupo( torneoId, grupoId, inscripcionId)
+  }
+
+
+  @ApiQuery({
+    name: 'torneoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  })
+  @ApiQuery({
+    name: 'grupoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  })  
+  @Delete('eliminarGrupo')
+  eliminarGrupo(@Query('torneoId') torneoId : number, @Query('grupoId') grupoId : number){
+    return this.gruposService.borrarGrupo( torneoId, grupoId)
+  }
+
+
+
 
 
 
