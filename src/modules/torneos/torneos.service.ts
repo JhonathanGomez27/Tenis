@@ -235,6 +235,25 @@ export class TorneosService {
       message: `se han creado un total de  ${contador} partidos, por favor dijita la fecha en la que se realizaran cada uno de ellos`
     }
   }
+
+
+
+  async volverAsorteoGruupos(id: number) {
+    const torneo = await this.torneoRepository.findOneBy({ id: id })
+
+    torneo.estado = Estado.SORTEO
+
+    await this.torneoRepository.save(torneo)
+
+
+    return {
+      message :  'El Torneo Ha vuelto al estado Sorteo, para poder gestionar grupos o particiopantes en los grupos, se debe tener precaución al momento de realizar dicha gestión'
+    }
+  }
+
+
+
+
 }
 
 

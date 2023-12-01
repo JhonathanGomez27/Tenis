@@ -123,6 +123,20 @@ export class TorneosController {
   }
 
 
+  @ApiQuery({
+    name: 'torneoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  })
+  @Get('volverAsorteoGruupos')
+  volverAsorteoGruupos(@Query('torneoId') torneoId : number){
+    return this.torneosService.volverAsorteoGruupos(torneoId)
+
+  }
+
+
 
   
 
