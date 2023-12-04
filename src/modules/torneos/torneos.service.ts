@@ -176,7 +176,7 @@ export class TorneosService {
   }
 
 
-  async programarPartidosFaseGrupos(idTorneo: number/*, @TransactionManager() manager?: EntityManager*/) {
+  async programarPartidosFaseGrupos(idTorneo: number) {
 
     if (!idTorneo) {
       throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 430);

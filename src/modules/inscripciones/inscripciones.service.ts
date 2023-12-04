@@ -152,7 +152,7 @@ export class InscripcionesService {
 
     const inscripciones = await this.inscripcionRepository.find({ 
       where: {torneo: { id: torneo.id } },
-      relations: ['jugador', 'pareja'],
+      relations: ['jugador', 'pareja', 'pareja.jugador1', 'pareja.jugador2'],
     })
     return inscripciones
   }

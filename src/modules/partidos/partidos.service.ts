@@ -37,13 +37,18 @@ export class PartidosService {
     });
 
 
+   // return 
+
+
     if (!torneo) {
       throw new MiExcepcionPersonalizada('No se encontro el Torneo', 404);
     }
     const partidos = await this.partidoRepository.find({
       where: { torneo: { id: idTorneo } },
-      relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2', 'grupo'],
+      relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2', 'grupo', 'pareja1.jugador1' , 'pareja1.jugador2', 'pareja2.jugador1', 'pareja2.jugador2'],
     });
+
+   // return partidos
     const partidosFormateados = []
     for (const partido of partidos) {
 
@@ -67,13 +72,13 @@ export class PartidosService {
         pareja1: {
           id: partido.pareja1 ? partido.pareja1.id : undefined,
           nombre: partido.pareja1
-            ? partido.pareja1.jugador1.nombre + partido.pareja1.jugador2.nombre
+            ? partido.pareja1.jugador1.nombre +  ' - ' + partido.pareja1.jugador2.nombre
             : undefined,
         },
         pareja2: {
           id: partido.pareja2 ? partido.pareja2.id : undefined,
           nombre: partido.pareja2
-            ? partido.pareja2.jugador1.nombre + partido.pareja2.jugador2.nombre
+            ? partido.pareja2.jugador1.nombre +    ' - ' + partido.pareja2.jugador2.nombre
             : undefined,
         }
       }
