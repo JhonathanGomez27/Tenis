@@ -102,9 +102,9 @@ export class TorneosController {
     required: true
 
   })
-  @Patch('CambiarTorneoASorteo')
-  CambiarTorneoASorteo(@Query('torneoId') torneoId : number) {
-    return this.torneosService.CambiarTorneoASorteo(torneoId);
+  @Patch('CambiarTorneoAProgramacion')
+  CambiarTorneoAProgramacion(@Query('torneoId') torneoId : number) {
+    return this.torneosService.CambiarTorneoAProgramacion(torneoId);
   }
 
 

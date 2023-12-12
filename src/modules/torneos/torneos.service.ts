@@ -374,7 +374,7 @@ export class TorneosService {
 
 
 
-  async CambiarTorneoASorteo(id: number) {
+  async CambiarTorneoAProgramacion(id: number) {
 
     if (!id) {
       throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 400);
