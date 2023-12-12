@@ -102,6 +102,20 @@ export class TorneosController {
     required: true
 
   })
+  @Patch('CambiarTorneoASorteo')
+  CambiarTorneoASorteo(@Query('torneoId') torneoId : number) {
+    return this.torneosService.CambiarTorneoASorteo(torneoId);
+  }
+
+
+
+  @ApiQuery({
+    name: 'torneoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  })
   @Get('FormarGrupos')
   formarGrupos(@Query('torneoId') torneoId : number){
     return this.torneosService.formarGrupos(torneoId)

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateTorneoDto } from './dto/create-torneo.dto';
 import { UpdateTorneoDto } from './dto/update-torneo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Estado, Torneo } from './entities/torneo.entity';
+import { Estado, Modalidad, Tipo, Torneo } from './entities/torneo.entity';
 import { EntityManager, Repository, Transaction } from 'typeorm';
 import { handleDbError } from 'src/utils/error.message';
 import { MiExcepcionPersonalizada } from 'src/utils/exception';
@@ -23,6 +23,14 @@ export class TorneosService {
 
   async create(createTorneoDto: CreateTorneoDto) {
     try {
+
+
+      if (createTorneoDto.tipo_torneo === Tipo.ESCALERA) {
+        const verificarCantidadGrupos = createTorneoDto.cantidad_grupos % 2;
+        if (verificarCantidadGrupos != 0) {
+          throw new MiExcepcionPersonalizada(`La cantidad de grupos de un torneo ${Tipo.ESCALERA} debe ser par`, 430);
+        }
+      }
 
       const torneo = this.torneoRepository.create(createTorneoDto);
       const torneoGuardado = await this.torneoRepository.save(torneo);
@@ -70,6 +78,9 @@ export class TorneosService {
       relations: ['inscripciones', 'inscripciones.jugador', 'inscripciones.pareja'],
     });
 
+
+
+
     if (!torneo) {
       throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
     }
@@ -82,60 +93,54 @@ export class TorneosService {
     }
 
 
+    //TODO:Validaciones torneo escalera, preguntar bien todas las validaciones
 
-
+    if (torneo.tipo_torneo === Tipo.ESCALERA) {
+      const validarCantidadInscripciones = torneo.inscripciones.length % 2;
+      if (validarCantidadInscripciones != 0) {
+        const message = `el numero de participantes genera conflicto para iniciar este torneo, por favor revisar`
+        throw new MiExcepcionPersonalizada(message, 409);
+      }
+    }
+    //return torneo
     torneo.estado = Estado.SORTEO
-
     await this.torneoRepository.save(torneo)
-
     return {
       message: 'Se han cerrado las inscripciones a este torneo ahora esta en fase de ' + Estado.SORTEO + ' Este es el torneo que se dara inicio',
       torneo: torneo
-
     }
-
-
-
-
   }
 
 
   async formarGrupos(id: number) {
 
-    try {
-      if (!id) {
-        throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 430);
-      }
+    //try {
+    if (!id) {
+      throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 430);
+    }
 
-      const torneo = await this.torneoRepository.findOne({
-        where: { id: id },
-        relations: ['inscripciones', 'inscripciones.jugador', 'inscripciones.pareja'],
-      });
+    const torneo = await this.torneoRepository.findOne({
+      where: { id: id },
+      relations: ['inscripciones', 'inscripciones.jugador', 'inscripciones.pareja'],
+    });
 
-      if (!torneo) {
-        throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
-      }
-
-
-      if (torneo.estado != Estado.SORTEO) {
-        const message = `este torneo esta en estado ${torneo.estado} por lo cual es imposible realizar esta accion`
-        throw new MiExcepcionPersonalizada(message, 403);
-      }
+    if (!torneo) {
+      throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
+    }
 
 
+    if (torneo.estado != Estado.SORTEO) {
+      const message = `este torneo esta en estado ${torneo.estado} por lo cual es imposible realizar esta accion`
+      throw new MiExcepcionPersonalizada(message, 403);
+    }
 
+    if (torneo.tipo_torneo === Tipo.REGULAR) {
       const inscripciones = torneo.inscripciones;
       const inscripcionesAleatorias = inscripciones.sort(() => Math.random() - 0.5);
       //return inscripcionesAleatorias
       // Calcular cantidad de participantes por grupo y cantidad de grupos
       const participantesPorGrupo = Math.ceil(inscripciones.length / torneo.cantidad_grupos);
       const cantidadGrupos = torneo.cantidad_grupos;
-
-      // return {
-      //   participantesPorGrupo, cantidadGrupos
-      // }
-
-
       // Inicializar grupos
       const grupos: Grupo[] = [];
       for (let i = 0; i < cantidadGrupos; i++) {
@@ -167,13 +172,127 @@ export class TorneosService {
         grupo['torneo'] = undefined
       }
       return gruposResponse
+    } else if (torneo.tipo_torneo === Tipo.ESCALERA) {
 
-    } catch (error) {
-      const message = handleDbError(error)
-      return { message }
+      const inscripciones = torneo.inscripciones;
+      const modalidad = torneo.modalidad;
+      const jugadoresPorGrupo = torneo.inscripciones.length / torneo.cantidad_grupos
+
+      //return jugadoresPorGrupo
+
+      const grupos = await this.asignacionGruposTorneoEscalera(inscripciones, torneo.cantidad_grupos, jugadoresPorGrupo, modalidad, torneo)
+
+      const gruposResponse = []
+
+
+      for (const grupo of grupos) {
+        const grupoPersistido = await this.grupoRepository.save(grupo);
+        gruposResponse.push(grupoPersistido)
+      }
+
+      torneo.estado = Estado.PROGRAMACION
+      await this.torneoRepository.save(torneo)
+      for (const grupo of gruposResponse) {
+        grupo['torneo'] = undefined
+      }
+
+
+
+
+      return {
+        gruposResponse
+      }
+
+
+
     }
 
+
+
   }
+
+
+
+  async asignacionGruposTorneoEscalera(inscripciones: Array<any>, cantidadGrupos: number, jugadoresPorGrupo: number, modalidad: string, torneo: Torneo) {
+
+
+    const inscripcionesRankingPares = []
+    const inscripcionesRankingImpares = []
+
+    for (const inscripcion of inscripciones) {
+      if (modalidad === Modalidad.SINGLES) {
+        if (inscripcion.jugador.ranking % 2 == 0) {
+          inscripcionesRankingPares.push(inscripcion)
+        } else {
+          inscripcionesRankingImpares.push(inscripcion)
+        }
+      } else if (modalidad === Modalidad.DOBLES) {
+        if (inscripcion.pareja.ranking % 2 == 0) {
+          inscripcionesRankingPares.push(inscripcion)
+        } else {
+          inscripcionesRankingImpares.push(inscripcion)
+        }
+      }
+    }
+
+
+    // Crear grupos
+    const grupos: any[] = [];
+
+    for (let i = 0; i < cantidadGrupos; i++) {
+      const grupo = new Grupo();
+      grupo.nombre_grupo = String.fromCharCode(65 + i); // Asigna nombres de grupo A, B, C, ...
+      grupo.completado = false;
+      grupo.torneo = torneo;
+      grupo.participantes = [];
+      grupos.push(grupo);
+
+    }
+
+
+
+    if (cantidadGrupos == 2) {
+      for (let i = 0; i < jugadoresPorGrupo; i++) {
+
+        const inscripcionImpar = inscripcionesRankingImpares.shift();
+        const inscripcionPar = inscripcionesRankingPares.shift();
+
+        if (inscripcionImpar) {
+          grupos[0].participantes.push(inscripcionImpar);
+        }
+
+        if (inscripcionPar) {
+          grupos[1].participantes.push(inscripcionPar);
+        }
+
+
+      }
+
+    } //TODO: hacer esto
+    else if (cantidadGrupos == 4) {
+
+
+    } else if (cantidadGrupos == 6) {
+
+    } else if (cantidadGrupos == 8) {
+
+    }
+    //invertir la posicion 
+
+    for (const grupo of grupos) {
+      grupo.participantes.reverse()
+      grupo.participantes.forEach((participante, index) => {
+        participante.ranking = index + 1;
+      });
+    }
+    return grupos;
+  }
+
+
+
+
+
+
 
 
   async programarPartidosFaseGrupos(idTorneo: number) {
@@ -247,8 +366,48 @@ export class TorneosService {
 
 
     return {
-      message :  'El Torneo Ha vuelto al estado Sorteo, para poder gestionar grupos o particiopantes en los grupos, se debe tener precaución al momento de realizar dicha gestión'
+      message: 'El Torneo Ha vuelto al estado Sorteo, para poder gestionar grupos o particiopantes en los grupos, se debe tener precaución al momento de realizar dicha gestión'
     }
+  }
+
+
+
+
+
+  async CambiarTorneoASorteo(id: number) {
+
+    if (!id) {
+      throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 400);
+    }
+
+    const torneo = await this.torneoRepository.findOne({
+      where: { id: id }
+    });
+
+
+
+
+    if (!torneo) {
+      throw new MiExcepcionPersonalizada('No se encontro el Torneo', 404);
+    }
+
+    if (torneo.estado != Estado.SORTEO) {
+      const message = `Este torneo esta en estado ${torneo.estado} por lo cual es imposible realizar esta accion`
+      throw new MiExcepcionPersonalizada(message, 409);
+    }
+
+
+    torneo.estado = Estado.PROGRAMACION
+    await this.torneoRepository.save(torneo)
+
+
+    return {
+      message: `El Torneo ha avanzado manualmente al estado ${torneo.estado}`
+    }
+
+
+
+
   }
 
 
