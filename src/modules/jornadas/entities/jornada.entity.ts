@@ -1,10 +1,18 @@
 import { Partido } from "src/modules/partidos/entities/partido.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Torneo } from "src/modules/torneos/entities/torneo.entity";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 
 export enum TipoJornada {
     REGULAR = 'regular',
     CRUZADA = 'cruzada'
+   
+}
+
+
+export enum Retadores {
+    PARES = 'pares',
+    IMPARES = 'impares'
    
 }
 
@@ -20,6 +28,14 @@ export class Jornada {
         enum: TipoJornada
     })
     tipo: 'regular' | 'cruzada'
+
+
+    @Column({
+        type: 'enum',
+        enum: Retadores,
+        nullable: true
+    })
+    retadores: 'pares' | 'impares'
 
 
     @Column({
@@ -76,8 +92,17 @@ export class Jornada {
       participantes: any[];
 
 
+      @Column({type: 'boolean', default: false})
+      finalizado: boolean
+
+
       @OneToMany(() => Partido, partido => partido.jornada)
       partidos: Partido[];
+
+
+      @ManyToOne(() => Torneo, torneo => torneo.grupos)
+      @JoinColumn({ name: 'torneoId' })
+      torneo: Torneo;
 
 
 

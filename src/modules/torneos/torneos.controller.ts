@@ -157,6 +157,28 @@ export class TorneosController {
     required: true
 
   })
+  @ApiQuery({
+    name: 'jornadaId',
+    type: Number,
+    description: 'Id de la jornada a buscar',
+    required: true
+
+  })
+  @Get('programarPartidosFaseGruposTorneoEscalera')
+  programarPartidosFaseGruposTorneoEscalerta(@Query('torneoId') torneoId : number, @Query('jornadaId') jornadaId : number){
+    return this.torneosService.programarPartidosFaseGruposTorneoEscalera(torneoId, jornadaId)
+
+  }
+
+
+
+  @ApiQuery({
+    name: 'torneoId',
+    type: Number,
+    description: 'Id del torneo a buscar',
+    required: true
+
+  })
   @Get('volverAsorteoGruupos')
   volverAsorteoGruupos(@Query('torneoId') torneoId : number){
     return this.torneosService.volverAsorteoGruupos(torneoId)

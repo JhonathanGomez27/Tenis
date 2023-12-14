@@ -129,6 +129,10 @@ export class Torneo {
     cantidad_jornadas_cruzadas: number;
 
 
+    @Column({ nullable: true, default: 1})
+    jornada_actual: number
+
+
 
     @OneToMany(() => Partido, partido => partido.torneo)
     partidos: Partido[];

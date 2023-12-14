@@ -8,7 +8,7 @@ import { handleDbError } from 'src/utils/error.message';
 import { MiExcepcionPersonalizada } from 'src/utils/exception';
 import { Grupo } from '../grupos/entities/grupo.entity';
 import { Partido } from '../partidos/entities/partido.entity';
-import { Jornada } from '../jornadas/entities/jornada.entity';
+import { Jornada, Retadores, TipoJornada } from '../jornadas/entities/jornada.entity';
 
 
 @Injectable()
@@ -119,7 +119,7 @@ export class TorneosService {
 
     //try {
     if (!id) {
-      throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 430);
+      throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 400);
     }
 
     const torneo = await this.torneoRepository.findOne({
@@ -128,7 +128,7 @@ export class TorneosService {
     });
 
     if (!torneo) {
-      throw new MiExcepcionPersonalizada('No se encontro el Torneo', 430);
+      throw new MiExcepcionPersonalizada('No se encontro el Torneo', 404);
     }
 
 
@@ -205,8 +205,44 @@ export class TorneosService {
 
       //formar jornadas
 
-      const jornadas = await this.formarJornadas(torneo.cantidad_jornadas_regulares, torneo.cantidad_jornadas_cruzadas, grupos)
+      const jornadas = await this.formarJornadas(torneo.cantidad_jornadas_regulares, torneo.cantidad_jornadas_cruzadas, grupos, torneo)
+
+
+
+      let regulares = []
+      let cruzadas = []
+      let contadorregulares = 0;
+      let contadorcruzadas = 0;
+
+      for (const jornada of jornadas) {
+        if(jornada.tipo === TipoJornada.REGULAR)
+        {
+          if(contadorregulares % 2 == 0){
+            jornada.retadores = Retadores.PARES
+            await this.jornadaRepository.save(jornada)
+          }else{
+            jornada.retadores = Retadores.IMPARES
+            await this.jornadaRepository.save(jornada)
+          }
+          contadorregulares++;
+         
+        }else if(jornada.tipo === TipoJornada.CRUZADA){
+          if(contadorcruzadas % 2 == 0){
+            jornada.retadores = Retadores.PARES
+            await this.jornadaRepository.save(jornada)
+          }else{
+            jornada.retadores = Retadores.IMPARES
+            await this.jornadaRepository.save(jornada)
+          }
+
+          contadorcruzadas++;
+        
+        }
+        
+      }
+
       
+     
 
      
 
@@ -233,7 +269,7 @@ export class TorneosService {
  
 
 
-  async formarJornadas(cantidadJornadasRegulares: number, cantidadJornadasCruzadas: number, participantes: any): Promise<Jornada[]> {
+  async formarJornadas(cantidadJornadasRegulares: number, cantidadJornadasCruzadas: number, participantes: any, torneo: Torneo): Promise<Jornada[]> {
     const jornadas: Jornada[] = [];
 
 
@@ -282,9 +318,11 @@ export class TorneosService {
       if(contadorJornadas == 0){
         jornada.participantes = participantes
         jornada.posiciones = participantes
+        jornada.torneo = torneo
         const jornadaPersitida = await this.jornadaRepository.save(jornada);
         contadorJornadas++
       }else{
+        jornada.torneo = torneo
         const jornadaPersitida = await this.jornadaRepository.save(jornada);
       }      
     }
@@ -442,6 +480,13 @@ export class TorneosService {
     return {
       message: `se han creado un total de  ${contador} partidos, por favor dijita la fecha en la que se realizaran cada uno de ellos`
     }
+  }
+
+
+  async programarPartidosFaseGruposTorneoEscalera(torneoId: number, jornadaId: number){
+
+    return 'Implementar'
+
   }
 
 
