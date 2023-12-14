@@ -45,6 +45,19 @@ export class TorneosController {
   }
 
 
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthAccessGuard, RolesGuard)
+  @Patch('editarTorneo')
+  @ApiQuery({
+    name: 'id',
+    type: Number,
+    required: true
+  })
+  editarTorneo(@Body() updateTorneoDto: UpdateTorneoDto, @Query('id') id){
+    return this.torneosService.editarTorneo(updateTorneoDto, id)
+  }
+
+
   @Get('ObtenerRamas')
   obtenerRamas() {
     return this.torneosService.enumToJsonArray(rama);

@@ -411,6 +411,47 @@ export class TorneosService {
   }
 
 
+  async editarTorneo(updateTorneoDto: UpdateTorneoDto, id: number){
+
+    if (!id) {
+      throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 400);
+    }
+
+    const torneo = await this.torneoRepository.findOne({
+      where: { id: id }     
+    });
+
+    if (!torneo) {
+      throw new MiExcepcionPersonalizada('No se encontro el Torneo', 404);
+    }
+
+
+    if (torneo.estado != Estado.INICIAL) {
+      const message = `este torneo esta en estado ${torneo.estado} por lo cual es imposible realizar esta accion`
+      throw new MiExcepcionPersonalizada(message, 409);
+    }
+
+
+    if (updateTorneoDto.tipo_torneo === Tipo.ESCALERA) {
+      const verificarCantidadGrupos = updateTorneoDto.cantidad_grupos % 2;
+      if (verificarCantidadGrupos != 0) {
+        throw new MiExcepcionPersonalizada(`La cantidad de grupos de un torneo ${Tipo.ESCALERA} debe ser par`, 430);
+      }
+    }
+
+
+    const torneoActualizado = await this.torneoRepository.save(updateTorneoDto)
+
+    return{
+      torneoActualizado
+    }
+
+
+
+
+  }
+
+
 
 
 }
