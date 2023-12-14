@@ -8,6 +8,7 @@ import { handleDbError } from 'src/utils/error.message';
 import { MiExcepcionPersonalizada } from 'src/utils/exception';
 import { Grupo } from '../grupos/entities/grupo.entity';
 import { Partido } from '../partidos/entities/partido.entity';
+import { Jornada } from '../jornadas/entities/jornada.entity';
 
 
 @Injectable()
@@ -16,7 +17,9 @@ export class TorneosService {
   constructor(
     @InjectRepository(Torneo) private torneoRepository: Repository<Torneo>,
     @InjectRepository(Grupo) private grupoRepository: Repository<Grupo>,
-    @InjectRepository(Partido) private partidoRepository: Repository<Partido>
+    @InjectRepository(Partido) private partidoRepository: Repository<Partido>,
+    @InjectRepository(Jornada) private jornadaRepository: Repository<Jornada>,
+    
   ) { }
 
 
@@ -174,6 +177,9 @@ export class TorneosService {
       return gruposResponse
     } else if (torneo.tipo_torneo === Tipo.ESCALERA) {
 
+
+    
+
       const inscripciones = torneo.inscripciones;
       const modalidad = torneo.modalidad;
       const jugadoresPorGrupo = torneo.inscripciones.length / torneo.cantidad_grupos
@@ -197,10 +203,21 @@ export class TorneosService {
       }
 
 
+      //formar jornadas
+
+      const jornadas = await this.formarJornadas(torneo.cantidad_jornadas_regulares, torneo.cantidad_jornadas_cruzadas, grupos)
+      
+
+     
+
+
+
+
 
 
       return {
-        gruposResponse
+        gruposResponse,
+        jornadas
       }
 
 
@@ -210,6 +227,78 @@ export class TorneosService {
 
 
   }
+
+
+
+ 
+
+
+  async formarJornadas(cantidadJornadasRegulares: number, cantidadJornadasCruzadas: number, participantes: any): Promise<Jornada[]> {
+    const jornadas: Jornada[] = [];
+
+
+    const cantidadOriginalRegulares = cantidadJornadasRegulares;
+    const cantidadOriginalCruzadas = cantidadJornadasCruzadas;
+
+    const cantidadJornadasPorCruzada = Math.floor(cantidadJornadasRegulares / cantidadJornadasCruzadas);
+    const cantidadTotalJornadas = cantidadJornadasRegulares + cantidadJornadasCruzadas;
+
+    let contadorJornadasCruzadas = 0;
+
+    if (cantidadOriginalRegulares > cantidadOriginalCruzadas) {
+      for (let i = 0; i < cantidadTotalJornadas; i++) {
+        if (contadorJornadasCruzadas < cantidadJornadasCruzadas) {
+          //jornadas.push('regular');
+          const jornada = new Jornada()          
+          jornada.tipo = 'regular'
+          jornadas.push(jornada);
+          contadorJornadasCruzadas++;
+        } else {
+          const jornada = new Jornada() 
+          jornada.tipo = 'cruzada'
+          jornadas.push(jornada);
+          contadorJornadasCruzadas = 0;
+        }
+      }
+
+    } if (cantidadOriginalRegulares == cantidadOriginalCruzadas) {
+      for (let i = 0; i < cantidadTotalJornadas; i++) {
+        if (i % 2 === 0) {
+          const jornada = new Jornada()          
+          jornada.tipo = 'regular'
+          jornadas.push(jornada);
+        } else {
+          const jornada = new Jornada() 
+          jornada.tipo = 'cruzada'
+          jornadas.push(jornada);
+        }
+      }
+
+    }
+
+
+    let contadorJornadas = 0;
+    for (const jornada of jornadas) {
+      if(contadorJornadas == 0){
+        jornada.participantes = participantes
+        jornada.posiciones = participantes
+        const jornadaPersitida = await this.jornadaRepository.save(jornada);
+        contadorJornadas++
+      }else{
+        const jornadaPersitida = await this.jornadaRepository.save(jornada);
+      }      
+    }
+
+
+    return jornadas;
+  }
+
+
+
+
+
+
+
 
 
 
@@ -411,14 +500,14 @@ export class TorneosService {
   }
 
 
-  async editarTorneo(updateTorneoDto: UpdateTorneoDto, id: number){
+  async editarTorneo(updateTorneoDto: UpdateTorneoDto, id: number) {
 
     if (!id) {
       throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 400);
     }
 
     const torneo = await this.torneoRepository.findOne({
-      where: { id: id }     
+      where: { id: id }
     });
 
     if (!torneo) {
@@ -442,39 +531,39 @@ export class TorneosService {
 
 
 
-    if(updateTorneoDto.nombre)
-    torneo.nombre = updateTorneoDto.nombre
+    if (updateTorneoDto.nombre)
+      torneo.nombre = updateTorneoDto.nombre
 
-    if(updateTorneoDto.tipo_torneo)
-    torneo.tipo_torneo = updateTorneoDto.tipo_torneo
+    if (updateTorneoDto.tipo_torneo)
+      torneo.tipo_torneo = updateTorneoDto.tipo_torneo
 
-    if(updateTorneoDto.rama)
-    torneo.rama = updateTorneoDto.rama
+    if (updateTorneoDto.rama)
+      torneo.rama = updateTorneoDto.rama
 
-    if(updateTorneoDto.modalidad)
-    torneo.modalidad = updateTorneoDto.modalidad
+    if (updateTorneoDto.modalidad)
+      torneo.modalidad = updateTorneoDto.modalidad
 
-    if(updateTorneoDto.cantidad_grupos)
-    torneo.cantidad_grupos = updateTorneoDto.cantidad_grupos
+    if (updateTorneoDto.cantidad_grupos)
+      torneo.cantidad_grupos = updateTorneoDto.cantidad_grupos
 
-    if(updateTorneoDto.categoria)
-    torneo.categoria = updateTorneoDto.categoria
+    if (updateTorneoDto.categoria)
+      torneo.categoria = updateTorneoDto.categoria
 
-    if(updateTorneoDto.configuracion_sets)
-    torneo.configuracion_sets = updateTorneoDto.configuracion_sets
+    if (updateTorneoDto.configuracion_sets)
+      torneo.configuracion_sets = updateTorneoDto.configuracion_sets
 
-    if(updateTorneoDto.cantidad_jornadas_regulares)
-    torneo.cantidad_jornadas_regulares = updateTorneoDto.cantidad_jornadas_regulares
+    if (updateTorneoDto.cantidad_jornadas_regulares)
+      torneo.cantidad_jornadas_regulares = updateTorneoDto.cantidad_jornadas_regulares
 
-    if(updateTorneoDto.cantidad_jornadas_cruzadas)
-    torneo.cantidad_jornadas_cruzadas = updateTorneoDto.cantidad_jornadas_cruzadas
+    if (updateTorneoDto.cantidad_jornadas_cruzadas)
+      torneo.cantidad_jornadas_cruzadas = updateTorneoDto.cantidad_jornadas_cruzadas
 
 
 
 
     const torneoActualizado = await this.torneoRepository.save(torneo)
 
-    return{
+    return {
       torneoActualizado
     }
 

@@ -6,10 +6,11 @@ import { Torneo } from './entities/torneo.entity';
 import { IamModule } from '../iam/iam.module';
 import { Grupo } from '../grupos/entities/grupo.entity';
 import { Partido } from '../partidos/entities/partido.entity';
+import { Jornada } from '../jornadas/entities/jornada.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Torneo, Grupo, Partido]),
+    TypeOrmModule.forFeature([Torneo, Grupo, Partido, Jornada]),
     IamModule
   ],
   controllers: [TorneosController],

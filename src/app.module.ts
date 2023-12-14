@@ -16,6 +16,7 @@ import { PartidosModule } from './modules/partidos/partidos.module';
 import { InscripcionesModule } from './modules/inscripciones/inscripciones.module';
 import { GruposModule } from './modules/grupos/grupos.module';
 import { LlavesModule } from './modules/llaves/llaves.module';
+import { JornadasModule } from './modules/jornadas/jornadas.module';
 
 
 
@@ -50,7 +51,8 @@ import { LlavesModule } from './modules/llaves/llaves.module';
     PartidosModule,
     InscripcionesModule,
     GruposModule,
-    LlavesModule
+    LlavesModule,
+    JornadasModule
    
     
   ],

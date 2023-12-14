@@ -1,4 +1,5 @@
 import { Grupo } from "src/modules/grupos/entities/grupo.entity";
+import { Jornada } from "src/modules/jornadas/entities/jornada.entity";
 import { Jugador } from "src/modules/jugadores/entities/jugadore.entity";
 import { Pareja } from "src/modules/parejas/entities/pareja.entity";
 import { Fases, Torneo } from "src/modules/torneos/entities/torneo.entity";
@@ -93,5 +94,10 @@ export class Partido {
     @ManyToOne(() => Grupo, { nullable: true })
     @JoinColumn({ name: 'grupoId' })
     grupo: Grupo;
+
+
+    @ManyToOne(() => Jornada, { nullable: true })
+    @JoinColumn({ name: 'jornadaId' })
+    jornada: Jornada;
    
 }

@@ -1,26 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { CreateJornadaDto } from './dto/create-jornada.dto';
 import { UpdateJornadaDto } from './dto/update-jornada.dto';
+import { Jornada } from './entities/jornada.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class JornadasService {
-  create(createJornadaDto: CreateJornadaDto) {
-    return 'This action adds a new jornada';
-  }
-
-  findAll() {
-    return `This action returns all jornadas`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} jornada`;
-  }
-
-  update(id: number, updateJornadaDto: UpdateJornadaDto) {
-    return `This action updates a #${id} jornada`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} jornada`;
-  }
+  constructor(
+    @InjectRepository(Jornada) private jornadaRepository: Repository<Jornada>,
+   
+  ) { }
 }
