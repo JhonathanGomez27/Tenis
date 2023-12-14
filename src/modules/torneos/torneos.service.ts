@@ -440,7 +440,39 @@ export class TorneosService {
     }
 
 
-    const torneoActualizado = await this.torneoRepository.save(updateTorneoDto)
+
+
+    if(updateTorneoDto.nombre)
+    torneo.nombre = updateTorneoDto.nombre
+
+    if(updateTorneoDto.tipo_torneo)
+    torneo.tipo_torneo = updateTorneoDto.tipo_torneo
+
+    if(updateTorneoDto.rama)
+    torneo.rama = updateTorneoDto.rama
+
+    if(updateTorneoDto.modalidad)
+    torneo.modalidad = updateTorneoDto.modalidad
+
+    if(updateTorneoDto.cantidad_grupos)
+    torneo.cantidad_grupos = updateTorneoDto.cantidad_grupos
+
+    if(updateTorneoDto.categoria)
+    torneo.categoria = updateTorneoDto.categoria
+
+    if(updateTorneoDto.configuracion_sets)
+    torneo.configuracion_sets = updateTorneoDto.configuracion_sets
+
+    if(updateTorneoDto.cantidad_jornadas_regulares)
+    torneo.cantidad_jornadas_regulares = updateTorneoDto.cantidad_jornadas_regulares
+
+    if(updateTorneoDto.cantidad_jornadas_cruzadas)
+    torneo.cantidad_jornadas_cruzadas = updateTorneoDto.cantidad_jornadas_cruzadas
+
+
+
+
+    const torneoActualizado = await this.torneoRepository.save(torneo)
 
     return{
       torneoActualizado

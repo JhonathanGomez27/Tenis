@@ -122,6 +122,13 @@ export class Torneo {
     })
     estado: 'Inicial' | 'En Proceso' | 'Finalizado' | 'Sorteo' | 'Programacion'
 
+    @Column({ nullable: true})
+    cantidad_jornadas_regulares: number;
+
+    @Column({ nullable: true})
+    cantidad_jornadas_cruzadas: number;
+
+
 
     @OneToMany(() => Partido, partido => partido.torneo)
     partidos: Partido[];
