@@ -9,6 +9,7 @@ import { MiExcepcionPersonalizada } from 'src/utils/exception';
 import { ResultadoPartidoDTO } from './dto/resultado.dto';
 import { Grupo } from '../grupos/entities/grupo.entity';
 import { Llave } from '../llaves/entities/llave.entity';
+import { Jornada, TipoJornada } from '../jornadas/entities/jornada.entity';
 
 @Injectable()
 export class PartidosService {
@@ -19,6 +20,7 @@ export class PartidosService {
     @InjectRepository(Torneo) private torneoRepository: Repository<Torneo>,
     @InjectRepository(Grupo) private grupoRepository: Repository<Grupo>,
     @InjectRepository(Llave) private llaveRepository: Repository<Llave>,
+    @InjectRepository(Jornada) private jornadaRepository: Repository<Jornada>,
 
   ) { }
 
@@ -37,7 +39,7 @@ export class PartidosService {
     });
 
 
-   // return 
+    // return 
 
 
     if (!torneo) {
@@ -45,10 +47,10 @@ export class PartidosService {
     }
     const partidos = await this.partidoRepository.find({
       where: { torneo: { id: idTorneo } },
-      relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2', 'grupo', 'pareja1.jugador1' , 'pareja1.jugador2', 'pareja2.jugador1', 'pareja2.jugador2', 'jornada'],
+      relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2', 'grupo', 'pareja1.jugador1', 'pareja1.jugador2', 'pareja2.jugador1', 'pareja2.jugador2', 'jornada'],
     });
 
-   // return partidos
+    // return partidos
     const partidosFormateados = []
     for (const partido of partidos) {
 
@@ -73,13 +75,13 @@ export class PartidosService {
         pareja1: {
           id: partido.pareja1 ? partido.pareja1.id : undefined,
           nombre: partido.pareja1
-            ? partido.pareja1.jugador1.nombre +  ' - ' + partido.pareja1.jugador2.nombre
+            ? partido.pareja1.jugador1.nombre + ' - ' + partido.pareja1.jugador2.nombre
             : undefined,
         },
         pareja2: {
           id: partido.pareja2 ? partido.pareja2.id : undefined,
           nombre: partido.pareja2
-            ? partido.pareja2.jugador1.nombre +    ' - ' + partido.pareja2.jugador2.nombre
+            ? partido.pareja2.jugador1.nombre + ' - ' + partido.pareja2.jugador2.nombre
             : undefined,
         }
       }
@@ -98,17 +100,17 @@ export class PartidosService {
     }
     const partido = await this.partidoRepository.findOne({
       where: { id: id },
-      relations: ['grupo', 'torneo', 'jornada'],
+      relations: ['grupo', 'torneo', 'jornada', 'jugador1', 'jugador2', 'pareja1', 'pareja2'],
     });
 
     if (!partido) {
       throw new MiExcepcionPersonalizada('No se encontro el partido', 404);
-    }    
-    
+    }
 
-    
 
-    if(partido.torneo.estado === 'Finalizado'){
+
+
+    if (partido.torneo.estado === 'Finalizado') {
       throw new MiExcepcionPersonalizada('No Se puede actualizar un partido de un Torneo Finalizado', 403);
     }
 
@@ -118,14 +120,14 @@ export class PartidosService {
     const { sets, ganador, perdedor } = nuevoResultado;
 
 
-    if(partido.torneo.tipo_torneo === Tipo.REGULAR){
+    if (partido.torneo.tipo_torneo === Tipo.REGULAR) {
       if (partido.fase === 'grupos') {
         // Obtener las posiciones actuales del grupo
         const posicionesActuales = partido.grupo.posiciones || {};
-  
-  
+
+
         if (Object.keys(posicionesActuales).length === 0) {
-  
+
           if (ganador) {
             const ganadorId = ganador.id;
             posicionesActuales[ganadorId] = posicionesActuales[ganadorId] || {};
@@ -134,7 +136,7 @@ export class PartidosService {
             posicionesActuales[ganadorId].setsPerdidos = (posicionesActuales[ganadorId]?.setsPerdidos || 0) + ganador.setsPerdidos;
             posicionesActuales[ganadorId].puntosSets = (posicionesActuales[ganadorId]?.puntosSets || 0) + ganador.puntosSets;
           }
-  
+
           // Incrementar los valores del perdedor
           if (perdedor) {
             const perdedorId = perdedor.id;
@@ -144,17 +146,17 @@ export class PartidosService {
             posicionesActuales[perdedorId].setsPerdidos = (posicionesActuales[perdedorId]?.setsPerdidos || 0) + perdedor.setsPerdidos;
             posicionesActuales[perdedorId].puntosSets = (posicionesActuales[perdedorId]?.puntosSets || 0) + perdedor.puntosSets;
           }
-  
-  
-  
+
+
+
           const participantesOrdenados = partido.grupo.participantes.sort((a, b) => {
             const puntosA = posicionesActuales[a.jugador?.id || a.pareja?.id]?.puntos || 0;
             const puntosB = posicionesActuales[b.jugador?.id || b.pareja?.id]?.puntos || 0;
             return puntosB - puntosA;
           });
-  
+
           // return posicionesActuales
-  
+
           // Actualizar las posiciones en el grupo
           partido.grupo.posiciones = participantesOrdenados.map((participante) => {
             const participanteId = participante.jugador?.id || participante.pareja?.id;
@@ -166,25 +168,25 @@ export class PartidosService {
               puntosSets: posicionesActuales[participanteId]?.puntosSets || 0,
             };
           });
-  
+
         } else {
-  
+
           if (ganador && perdedor) {
             partido.grupo.posiciones = await this.actualizarDatos(posicionesActuales, nuevoResultado);
           }
         }
         await this.grupoRepository.save(partido.grupo);
-  
+
         partido.resultado = {
           sets: sets,
           ganador: ganador,
           perdedor: perdedor,
         };
-  
+
         partido.finalizado = true
-  
+
         const partidoActualizado = await this.partidoRepository.save(partido);
-  
+
         return partidoActualizado;
       } else {
         partido.resultado = {
@@ -192,30 +194,103 @@ export class PartidosService {
           ganador: ganador,
           perdedor: perdedor,
         };
-  
+
         partido.finalizado = true
-  
+
         const partidoActualizado = await this.partidoRepository.save(partido);
         return partidoActualizado;
-  
-  
+
+
       }
-    }else if( partido.torneo.tipo_torneo === Tipo.ESCALERA){
+    } else if (partido.torneo.tipo_torneo === Tipo.ESCALERA) {
+
+      if(partido.finalizado){
+        throw new MiExcepcionPersonalizada('El partido ya se ha marcado como finalizado, no se puede editar', 403);
+
+      }
 
       if (partido.fase === 'grupos') {
 
         const jornada = partido.jornada
         const grupo = partido.grupo
 
+        const jornadaEntidad = await this.jornadaRepository.findOneBy(jornada)
+        const grupoEntidad = await this.grupoRepository.findOneBy(grupo)
+
+        //return grupoEntidad
 
 
-        return jornada
-
-        //const found = array1.find((element) => element > 10);
-
-
-       // const objectFind
-
+        if(jornadaEntidad.tipo === TipoJornada.REGULAR){
+          partido.resultado = {
+            sets: sets,
+            ganador: ganador,
+            perdedor: perdedor,
+          };
+  
+          partido.finalizado = true
+  
+          const partidoActualizado = await this.partidoRepository.save(partido);
+  
+  
+          //buscar si el ganador es el jugador1 o la pareja1
+  
+          let cambioRanking = false
+          let tipocambio: string;
+  
+  
+  
+          if (ganador.tipo == 'jugador') {
+            if (partido.jugador1.id == ganador.id) {
+              cambioRanking = true
+              tipocambio = 'jugador'
+            }
+          }
+  
+          if (ganador.tipo == 'pareja') {
+            if (partido.pareja1.id == ganador.id) {
+              cambioRanking = true
+              tipocambio = 'pareja'
+            }
+          }
+  
+  
+          
+          if (cambioRanking && tipocambio == 'jugador') {
+  
+            //return jornada.participantes
+            //buscar el perdedor y el ganador y cambiarlos
+            for (const grupo of jornada.participantes) {
+              if (grupo.id == partido.grupo.id) {
+                //console.log(grupo.participantes)
+               /* ganadorFound = grupo.participantes.find((participante) =>  participante.jugador.id == ganador.id);
+                perdedorFound = grupo.participantes.find((participante) =>  participante.jugador.id == perdedor.id);*/
+                const ganadorIndex = grupo.participantes.findIndex(participante => participante.jugador.id === ganador.id);
+                const perdedorIndex = grupo.participantes.findIndex(participante => participante.jugador.id === perdedor.id);
+            
+                if (ganadorIndex !== -1 && perdedorIndex !== -1) {
+                  console.log('entre')
+                  // Intercambiar los rankings
+                  const tempRanking = grupo.participantes[ganadorIndex].ranking;
+                  grupo.participantes[ganadorIndex].ranking = grupo.participantes[perdedorIndex].ranking;
+                  grupo.participantes[perdedorIndex].ranking = tempRanking;
+  
+                  grupoEntidad.participantes = grupo.participantes
+  
+                  await this.grupoRepository.save(grupoEntidad)
+  
+  
+                }           
+  
+              }  
+            }  
+            jornadaEntidad.participantes = jornada.participantes
+            jornadaEntidad.posiciones = jornada.participantes
+            await this.jornadaRepository.save(jornadaEntidad)  
+          }   
+          return {
+            message: 'Partido Editado con exito'
+          }
+        }
       }
 
     }
@@ -331,8 +406,8 @@ export class PartidosService {
         return a.setsPerdidos - b.setsPerdidos;
       });
       // Organizar la fase de llaves
-      const llaves = this.organizarLlaves(participantesOrdenadosGlobal);     
-      const llavesReturn = [] 
+      const llaves = this.organizarLlaves(participantesOrdenadosGlobal);
+      const llavesReturn = []
       // guardar las llaves en la bd
       const modalidad = torneo.modalidad
       const fase = this.obtenerEtapa(llaves.length)
@@ -389,7 +464,7 @@ export class PartidosService {
       return llavesReturn;
     } else if (torneo.fase_actual === 'octavos' || torneo.fase_actual === 'cuartos' || torneo.fase_actual === 'semifinales') {
       const llavesJugadas = await this.llaveRepository.find({
-        where: { torneo: torneo }       
+        where: { torneo: torneo }
       })
       const partidosJugadosLlaves = await this.partidoRepository.find({
         where: { torneo: torneo, fase: torneo.fase_actual }
