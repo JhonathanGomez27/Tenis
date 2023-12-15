@@ -299,7 +299,7 @@ export class PartidosService {
           const partidos = await this.partidoRepository.find({ where: {jornada: jornada}})
 
           if(todosFinalizados.length == partidos.length){
-            if(numeroJornadaActual < cantidad_jornadas){
+            if(numeroJornadaActual <= cantidad_jornadas){
 
               //buscar todas las jornadas del torneo
 

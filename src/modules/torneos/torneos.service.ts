@@ -552,6 +552,27 @@ export class TorneosService {
         }
 
 
+      } else if (tipoJornada === TipoJornada.CRUZADA) {
+
+        if (retadores === Retadores.PARES) {
+
+          
+         //aqui la logica
+          jornada.sorteado = true
+          await this.jornadaRepository.save(jornada);
+        } else if (retadores === Retadores.IMPARES) {
+        
+          //aqui la logica
+
+
+          jornada.sorteado = true
+          await this.jornadaRepository.save(jornada);
+
+        }
+
+
+
+
       }
 
       torneo.jornada_actual = torneo.jornada_actual + 1
@@ -572,7 +593,7 @@ export class TorneosService {
     }
 
 
-    
+
 
   }
 
@@ -682,27 +703,27 @@ export class TorneosService {
     for (let i = 0; i < Math.max(pares.length, impares.length); i++) {
       // Si no es el primer o último participante impar, organiza el enfrentamiento
       const partido = new Partido();
-        partido.torneo = torneo;
-        partido.fase = 'grupos';
-        partido.grupo = grupo;
-        partido.jornada = jornada;
+      partido.torneo = torneo;
+      partido.fase = 'grupos';
+      partido.grupo = grupo;
+      partido.jornada = jornada;
 
-        // Asignar IDs de participantes al partido
-        if (torneo.modalidad === 'singles') {
-          partido.jugador1 = pares[i].jugador;
-          partido.jugador2 = impares[i].jugador;
-        } else if (torneo.modalidad === 'dobles') {
-          partido.pareja1 = pares[i].pareja;
-          partido.pareja2 = impares[i].pareja;
-        }
+      // Asignar IDs de participantes al partido
+      if (torneo.modalidad === 'singles') {
+        partido.jugador1 = pares[i].jugador;
+        partido.jugador2 = impares[i].jugador;
+      } else if (torneo.modalidad === 'dobles') {
+        partido.pareja1 = pares[i].pareja;
+        partido.pareja2 = impares[i].pareja;
+      }
 
-        // Puedes ajustar el manejo de fechas y otros campos según tus necesidades
-        await this.partidoRepository.save(partido);
+      // Puedes ajustar el manejo de fechas y otros campos según tus necesidades
+      await this.partidoRepository.save(partido);
 
-        contador++;
+      contador++;
     }
 
-    return contador+contador;
+    return contador + contador;
   }
 
 
