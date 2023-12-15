@@ -61,6 +61,8 @@ export class JornadasService {
       throw new MiExcepcionPersonalizada('No se encontro La Jornada', 404);
     }
 
+    
+
     return {
       jornada: jornada
     }

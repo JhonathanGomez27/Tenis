@@ -32,6 +32,12 @@ export class GruposService {
     const grupos = await this.grupoRepository.find({
       where: { torneo: { id: torneo.id } }
     });
+
+
+    grupos.forEach((grupo) => {
+      grupo.participantes.sort((a, b) => a.ranking - b.ranking);
+    });
+
     return grupos
   }
 
