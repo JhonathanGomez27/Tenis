@@ -548,6 +548,9 @@ export class TorneosService {
         }
       }
 
+      torneo.jornada_actual = torneo.jornada_actual + 1
+      await this.torneoRepository.save(torneo)
+
 
 
 
@@ -578,7 +581,7 @@ export class TorneosService {
     // Organiza los enfrentamientos
     //const enfrentamientos: [any, any][] = [];
 
-    console.log('math',Math.min(pares.length, impares.length))
+ 
     let contador = 0;
     for (let i = 0; i < Math.min(pares.length, impares.length); i++) {
       //enfrentamientos.push([pares[i], impares[i]]);
@@ -607,8 +610,10 @@ export class TorneosService {
 
     }
 
-    // Ahora 'enfrentamientos' contiene los enfrentamientos entre rankings par e impar
-    //console.log(enfrentamientos);
+
+   
+
+   
 
     return contador+contador
 
