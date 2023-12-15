@@ -19,7 +19,7 @@ export class TorneosService {
     @InjectRepository(Grupo) private grupoRepository: Repository<Grupo>,
     @InjectRepository(Partido) private partidoRepository: Repository<Partido>,
     @InjectRepository(Jornada) private jornadaRepository: Repository<Jornada>,
-    
+
   ) { }
 
 
@@ -178,7 +178,7 @@ export class TorneosService {
     } else if (torneo.tipo_torneo === Tipo.ESCALERA) {
 
 
-    
+
 
       const inscripciones = torneo.inscripciones;
       const modalidad = torneo.modalidad;
@@ -215,36 +215,35 @@ export class TorneosService {
       let contadorcruzadas = 0;
 
       for (const jornada of jornadas) {
-        if(jornada.tipo === TipoJornada.REGULAR)
-        {
-          if(contadorregulares % 2 == 0){
+        if (jornada.tipo === TipoJornada.REGULAR) {
+          if (contadorregulares % 2 == 0) {
             jornada.retadores = Retadores.PARES
             await this.jornadaRepository.save(jornada)
-          }else{
+          } else {
             jornada.retadores = Retadores.IMPARES
             await this.jornadaRepository.save(jornada)
           }
           contadorregulares++;
-         
-        }else if(jornada.tipo === TipoJornada.CRUZADA){
-          if(contadorcruzadas % 2 == 0){
+
+        } else if (jornada.tipo === TipoJornada.CRUZADA) {
+          if (contadorcruzadas % 2 == 0) {
             jornada.retadores = Retadores.PARES
             await this.jornadaRepository.save(jornada)
-          }else{
+          } else {
             jornada.retadores = Retadores.IMPARES
             await this.jornadaRepository.save(jornada)
           }
 
           contadorcruzadas++;
-        
+
         }
-        
+
       }
 
-      
-     
 
-     
+
+
+
 
 
 
@@ -266,7 +265,7 @@ export class TorneosService {
 
 
 
- 
+
 
 
   async formarJornadas(cantidadJornadasRegulares: number, cantidadJornadasCruzadas: number, participantes: any, torneo: Torneo): Promise<Jornada[]> {
@@ -285,12 +284,12 @@ export class TorneosService {
       for (let i = 0; i < cantidadTotalJornadas; i++) {
         if (contadorJornadasCruzadas < cantidadJornadasCruzadas) {
           //jornadas.push('regular');
-          const jornada = new Jornada()          
+          const jornada = new Jornada()
           jornada.tipo = 'regular'
           jornadas.push(jornada);
           contadorJornadasCruzadas++;
         } else {
-          const jornada = new Jornada() 
+          const jornada = new Jornada()
           jornada.tipo = 'cruzada'
           jornadas.push(jornada);
           contadorJornadasCruzadas = 0;
@@ -300,11 +299,11 @@ export class TorneosService {
     } if (cantidadOriginalRegulares == cantidadOriginalCruzadas) {
       for (let i = 0; i < cantidadTotalJornadas; i++) {
         if (i % 2 === 0) {
-          const jornada = new Jornada()          
+          const jornada = new Jornada()
           jornada.tipo = 'regular'
           jornadas.push(jornada);
         } else {
-          const jornada = new Jornada() 
+          const jornada = new Jornada()
           jornada.tipo = 'cruzada'
           jornadas.push(jornada);
         }
@@ -315,16 +314,16 @@ export class TorneosService {
 
     let contadorJornadas = 0;
     for (const jornada of jornadas) {
-      if(contadorJornadas == 0){
+      if (contadorJornadas == 0) {
         jornada.participantes = participantes
         jornada.posiciones = participantes
         jornada.torneo = torneo
         const jornadaPersitida = await this.jornadaRepository.save(jornada);
         contadorJornadas++
-      }else{
+      } else {
         jornada.torneo = torneo
         const jornadaPersitida = await this.jornadaRepository.save(jornada);
-      }      
+      }
     }
 
 
@@ -483,9 +482,140 @@ export class TorneosService {
   }
 
 
-  async programarPartidosFaseGruposTorneoEscalera(torneoId: number, jornadaId: number){
+  async programarPartidosFaseGruposTorneoEscalera(torneoId: number, jornadaId: number) {
 
-    return 'Implementar'
+    if (!torneoId || !jornadaId) {
+      throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo o de Jornada', 400);
+    }
+    const torneo = await this.torneoRepository.findOne({
+      where: { id: torneoId },
+      relations: ['grupos', 'jornadas'],
+    });
+    if (!torneo) {
+      throw new MiExcepcionPersonalizada('No se encontró el Torneo', 404);
+    }
+
+    if (torneo.tipo_torneo != Tipo.ESCALERA) {
+      throw new MiExcepcionPersonalizada(`el torneo es de tipo ${torneo.tipo_torneo} por lo cual no se puede realizar esta acción`, 409);
+    }
+
+    if (torneo.estado !== Estado.PROGRAMACION) {
+      const message = `Este torneo está en estado ${torneo.estado}, por lo cual es imposible realizar esta acción`;
+      throw new MiExcepcionPersonalizada(message, 409);
+    }
+
+    let jornada = await this.jornadaRepository.findOneBy({ id: jornadaId })
+
+    if (!jornada) {
+      throw new MiExcepcionPersonalizada('No se encontro La Jornada', 404);
+    }
+
+
+    if(jornada.sorteado || jornada.finalizado){
+      throw new MiExcepcionPersonalizada('No puedes hacer esto, los partidos de esta jornada ya fueron sorteados', 409);
+    }
+
+
+
+    let jornadaFound;
+    for (let index = 0; index < torneo.jornadas.length; index++) {
+      jornadaFound = torneo.jornadas[torneo.jornada_actual - 1];
+
+    }
+
+    if (jornadaFound.id == jornada.id) {
+
+      //progrmar los partidos
+
+      const tipoJornada = jornada.tipo
+      const retadores = jornada.retadores
+
+      let partidos ;
+
+
+      if (tipoJornada === TipoJornada.REGULAR) {
+
+
+        if (retadores === Retadores.PARES) {
+          for (const grupo of jornada.participantes) {
+            partidos = await this.programarPartidosGruposJornadaRegularRetadoresPares(grupo.participantes, jornada, torneo, grupo.id)            
+
+          }
+
+          jornada.sorteado = true
+          await this.jornadaRepository.save(jornada);
+
+        }
+      }
+
+
+
+
+      return {
+        message: `se formaron un total de ${partidos} partidos para esta Jornada`
+      }
+
+
+
+
+
+
+    }
+
+  }
+
+
+
+  async programarPartidosGruposJornadaRegularRetadoresPares(participantes: any[], jornada: Jornada, torneo: Torneo, grupo) {
+
+    // Ordena los participantes por ranking de manera descendente
+    const participantesOrdenados = participantes.sort((a, b) => b.ranking - a.ranking);
+
+    // Divide los participantes en dos arreglos: pares e impares
+    const pares = participantesOrdenados.filter((_, index) => index % 2 === 0);
+    const impares = participantesOrdenados.filter((_, index) => index % 2 !== 0);
+
+    // Organiza los enfrentamientos
+    //const enfrentamientos: [any, any][] = [];
+
+    console.log('math',Math.min(pares.length, impares.length))
+    let contador = 0;
+    for (let i = 0; i < Math.min(pares.length, impares.length); i++) {
+      //enfrentamientos.push([pares[i], impares[i]]);
+
+      const partido = new Partido();
+      partido.torneo = torneo;
+      partido.fase = 'grupos';
+      partido.grupo = grupo;
+      partido.jornada = jornada
+
+      // Asignar IDs de participantes al partido
+      if (torneo.modalidad === 'singles') {
+        partido.jugador1 = pares[i].jugador;
+        partido.jugador2 = impares[i].jugador;
+      } else if (torneo.modalidad === 'dobles') {
+        partido.pareja1 = pares[i].pareja;
+        partido.pareja2 = impares[i].pareja;
+      }
+
+
+       //partidos.push(partido)
+       contador++
+
+       // Puedes ajustar el manejo de fechas y otros campos según tus necesidades
+       await this.partidoRepository.save(partido);
+
+    }
+
+    // Ahora 'enfrentamientos' contiene los enfrentamientos entre rankings par e impar
+    //console.log(enfrentamientos);
+
+    return contador+contador
+
+
+
+
+
 
   }
 

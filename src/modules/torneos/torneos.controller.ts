@@ -166,6 +166,7 @@ export class TorneosController {
   })
   @Get('programarPartidosFaseGruposTorneoEscalera')
   programarPartidosFaseGruposTorneoEscalerta(@Query('torneoId') torneoId : number, @Query('jornadaId') jornadaId : number){
+    //console.log(torneoId, jornadaId)
     return this.torneosService.programarPartidosFaseGruposTorneoEscalera(torneoId, jornadaId)
 
   }

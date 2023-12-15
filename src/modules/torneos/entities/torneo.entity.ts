@@ -1,5 +1,6 @@
 import { Grupo } from "src/modules/grupos/entities/grupo.entity";
 import { Inscripcion } from "src/modules/inscripciones/entities/inscripcione.entity";
+import { Jornada } from "src/modules/jornadas/entities/jornada.entity";
 import { categoria, rama } from "src/modules/jugadores/entities/jugadore.entity";
 import { Llave } from "src/modules/llaves/entities/llave.entity";
 import { Partido } from "src/modules/partidos/entities/partido.entity";
@@ -147,6 +148,10 @@ export class Torneo {
 
     @OneToMany(() => Llave, llave => llave.torneo)
     llaves: Llave[];
+
+    
+    @OneToMany(() => Jornada, jornada => jornada.torneo)
+    jornadas: Jornada[];
 
 
 

@@ -96,6 +96,10 @@ export class Jornada {
       finalizado: boolean
 
 
+      @Column({type: 'boolean', default: false})
+      sorteado: boolean
+
+
       @OneToMany(() => Partido, partido => partido.jornada)
       partidos: Partido[];
 
