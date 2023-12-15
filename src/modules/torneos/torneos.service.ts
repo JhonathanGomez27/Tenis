@@ -618,25 +618,70 @@ export class TorneosService {
   }
 
 
+  // async programarPartidosGruposJornadaRegularRetadoresImpares(participantes: any[], jornada: Jornada, torneo: Torneo, grupo) {
+  //   // Ordena los participantes por ranking de manera descendente
+  //   const participantesOrdenados = participantes.sort((a, b) => b.ranking - a.ranking);
+
+  //   // Divide los participantes en dos arreglos: pares e impares
+  //   const pares = participantesOrdenados.filter((_, index) => index % 2 === 0);
+  //   const impares = participantesOrdenados.filter((_, index) => index % 2 !== 0);
+
+  //   // Organiza los enfrentamientos
+  //   // const enfrentamientos: [any, any][] = [];
+  //   let contador = 0;
+
+  //   // Obtén el índice del último participante impar
+  //   const ultimoImparIndex = impares.length - 1;
+
+  //   for (let i = 0; i < Math.min(pares.length, impares.length); i++) {
+  //     // Si no es el primer o último participante impar, organiza el enfrentamiento
+  //     if (i !== 0 && i !== ultimoImparIndex) {
+  //       const partido = new Partido();
+  //       partido.torneo = torneo;
+  //       partido.fase = 'grupos';
+  //       partido.grupo = grupo;
+  //       partido.jornada = jornada;
+
+  //       // Asignar IDs de participantes al partido
+  //       if (torneo.modalidad === 'singles') {
+  //         partido.jugador1 = impares[i].jugador;
+  //         partido.jugador2 = pares[i].jugador;
+  //       } else if (torneo.modalidad === 'dobles') {
+  //         partido.pareja1 = impares[i].pareja;
+  //         partido.pareja2 = pares[i].pareja;
+  //       }
+
+  //       // Puedes ajustar el manejo de fechas y otros campos según tus necesidades
+  //       await this.partidoRepository.save(partido);
+
+  //       contador++;
+  //     }
+  //   }
+
+  //   return contador;
+  // }
+
+
   async programarPartidosGruposJornadaRegularRetadoresImpares(participantes: any[], jornada: Jornada, torneo: Torneo, grupo) {
     // Ordena los participantes por ranking de manera descendente
-    const participantesOrdenados = participantes.sort((a, b) => b.ranking - a.ranking);
+    const participantesOrdenados = participantes.sort((a, b) => a.ranking - b.ranking);
 
     // Divide los participantes en dos arreglos: pares e impares
-    const pares = participantesOrdenados.filter((_, index) => index % 2 === 0);
-    const impares = participantesOrdenados.filter((_, index) => index % 2 !== 0);
+    let pares = participantesOrdenados.filter((_, index) => index % 2 === 0);
+    let impares = participantesOrdenados.filter((_, index) => index % 2 !== 0);
 
     // Organiza los enfrentamientos
     // const enfrentamientos: [any, any][] = [];
     let contador = 0;
 
     // Obtén el índice del último participante impar
-    const ultimoImparIndex = impares.length - 1;
+    const ultimoParIndex = pares.length - 1;
+    pares.splice(0, 1);
+    impares.splice(ultimoParIndex, 1);
 
-    for (let i = 0; i < Math.min(pares.length, impares.length); i++) {
+    for (let i = 0; i < Math.max(pares.length, impares.length); i++) {
       // Si no es el primer o último participante impar, organiza el enfrentamiento
-      if (i !== 0 && i !== ultimoImparIndex) {
-        const partido = new Partido();
+      const partido = new Partido();
         partido.torneo = torneo;
         partido.fase = 'grupos';
         partido.grupo = grupo;
@@ -644,18 +689,17 @@ export class TorneosService {
 
         // Asignar IDs de participantes al partido
         if (torneo.modalidad === 'singles') {
-          partido.jugador1 = impares[i].jugador;
-          partido.jugador2 = pares[i].jugador;
+          partido.jugador1 = pares[i].jugador;
+          partido.jugador2 = impares[i].jugador;
         } else if (torneo.modalidad === 'dobles') {
-          partido.pareja1 = impares[i].pareja;
-          partido.pareja2 = pares[i].pareja;
+          partido.pareja1 = pares[i].pareja;
+          partido.pareja2 = impares[i].pareja;
         }
 
         // Puedes ajustar el manejo de fechas y otros campos según tus necesidades
         await this.partidoRepository.save(partido);
 
         contador++;
-      }
     }
 
     return contador;
