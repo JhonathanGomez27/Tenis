@@ -94,6 +94,10 @@ export class PartidosService {
 
 
 
+
+
+
+
   async actualizarResultado(id: number, nuevoResultado: ResultadoPartidoDTO) {
     if (!id) {
       throw new MiExcepcionPersonalizada('No se Proporciono un id del partido', 400);
@@ -229,11 +233,7 @@ export class PartidosService {
   
           partido.finalizado = true
   
-          const partidoActualizado = await this.partidoRepository.save(partido);
-  
-  
-          //buscar si el ganador es el jugador1 o la pareja1
-  
+          const partidoActualizado = await this.partidoRepository.save(partido);  
           let cambioRanking = false
           let tipocambio: string;
   
@@ -268,7 +268,7 @@ export class PartidosService {
                 const perdedorIndex = grupo.participantes.findIndex(participante => participante.jugador.id === perdedor.id);
             
                 if (ganadorIndex !== -1 && perdedorIndex !== -1) {
-                  console.log('entre')
+                 
                   // Intercambiar los rankings
                   const tempRanking = grupo.participantes[ganadorIndex].ranking;
                   grupo.participantes[ganadorIndex].ranking = grupo.participantes[perdedorIndex].ranking;
@@ -286,7 +286,42 @@ export class PartidosService {
             jornadaEntidad.participantes = jornada.participantes
             jornadaEntidad.posiciones = jornada.participantes
             await this.jornadaRepository.save(jornadaEntidad)  
-          }   
+          } 
+
+
+
+          const jornadaActual = partido.jornada.id
+          const numeroJornadaActual = partido.torneo.jornada_actual
+          const cantidad_jornadas = partido.torneo.cantidad_jornadas_cruzadas + partido.torneo.cantidad_jornadas_regulares
+
+          const todosFinalizados = await this.partidoRepository.find({where: {jornada: jornada, finalizado: true}})
+
+          const partidos = await this.partidoRepository.find({ where: {jornada: jornada}})
+
+          if(todosFinalizados.length == partidos.length){
+            if(numeroJornadaActual < cantidad_jornadas){
+
+              //buscar todas las jornadas del torneo
+
+              const jornadas = await this.jornadaRepository.find({where: {torneo: partido.torneo}})
+
+              let idSiguienteJornada = await this.obtenerSiguienteIdCercano(jornadaActual, jornadas)
+
+              let siguienteJornada = await this.jornadaRepository.findOne({where: {id: idSiguienteJornada}})
+
+
+              siguienteJornada.posiciones = jornada.posiciones
+              siguienteJornada.participantes = jornada.participantes
+
+              await this.jornadaRepository.save(siguienteJornada)
+             
+              
+            }
+
+            jornada.finalizado = true
+            await this.jornadaRepository.save(jornada)
+          }
+
           return {
             message: 'Partido Editado con exito'
           }
@@ -321,6 +356,21 @@ export class PartidosService {
     }
 
     return posiciones;
+  }
+
+
+  async obtenerSiguienteIdCercano(idActual: number, jornadas: any[]): Promise<number> {
+    const idsOrdenados = jornadas
+      .map((jornada) => jornada.id)
+      .sort((a, b) => a - b);
+  
+    const indiceActual = idsOrdenados.indexOf(idActual);
+  
+    if (indiceActual !== -1 && indiceActual < idsOrdenados.length - 1) {
+      return idsOrdenados[indiceActual + 1];
+    }
+  
+    return null;
   }
 
 

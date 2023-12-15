@@ -702,7 +702,7 @@ export class TorneosService {
         contador++;
     }
 
-    return contador;
+    return contador+contador;
   }
 
 
