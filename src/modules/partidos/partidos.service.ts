@@ -45,7 +45,7 @@ export class PartidosService {
     }
     const partidos = await this.partidoRepository.find({
       where: { torneo: { id: idTorneo } },
-      relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2', 'grupo', 'pareja1.jugador1' , 'pareja1.jugador2', 'pareja2.jugador1', 'pareja2.jugador2'],
+      relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2', 'grupo', 'pareja1.jugador1' , 'pareja1.jugador2', 'pareja2.jugador1', 'pareja2.jugador2', 'jornada'],
     });
 
    // return partidos
@@ -57,6 +57,7 @@ export class PartidosService {
         fase: partido.fase,
         resultado: partido.resultado,
         date: partido.date,
+        jornada: partido.jornada,
         grupo: {
           id: partido.grupo ? partido.grupo.id : undefined,   //partido.jugador1 ? partido.jugador1.id : undefined,
           nombre_grupo: partido.grupo ? partido.grupo.nombre_grupo : undefined
@@ -210,7 +211,10 @@ export class PartidosService {
 
         return jornada
 
-        //const objectFind
+        //const found = array1.find((element) => element > 10);
+
+
+       // const objectFind
 
       }
 
