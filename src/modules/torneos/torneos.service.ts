@@ -511,7 +511,7 @@ export class TorneosService {
     }
 
 
-    if(jornada.sorteado || jornada.finalizado){
+    if (jornada.sorteado || jornada.finalizado) {
       throw new MiExcepcionPersonalizada('No puedes hacer esto, los partidos de esta jornada ya fueron sorteados', 409);
     }
 
@@ -530,7 +530,7 @@ export class TorneosService {
       const tipoJornada = jornada.tipo
       const retadores = jornada.retadores
 
-      let partidos ;
+      let partidos;
 
 
       if (tipoJornada === TipoJornada.REGULAR) {
@@ -538,14 +538,20 @@ export class TorneosService {
 
         if (retadores === Retadores.PARES) {
           for (const grupo of jornada.participantes) {
-            partidos = await this.programarPartidosGruposJornadaRegularRetadoresPares(grupo.participantes, jornada, torneo, grupo.id)            
-
+            partidos = await this.programarPartidosGruposJornadaRegularRetadoresPares(grupo.participantes, jornada, torneo, grupo.id)
           }
-
+          jornada.sorteado = true
+          await this.jornadaRepository.save(jornada);
+        } else if (retadores === Retadores.IMPARES) {
+          for (const grupo of jornada.participantes) {
+            partidos = await this.programarPartidosGruposJornadaRegularRetadoresImpares(grupo.participantes, jornada, torneo, grupo.id)
+          }
           jornada.sorteado = true
           await this.jornadaRepository.save(jornada);
 
         }
+
+
       }
 
       torneo.jornada_actual = torneo.jornada_actual + 1
@@ -570,7 +576,6 @@ export class TorneosService {
 
 
   async programarPartidosGruposJornadaRegularRetadoresPares(participantes: any[], jornada: Jornada, torneo: Torneo, grupo) {
-
     // Ordena los participantes por ranking de manera descendente
     const participantesOrdenados = participantes.sort((a, b) => b.ranking - a.ranking);
 
@@ -579,9 +584,7 @@ export class TorneosService {
     const impares = participantesOrdenados.filter((_, index) => index % 2 !== 0);
 
     // Organiza los enfrentamientos
-    //const enfrentamientos: [any, any][] = [];
-
- 
+    //const enfrentamientos: [any, any][] = []; 
     let contador = 0;
     for (let i = 0; i < Math.min(pares.length, impares.length); i++) {
       //enfrentamientos.push([pares[i], impares[i]]);
@@ -602,27 +605,59 @@ export class TorneosService {
       }
 
 
-       //partidos.push(partido)
-       contador++
-
-       // Puedes ajustar el manejo de fechas y otros campos según tus necesidades
-       await this.partidoRepository.save(partido);
+      //partidos.push(partido)
+      contador++
+      // Puedes ajustar el manejo de fechas y otros campos según tus necesidades
+      await this.partidoRepository.save(partido);
 
     }
-
-
-   
-
-   
-
-    return contador+contador
-
-
-
-
-
-
+    return contador + contador
   }
+
+
+  async programarPartidosGruposJornadaRegularRetadoresImpares(participantes: any[], jornada: Jornada, torneo: Torneo, grupo) {
+    // Ordena los participantes por ranking de manera descendente
+    const participantesOrdenados = participantes.sort((a, b) => b.ranking - a.ranking);
+
+    // Divide los participantes en dos arreglos: pares e impares
+    const pares = participantesOrdenados.filter((_, index) => index % 2 === 0);
+    const impares = participantesOrdenados.filter((_, index) => index % 2 !== 0);
+
+    // Organiza los enfrentamientos
+    // const enfrentamientos: [any, any][] = [];
+    let contador = 0;
+
+    // Obtén el índice del último participante impar
+    const ultimoImparIndex = impares.length - 1;
+
+    for (let i = 0; i < Math.min(pares.length, impares.length); i++) {
+      // Si no es el primer o último participante impar, organiza el enfrentamiento
+      if (i !== 0 && i !== ultimoImparIndex) {
+        const partido = new Partido();
+        partido.torneo = torneo;
+        partido.fase = 'grupos';
+        partido.grupo = grupo;
+        partido.jornada = jornada;
+
+        // Asignar IDs de participantes al partido
+        if (torneo.modalidad === 'singles') {
+          partido.jugador1 = impares[i].jugador;
+          partido.jugador2 = pares[i].jugador;
+        } else if (torneo.modalidad === 'dobles') {
+          partido.pareja1 = impares[i].pareja;
+          partido.pareja2 = pares[i].pareja;
+        }
+
+        // Puedes ajustar el manejo de fechas y otros campos según tus necesidades
+        await this.partidoRepository.save(partido);
+
+        contador++;
+      }
+    }
+
+    return contador;
+  }
+
 
 
 

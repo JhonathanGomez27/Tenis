@@ -66,6 +66,8 @@ export class JugadoresService {
   ) {
     const whereConditions: Record<string, any> = {};
 
+    console.log('categoria', categoria)
+
     if (rama) {
       whereConditions.rama = rama;
     }

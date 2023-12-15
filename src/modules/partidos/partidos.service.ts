@@ -4,7 +4,7 @@ import { UpdatePartidoDto } from './dto/update-partido.dto';
 import { Partido } from './entities/partido.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Torneo } from '../torneos/entities/torneo.entity';
+import { Tipo, Torneo } from '../torneos/entities/torneo.entity';
 import { MiExcepcionPersonalizada } from 'src/utils/exception';
 import { ResultadoPartidoDTO } from './dto/resultado.dto';
 import { Grupo } from '../grupos/entities/grupo.entity';
@@ -97,7 +97,7 @@ export class PartidosService {
     }
     const partido = await this.partidoRepository.findOne({
       where: { id: id },
-      relations: ['grupo', 'torneo'],
+      relations: ['grupo', 'torneo', 'jornada'],
     });
 
     if (!partido) {
@@ -117,85 +117,102 @@ export class PartidosService {
     const { sets, ganador, perdedor } = nuevoResultado;
 
 
-    if (partido.fase === 'grupos') {
-      // Obtener las posiciones actuales del grupo
-      const posicionesActuales = partido.grupo.posiciones || {};
-
-
-      if (Object.keys(posicionesActuales).length === 0) {
-
-        if (ganador) {
-          const ganadorId = ganador.id;
-          posicionesActuales[ganadorId] = posicionesActuales[ganadorId] || {};
-          posicionesActuales[ganadorId].puntos = (posicionesActuales[ganadorId]?.puntos || 0) + 1;
-          posicionesActuales[ganadorId].setsGanados = (posicionesActuales[ganadorId]?.setsGanados || 0) + ganador.setsGanados;
-          posicionesActuales[ganadorId].setsPerdidos = (posicionesActuales[ganadorId]?.setsPerdidos || 0) + ganador.setsPerdidos;
-          posicionesActuales[ganadorId].puntosSets = (posicionesActuales[ganadorId]?.puntosSets || 0) + ganador.puntosSets;
+    if(partido.torneo.tipo_torneo === Tipo.REGULAR){
+      if (partido.fase === 'grupos') {
+        // Obtener las posiciones actuales del grupo
+        const posicionesActuales = partido.grupo.posiciones || {};
+  
+  
+        if (Object.keys(posicionesActuales).length === 0) {
+  
+          if (ganador) {
+            const ganadorId = ganador.id;
+            posicionesActuales[ganadorId] = posicionesActuales[ganadorId] || {};
+            posicionesActuales[ganadorId].puntos = (posicionesActuales[ganadorId]?.puntos || 0) + 1;
+            posicionesActuales[ganadorId].setsGanados = (posicionesActuales[ganadorId]?.setsGanados || 0) + ganador.setsGanados;
+            posicionesActuales[ganadorId].setsPerdidos = (posicionesActuales[ganadorId]?.setsPerdidos || 0) + ganador.setsPerdidos;
+            posicionesActuales[ganadorId].puntosSets = (posicionesActuales[ganadorId]?.puntosSets || 0) + ganador.puntosSets;
+          }
+  
+          // Incrementar los valores del perdedor
+          if (perdedor) {
+            const perdedorId = perdedor.id;
+            posicionesActuales[perdedorId] = posicionesActuales[perdedorId] || {};
+            posicionesActuales[perdedorId].puntos = (posicionesActuales[perdedorId]?.puntos || 0) + 0; // No suma puntos al perdedor
+            posicionesActuales[perdedorId].setsGanados = (posicionesActuales[perdedorId]?.setsGanados || 0) + perdedor.setsGanados;
+            posicionesActuales[perdedorId].setsPerdidos = (posicionesActuales[perdedorId]?.setsPerdidos || 0) + perdedor.setsPerdidos;
+            posicionesActuales[perdedorId].puntosSets = (posicionesActuales[perdedorId]?.puntosSets || 0) + perdedor.puntosSets;
+          }
+  
+  
+  
+          const participantesOrdenados = partido.grupo.participantes.sort((a, b) => {
+            const puntosA = posicionesActuales[a.jugador?.id || a.pareja?.id]?.puntos || 0;
+            const puntosB = posicionesActuales[b.jugador?.id || b.pareja?.id]?.puntos || 0;
+            return puntosB - puntosA;
+          });
+  
+          // return posicionesActuales
+  
+          // Actualizar las posiciones en el grupo
+          partido.grupo.posiciones = participantesOrdenados.map((participante) => {
+            const participanteId = participante.jugador?.id || participante.pareja?.id;
+            return {
+              id: participanteId,
+              puntos: posicionesActuales[participanteId]?.puntos || 0,
+              setsGanados: posicionesActuales[participanteId]?.setsGanados || 0,
+              setsPerdidos: posicionesActuales[participanteId]?.setsPerdidos || 0,
+              puntosSets: posicionesActuales[participanteId]?.puntosSets || 0,
+            };
+          });
+  
+        } else {
+  
+          if (ganador && perdedor) {
+            partido.grupo.posiciones = await this.actualizarDatos(posicionesActuales, nuevoResultado);
+          }
         }
-
-        // Incrementar los valores del perdedor
-        if (perdedor) {
-          const perdedorId = perdedor.id;
-          posicionesActuales[perdedorId] = posicionesActuales[perdedorId] || {};
-          posicionesActuales[perdedorId].puntos = (posicionesActuales[perdedorId]?.puntos || 0) + 0; // No suma puntos al perdedor
-          posicionesActuales[perdedorId].setsGanados = (posicionesActuales[perdedorId]?.setsGanados || 0) + perdedor.setsGanados;
-          posicionesActuales[perdedorId].setsPerdidos = (posicionesActuales[perdedorId]?.setsPerdidos || 0) + perdedor.setsPerdidos;
-          posicionesActuales[perdedorId].puntosSets = (posicionesActuales[perdedorId]?.puntosSets || 0) + perdedor.puntosSets;
-        }
-
-
-
-        const participantesOrdenados = partido.grupo.participantes.sort((a, b) => {
-          const puntosA = posicionesActuales[a.jugador?.id || a.pareja?.id]?.puntos || 0;
-          const puntosB = posicionesActuales[b.jugador?.id || b.pareja?.id]?.puntos || 0;
-          return puntosB - puntosA;
-        });
-
-        // return posicionesActuales
-
-        // Actualizar las posiciones en el grupo
-        partido.grupo.posiciones = participantesOrdenados.map((participante) => {
-          const participanteId = participante.jugador?.id || participante.pareja?.id;
-          return {
-            id: participanteId,
-            puntos: posicionesActuales[participanteId]?.puntos || 0,
-            setsGanados: posicionesActuales[participanteId]?.setsGanados || 0,
-            setsPerdidos: posicionesActuales[participanteId]?.setsPerdidos || 0,
-            puntosSets: posicionesActuales[participanteId]?.puntosSets || 0,
-          };
-        });
-
+        await this.grupoRepository.save(partido.grupo);
+  
+        partido.resultado = {
+          sets: sets,
+          ganador: ganador,
+          perdedor: perdedor,
+        };
+  
+        partido.finalizado = true
+  
+        const partidoActualizado = await this.partidoRepository.save(partido);
+  
+        return partidoActualizado;
       } else {
-
-        if (ganador && perdedor) {
-          partido.grupo.posiciones = await this.actualizarDatos(posicionesActuales, nuevoResultado);
-        }
+        partido.resultado = {
+          sets: sets,
+          ganador: ganador,
+          perdedor: perdedor,
+        };
+  
+        partido.finalizado = true
+  
+        const partidoActualizado = await this.partidoRepository.save(partido);
+        return partidoActualizado;
+  
+  
       }
-      await this.grupoRepository.save(partido.grupo);
+    }else if( partido.torneo.tipo_torneo === Tipo.ESCALERA){
 
-      partido.resultado = {
-        sets: sets,
-        ganador: ganador,
-        perdedor: perdedor,
-      };
+      if (partido.fase === 'grupos') {
 
-      partido.finalizado = true
+        const jornada = partido.jornada
+        const grupo = partido.grupo
 
-      const partidoActualizado = await this.partidoRepository.save(partido);
 
-      return partidoActualizado;
-    } else {
-      partido.resultado = {
-        sets: sets,
-        ganador: ganador,
-        perdedor: perdedor,
-      };
 
-      partido.finalizado = true
+        return jornada
 
-      const partidoActualizado = await this.partidoRepository.save(partido);
-      return partidoActualizado;
+        //const objectFind
 
+      }
 
     }
 
