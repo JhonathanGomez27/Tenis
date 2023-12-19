@@ -425,8 +425,8 @@ export class PartidosService {
 
           //obtener los grupos involucrados
 
-          const grupoAEntidad = await this.grupoRepository.findOne({where: {id:grupo1 }})
-          const grupoBEntidad = await this.grupoRepository.findOne({where: {id:grupo2 }})
+          const grupoAEntidad = await this.grupoRepository.findOne({ where: { id: grupo1 } })
+          const grupoBEntidad = await this.grupoRepository.findOne({ where: { id: grupo2 } })
 
 
 
@@ -450,7 +450,7 @@ export class PartidosService {
                     grupoBEntidad.participantes = grupoB.participantes;
 
                     // Guardar los cambios en la base de datos
-                     await this.grupoRepository.save(grupoAEntidad);
+                    await this.grupoRepository.save(grupoAEntidad);
                     await this.grupoRepository.save(grupoBEntidad);
                   }
                 }
@@ -483,7 +483,7 @@ export class PartidosService {
                     grupoBEntidad.participantes = grupoB.participantes;
 
                     // Guardar los cambios en la base de datos
-                     await this.grupoRepository.save(grupoAEntidad);
+                    await this.grupoRepository.save(grupoAEntidad);
                     await this.grupoRepository.save(grupoBEntidad);
                   }
                 }
@@ -617,122 +617,222 @@ export class PartidosService {
 
 
     if (torneo.fase_actual === 'grupos') {
-      const grupos = await this.grupoRepository.find({
-        where: { torneo: torneo },
-        relations: ['partidos'],
-      });
+      if (torneo.tipo_torneo === 'regular') {
+        const grupos = await this.grupoRepository.find({
+          where: { torneo: torneo },
+          relations: ['partidos'],
+        });
 
-      //return grupos
-      const todosFinalizados = grupos.every((grupo) =>
-        grupo.partidos.every((partido) => partido.finalizado)
-      );
+        //return grupos
+        const todosFinalizados = grupos.every((grupo) =>
+          grupo.partidos.every((partido) => partido.finalizado)
+        );
 
-      if (!todosFinalizados) {
-        throw new MiExcepcionPersonalizada('No todos los partidos de la fase de grupos han finalizado.', 400);
-
-      }
-      // return todosFinalizados
-      // Obtener los dos mejores participantes de cada grupo
-      const participantesOrdenados = [];
-      for (const grupo of grupos) {
-        //const participantesGrupo = grupo.participantes || [];
-        const participantesGrupo = grupo.posiciones || [];
-
-        const participantesOrdenadosGrupo = participantesGrupo
-          .sort((a, b) => {
-            // Lógica de ordenación basada en los resultados de la fase de grupos
-            if (b.puntos !== a.puntos) {
-
-              return b.puntos - a.puntos;
-            }
-            if (b.puntosSets !== a.puntosSets) {
-
-              return b.puntosSets - a.puntosSets;
-            }
-            if (b.setsGanados !== a.setsGanados) {
-
-              return b.setsGanados - a.setsGanados;
-            }
-            return a.setsPerdidos - b.setsPerdidos;
-          })
-          .slice(0, 2); // Tomar los dos mejores participantes
-
-        participantesOrdenados.push(...participantesOrdenadosGrupo);
-      }
-
-      //return participantesOrdenados
-
-      // Ordenar los participantes globales para sortear la fase de llaves
-      const participantesOrdenadosGlobal = participantesOrdenados.sort((a, b) => {
-        // Lógica de ordenación basada en los resultados de la fase de grupos
-        if (b.puntos !== a.puntos) {
-          return b.puntos - a.puntos;
+        if (!todosFinalizados) {
+          throw new MiExcepcionPersonalizada('No todos los partidos de la fase de grupos han finalizado.', 400);
         }
-        if (b.puntosSets !== a.puntosSets) {
-          return b.puntosSets - a.puntosSets;
-        }
-        if (b.setsGanados !== a.setsGanados) {
-          return b.setsGanados - a.setsGanados;
-        }
-        return a.setsPerdidos - b.setsPerdidos;
-      });
-      // Organizar la fase de llaves
-      const llaves = this.organizarLlaves(participantesOrdenadosGlobal);
-      const llavesReturn = []
-      // guardar las llaves en la bd
-      const modalidad = torneo.modalidad
-      const fase = this.obtenerEtapa(llaves.length)
-      for (const llave of llaves) {
+        // return todosFinalizados
+        // Obtener los dos mejores participantes de cada grupo
+        const participantesOrdenados = [];
+        for (const grupo of grupos) {
+          //const participantesGrupo = grupo.participantes || [];
+          const participantesGrupo = grupo.posiciones || [];
 
-        let jugador1: any
-        let jugador2: any
-        let pareja1: any
-        let pareja2: any
-        //let fase: any
-        if (modalidad === 'singles') {
-          jugador1 = llave.participante1.id
-          jugador2 = llave.participante2.id
-          //fase = this.obtenerEtapa(llaves.length)
+          const participantesOrdenadosGrupo = participantesGrupo
+            .sort((a, b) => {
+              // Lógica de ordenación basada en los resultados de la fase de grupos
+              if (b.puntos !== a.puntos) {
 
-          const llaveCreada = await this.llaveRepository.create({
-            torneo: torneo,
-            fase: fase,
-            jugador1: jugador1,
-            jugador2: jugador2
-          })
-          const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-          const partidoCreado = await this.partidoRepository.create({
-            fase: fase,
-            torneo: torneo,
-            jugador1: jugador1,
-            jugador2: jugador2
-          })
-          const partidoGuardado = await this.partidoRepository.save(partidoCreado)
-          llavesReturn.push(llaveGuardada)
+                return b.puntos - a.puntos;
+              }
+              if (b.puntosSets !== a.puntosSets) {
+
+                return b.puntosSets - a.puntosSets;
+              }
+              if (b.setsGanados !== a.setsGanados) {
+
+                return b.setsGanados - a.setsGanados;
+              }
+              return a.setsPerdidos - b.setsPerdidos;
+            })
+            .slice(0, 2); // Tomar los dos mejores participantes
+
+          participantesOrdenados.push(...participantesOrdenadosGrupo);
+        }
+
+        //return participantesOrdenados
+
+        // Ordenar los participantes globales para sortear la fase de llaves
+        const participantesOrdenadosGlobal = participantesOrdenados.sort((a, b) => {
+          // Lógica de ordenación basada en los resultados de la fase de grupos
+          if (b.puntos !== a.puntos) {
+            return b.puntos - a.puntos;
+          }
+          if (b.puntosSets !== a.puntosSets) {
+            return b.puntosSets - a.puntosSets;
+          }
+          if (b.setsGanados !== a.setsGanados) {
+            return b.setsGanados - a.setsGanados;
+          }
+          return a.setsPerdidos - b.setsPerdidos;
+        });
+        // Organizar la fase de llaves
+        const llaves = this.organizarLlaves(participantesOrdenadosGlobal);
+        const llavesReturn = []
+        // guardar las llaves en la bd
+        const modalidad = torneo.modalidad
+        const fase = this.obtenerEtapa(llaves.length)
+        for (const llave of llaves) {
+
+          let jugador1: any
+          let jugador2: any
+          let pareja1: any
+          let pareja2: any
+          //let fase: any
+          if (modalidad === 'singles') {
+            jugador1 = llave.participante1.id
+            jugador2 = llave.participante2.id
+            //fase = this.obtenerEtapa(llaves.length)
+
+            const llaveCreada =  this.llaveRepository.create({
+              torneo: torneo,
+              fase: fase,
+              jugador1: jugador1,
+              jugador2: jugador2
+            })
+            const llaveGuardada = await this.llaveRepository.save(llaveCreada)
+            const partidoCreado =  this.partidoRepository.create({
+              fase: fase,
+              torneo: torneo,
+              jugador1: jugador1,
+              jugador2: jugador2
+            })
+            const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+            llavesReturn.push(llaveGuardada)
+          } else {
+            pareja1 = llave.participante1.id
+            pareja2 = llave.participante2.id
+            const llaveCreada =  this.llaveRepository.create({
+              torneo: torneo,
+              fase: fase,
+              pareja1: pareja1,
+              pareja2: pareja2
+            })
+
+            const llaveGuardada = await this.llaveRepository.save(llaveCreada)
+            const partidoCreado =  this.partidoRepository.create({
+              fase: fase,
+              torneo: torneo,
+              pareja1: pareja1,
+              pareja2: pareja2
+            })
+            const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+            llavesReturn.push(llaveGuardada)
+          }
+        }
+        torneo.fase_actual = fase
+        await this.torneoRepository.save(torneo)
+        return llavesReturn;
+      } else if (torneo.tipo_torneo === 'escalera') {
+
+        const grupos = await this.grupoRepository.find({
+          where: { torneo: torneo },
+          relations: ['partidos'],
+        });
+
+        //return grupos
+        const todosFinalizados = grupos.every((grupo) =>
+          grupo.partidos.every((partido) => partido.finalizado)
+        );
+
+        if (!todosFinalizados) {
+          throw new MiExcepcionPersonalizada('No todos los partidos de la fase de grupos han finalizado.', 400);
+        }
+
+        let cantidadparticipantesclasificanGrupo = 0
+
+        if (torneo.cantidad_grupos === 2) {
+          cantidadparticipantesclasificanGrupo = 4
         } else {
-          pareja1 = llave.participante1.id
-          pareja2 = llave.participante2.id
-          const llaveCreada = await this.llaveRepository.create({
-            torneo: torneo,
-            fase: fase,
-            pareja1: pareja1,
-            pareja2: pareja2
-          })
-
-          const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-          const partidoCreado = await this.partidoRepository.create({
-            fase: fase,
-            torneo: torneo,
-            pareja1: pareja1,
-            pareja2: pareja2
-          })
-          const partidoGuardado = await this.partidoRepository.save(partidoCreado)
-          llavesReturn.push(llaveGuardada)
+          cantidadparticipantesclasificanGrupo = 2
         }
+
+
+
+        const participantesOrdenados = [];
+
+        // const participantesOrdenados = participantes.sort((a, b) => a.ranking - b.ranking);
+        for (const grupo of grupos) {
+          //const participantesGrupo = grupo.participantes || [];
+          const participantesGrupo = grupo.posiciones || [];
+
+          const participantesOrdenadosGrupo = participantesGrupo
+            .sort((a, b) => a.ranking - b.ranking)
+            .slice(0, cantidadparticipantesclasificanGrupo); // Tomar los dos mejores participantes
+          participantesOrdenados.push(...participantesOrdenadosGrupo);
+        }
+
+        const participantesOrdenadosGlobal = participantesOrdenados.sort((a, b) => a.ranking - b.ranking)
+
+
+        const llaves = this.organizarLlaves(participantesOrdenadosGlobal);
+        const llavesReturn = []
+
+        const modalidad = torneo.modalidad
+        const fase = this.obtenerEtapa(llaves.length)
+        for (const llave of llaves) {
+
+          let jugador1: any
+          let jugador2: any
+          let pareja1: any
+          let pareja2: any
+          //let fase: any
+          if (modalidad === 'singles') {
+            jugador1 = llave.participante1.id
+            jugador2 = llave.participante2.id
+            //fase = this.obtenerEtapa(llaves.length)
+
+            const llaveCreada =  this.llaveRepository.create({
+              torneo: torneo,
+              fase: fase,
+              jugador1: jugador1,
+              jugador2: jugador2
+            })
+            const llaveGuardada = await this.llaveRepository.save(llaveCreada)
+            const partidoCreado =  this.partidoRepository.create({
+              fase: fase,
+              torneo: torneo,
+              jugador1: jugador1,
+              jugador2: jugador2
+            })
+            const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+            llavesReturn.push(llaveGuardada)
+          } else {
+            pareja1 = llave.participante1.id
+            pareja2 = llave.participante2.id
+            const llaveCreada =  this.llaveRepository.create({
+              torneo: torneo,
+              fase: fase,
+              pareja1: pareja1,
+              pareja2: pareja2
+            })
+
+            const llaveGuardada = await this.llaveRepository.save(llaveCreada)
+            const partidoCreado =  this.partidoRepository.create({
+              fase: fase,
+              torneo: torneo,
+              pareja1: pareja1,
+              pareja2: pareja2
+            })
+            const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+            llavesReturn.push(llaveGuardada)
+          }
+        }
+        torneo.fase_actual = fase
+        await this.torneoRepository.save(torneo)
+        return llavesReturn;
+
       }
-      torneo.fase_actual = fase
-      await this.torneoRepository.save(torneo)
-      return llavesReturn;
     } else if (torneo.fase_actual === 'octavos' || torneo.fase_actual === 'cuartos' || torneo.fase_actual === 'semifinales') {
       const llavesJugadas = await this.llaveRepository.find({
         where: { torneo: torneo }
@@ -781,7 +881,7 @@ export class PartidosService {
           jugador2 = llave.participante2.id
           //fase = this.obtenerEtapa(llaves.length)
 
-          const llaveCreada = await this.llaveRepository.create({
+          const llaveCreada =  this.llaveRepository.create({
             torneo: torneo,
             fase: fase,
             jugador1: jugador1,
@@ -790,7 +890,7 @@ export class PartidosService {
 
           const llaveGuardada = await this.llaveRepository.save(llaveCreada)
 
-          const partidoCreado = await this.partidoRepository.create({
+          const partidoCreado =  this.partidoRepository.create({
             fase: fase,
             torneo: torneo,
             jugador1: jugador1,
@@ -806,7 +906,7 @@ export class PartidosService {
           pareja2 = llave.participante2.id
           //fase = this.obtenerEtapa(llaves.length)
 
-          const llaveCreada = await this.llaveRepository.create({
+          const llaveCreada =  this.llaveRepository.create({
             torneo: torneo,
             fase: fase,
             pareja1: pareja1,
@@ -814,7 +914,7 @@ export class PartidosService {
           })
 
           const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-          const partidoCreado = await this.partidoRepository.create({
+          const partidoCreado =  this.partidoRepository.create({
             fase: fase,
             torneo: torneo,
             pareja1: pareja1,
@@ -872,6 +972,9 @@ export class PartidosService {
       }
     }
   }
+
+
+  // astnc sortearSiguienteFase
 
 
   organizarLlaves(participantesOrdenados) {
