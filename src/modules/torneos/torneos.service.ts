@@ -169,7 +169,8 @@ export class TorneosService {
       if (grupoIndex < cantidadGrupos) {
         await this.grupoRepository.save(grupos[grupoIndex]);
       }
-      torneo.estado = Estado.PROGRAMACION
+      //torneo.estado = Estado.PROGRAMACION
+      torneo.estado = Estado.SORTEO
       await this.torneoRepository.save(torneo)
       for (const grupo of gruposResponse) {
         grupo['torneo'] = undefined
@@ -196,7 +197,8 @@ export class TorneosService {
         gruposResponse.push(grupoPersistido)
       }
 
-      torneo.estado = Estado.PROGRAMACION
+      //torneo.estado = Estado.PROGRAMACION
+      torneo.estado = Estado.SORTEO
       await this.torneoRepository.save(torneo)
       for (const grupo of gruposResponse) {
         grupo['torneo'] = undefined
@@ -516,6 +518,27 @@ export class TorneosService {
     }
 
 
+    const jornadas = await this.jornadaRepository.find({where: {torneo: torneo}})
+
+
+    const jornadaActual = jornada.id
+
+    let idAnteriorJornada = await this.obtenerAnteriorIdCercano(jornadaActual, jornadas)
+
+    let anteriorJornada = await this.jornadaRepository.findOne({where: {id: idAnteriorJornada}})
+    if(anteriorJornada.finalizado != true){
+      throw new MiExcepcionPersonalizada('No puedes hacer esto, la anterior jornada aun no ha finalizado', 409);
+    }
+
+
+  
+
+
+
+
+
+
+
 
     let jornadaFound;
     for (let index = 0; index < torneo.jornadas.length; index++) {
@@ -555,16 +578,13 @@ export class TorneosService {
       } else if (tipoJornada === TipoJornada.CRUZADA) {
 
         if (retadores === Retadores.PARES) {
-
-          
-         //aqui la logica
+          //partidos = await this.programarPartidosGruposJornadaCruzadaRetadoresPares(jornada.participantes, torneo, jornada)
+          partidos = await this.programarPartidosGruposJornadaCruzadaRetadoresPares(jornada.posiciones, torneo, jornada)
           jornada.sorteado = true
           await this.jornadaRepository.save(jornada);
         } else if (retadores === Retadores.IMPARES) {
-        
-          //aqui la logica
 
-
+          partidos = await this.programarPartidosFaseGruposJornadaCruzadaRetadoresImpares(jornada.posiciones, torneo, jornada)
           jornada.sorteado = true
           await this.jornadaRepository.save(jornada);
 
@@ -595,6 +615,22 @@ export class TorneosService {
 
 
 
+  }
+
+
+
+  async obtenerAnteriorIdCercano(idActual: number, jornadas: any[]): Promise<number> {
+    const idsOrdenados = jornadas
+      .map((jornada) => jornada.id)
+      .sort((a, b) => a - b);
+  
+    const indiceActual = idsOrdenados.indexOf(idActual);
+  
+    if (indiceActual !== -1 && indiceActual < idsOrdenados.length - 1) {
+      return idsOrdenados[indiceActual - 1];
+    }
+  
+    return null;
   }
 
 
@@ -728,6 +764,294 @@ export class TorneosService {
 
 
 
+
+  // async programarPartidosGruposJornadaCruzadaRetadoresPares(grupos, torneo: Torneo, jornada: Jornada) {
+  //   // Ordenar participantes dentro de cada grupo por ranking
+  //   grupos.forEach((grupo) => {
+  //     grupo.participantes.sort((a, b) => a.ranking - b.ranking);
+  //   });
+
+  //   // Asignar parejas según el criterio de pares e impares
+
+  //   const vs = []
+
+
+
+  //   for (let i = 0; i < grupos.length; i += 2) {
+  //     const grupoA = grupos[i];
+  //     const grupoB = grupos[i + 1];
+
+  //     //for (let j = 0; j < grupoA.participantes.length; j += 2) { 
+  //     //for (let j = 0; j < grupoA.participantes.length / 2; j++) {
+  //     for (let j = 0; j < grupoA.participantes.length; j++) {
+  //     //for (let j = 0; j < grupoA.participantes.length / 2; j++) {
+  //       const partido = new Partido();
+  //       // partido.torneo = torneo;
+  //       partido.fase = 'grupos';
+  //       //partido.grupo = grupo;
+  //       // partido.jornada = jornada;
+
+  //       // Asignar IDs de participantes al partido
+  //       // if (torneo.modalidad === 'singles') {
+  //       //   partido.jugador1 =  grupoB.participantes[j + 1].jugador;
+  //       //   partido.jugador2 = grupoA.participantes[j].jugador;
+
+  //       // } else if (torneo.modalidad === 'dobles') {
+  //       //   partido.pareja1 =  grupoB.participantes[j + 1].pareja;
+  //       //   partido.pareja2 = grupoA.participantes[j].pareja;
+  //       // }
+
+
+
+  //       //   if (torneo.modalidad === 'singles') {
+
+  //       //     partido.jugador1 = grupoA.participantes[j * 2 + 1].jugador;
+  //       //     partido.jugador2 = grupoB.participantes[j * 2].jugador;
+  //       // } else if (torneo.modalidad === 'dobles') {
+
+  //       //     partido.pareja1 = grupoA.participantes[j * 2 + 1].pareja;
+  //       //     partido.pareja2 = grupoB.participantes[j * 2].pareja;
+  //       // }
+
+
+  //       //   if (torneo.modalidad === 'singles') {
+  //       //     const participanteGrupoA = grupoA.participantes[j];
+  //       //     const participanteGrupoB = grupoB.participantes[j % grupoB.participantes.length];
+
+  //       //     partido.jugador1 = participanteGrupoB.jugador;
+  //       //     partido.jugador2 = participanteGrupoA.jugador;
+  //       // } else if (torneo.modalidad === 'dobles') {
+  //       //     const participanteGrupoA = grupoA.participantes[j];
+  //       //     const participanteGrupoB = grupoB.participantes[j % grupoB.participantes.length];
+
+  //       //     partido.pareja1 = participanteGrupoB.pareja;
+  //       //     partido.pareja2 = participanteGrupoA.pareja;
+  //       // }
+
+
+  //       //   if (torneo.modalidad === 'singles') {
+  //       //     const participanteGrupoA = grupoA.participantes[j];
+  //       //     const participanteGrupoB = grupoB.participantes[(grupoB.participantes.length - 1) - j];
+
+  //       //     partido.jugador1 = participanteGrupoB.jugador;
+  //       //     partido.jugador2 = participanteGrupoA.jugador;
+  //       // } else if (torneo.modalidad === 'dobles') {
+  //       //     const participanteGrupoA = grupoA.participantes[j];
+  //       //     const participanteGrupoB = grupoB.participantes[(grupoB.participantes.length - 1) - j];
+
+  //       //     partido.pareja1 = participanteGrupoB.pareja;
+  //       //     partido.pareja2 = participanteGrupoA.pareja;
+  //       // }
+
+
+
+  //       if (torneo.modalidad === 'singles') {
+  //         // const participanteGrupoA = grupoA.participantes[j];
+  //         // const participanteGrupoB = grupoB.participantes[(grupoB.participantes.length - 1) - j];
+
+
+  //         // const participanteGrupoA = grupoA.participantes[j];
+  //         // const participanteGrupoB = grupoB.participantes[j % grupoB.participantes.length];
+
+  //         // partido.jugador1 = participanteGrupoB.jugador;
+  //         // partido.jugador2 = participanteGrupoA.jugador;
+  //         partido.jugador1 = grupoA.participantes[j * 2 + 1].jugador;
+  //         partido.jugador2 = grupoB.participantes[j * 2].jugador;
+  //     } else if (torneo.modalidad === 'dobles') {
+  //         // const participanteGrupoA = grupoA.participantes[j];
+  //         // const participanteGrupoB = grupoB.participantes[(grupoB.participantes.length - 1) - j];
+
+  //             const participanteGrupoA = grupoA.participantes[j];
+  //           const participanteGrupoB = grupoB.participantes[j % grupoB.participantes.length];
+
+  //         partido.pareja1 = participanteGrupoB.pareja;
+  //         partido.pareja2 = participanteGrupoA.pareja;
+  //     }
+
+
+
+
+
+
+
+
+  //       //const parejaA = grupoA.participantes[j];
+  //       //const parejaB = grupoB.participantes[j + 1];
+
+  //       // Asignar parejas
+  //       // parejaA.pareja = parejaB;
+  //       // parejaB.pareja = parejaA;
+
+  //       vs.push(partido)
+  //       //vs.push(parejaB)
+  //     }
+  //   }
+
+  //   return vs
+  // }
+
+
+  async programarPartidosGruposJornadaCruzadaRetadoresPares(grupos, torneo: Torneo, jornada: Jornada) {
+    // Ordenar participantes dentro de cada grupo por ranking
+    grupos.forEach((grupo) => {
+      grupo.participantes.sort((a, b) => a.ranking - b.ranking);
+    });
+
+    for (let i = 0; i < grupos.length; i += 2) {
+      let grupoA = grupos[i].participantes;
+      let grupoB = grupos[i + 1].participantes;
+
+      const participantesIntercambiados = await this.intercambiarParesImpares(grupoA, grupoB);
+
+      grupos[i].participantes = participantesIntercambiados.nuevoGrupoA
+      grupos[i + 1].participantes = participantesIntercambiados.nuevoGrupoB
+
+    }
+    const vs = []
+
+    for (const grupoint of grupos) {
+      vs.push(await this.programarPartidosGruposJornadaCruzadaRetadoresPares1(grupoint.participantes, jornada, torneo))
+    }
+    return vs;
+  }
+
+
+  async programarPartidosGruposJornadaCruzadaRetadoresPares1(participantes: any[], jornada: Jornada, torneo: Torneo) {
+
+    const participantesOrdenados = participantes.sort((a, b) => b.ranking - a.ranking);
+
+
+    const pares = participantesOrdenados.filter((_, index) => index % 2 === 0);
+    const impares = participantesOrdenados.filter((_, index) => index % 2 !== 0);
+
+
+    const partidos = [];
+    let contador = 0;
+    for (let i = 0; i < Math.min(pares.length, impares.length); i++) {
+      //enfrentamientos.push([pares[i], impares[i]]);
+
+      const partido = new Partido();
+      partido.torneo = torneo;
+      partido.fase = 'grupos';
+      //partido.grupo = grupo;
+      partido.jornada = jornada
+
+
+      if (torneo.modalidad === 'singles') {
+        partido.jugador1 = pares[i].jugador;
+        partido.jugador2 = impares[i].jugador;
+      } else if (torneo.modalidad === 'dobles') {
+        partido.pareja1 = pares[i].pareja;
+        partido.pareja2 = impares[i].pareja;
+      }
+
+
+      partidos.push(partido)
+      contador++
+
+      await this.partidoRepository.save(partido);
+
+    }
+    //return partidos
+    return contador + contador
+  }
+
+
+
+  async programarPartidosFaseGruposJornadaCruzadaRetadoresImpares(grupos, torneo: Torneo, jornada: Jornada){
+
+    grupos.forEach((grupo) => {
+      grupo.participantes.sort((a, b) => a.ranking - b.ranking);
+    });
+
+    for (let i = 0; i < grupos.length; i += 2) {
+      let grupoA = grupos[i].participantes;
+      let grupoB = grupos[i + 1].participantes;
+
+      const participantesIntercambiados = await this.intercambiarParesImpares(grupoA, grupoB);
+
+      grupos[i].participantes = participantesIntercambiados.nuevoGrupoA
+      grupos[i + 1].participantes = participantesIntercambiados.nuevoGrupoB
+
+    }
+    const vs = []
+
+    for (const grupoint of grupos) {
+      vs.push(await this.programarPartidosGruposJornadaCruzadaRetadoresImPares1(grupoint.participantes, jornada, torneo))
+    }
+    return vs;
+
+  }
+
+
+  async programarPartidosGruposJornadaCruzadaRetadoresImPares1(participantes: any[], jornada: Jornada, torneo: Torneo) {
+    // Ordena los participantes por ranking de manera descendente
+    const participantesOrdenados = participantes.sort((a, b) => a.ranking - b.ranking);
+
+    // Divide los participantes en dos arreglos: pares e impares
+    let pares = participantesOrdenados.filter((_, index) => index % 2 === 0);
+    let impares = participantesOrdenados.filter((_, index) => index % 2 !== 0);
+
+    // Organiza los enfrentamientos
+    // const enfrentamientos: [any, any][] = [];
+    let contador = 0;
+
+    // Obtén el índice del último participante impar
+    const ultimoParIndex = pares.length - 1;
+    pares.splice(0, 1);
+    impares.splice(ultimoParIndex, 1);
+
+    for (let i = 0; i < Math.max(pares.length, impares.length); i++) {
+      // Si no es el primer o último participante impar, organiza el enfrentamiento
+      const partido = new Partido();
+      partido.torneo = torneo;
+      partido.fase = 'grupos';
+      //partido.grupo = grupo;
+      partido.jornada = jornada;
+
+      // Asignar IDs de participantes al partido
+      if (torneo.modalidad === 'singles') {
+        partido.jugador1 = pares[i].jugador;
+        partido.jugador2 = impares[i].jugador;
+      } else if (torneo.modalidad === 'dobles') {
+        partido.pareja1 = pares[i].pareja;
+        partido.pareja2 = impares[i].pareja;
+      }
+
+      // Puedes ajustar el manejo de fechas y otros campos según tus necesidades
+      await this.partidoRepository.save(partido);
+
+      contador++;
+    }
+
+    return contador + contador;
+  }
+
+
+
+
+
+  async intercambiarParesImpares(grupoA, grupoB) {
+
+
+    const paresA = grupoA.filter(objeto => objeto.ranking % 2 === 0);
+    const imparesA = grupoA.filter(objeto => objeto.ranking % 2 !== 0);
+
+    const paresB = grupoB.filter(objeto => objeto.ranking % 2 === 0);
+    const imparesB = grupoB.filter(objeto => objeto.ranking % 2 !== 0);
+
+    // Intercambiar pares entre los grupos
+    const nuevoGrupoA = [...imparesA, ...paresB];
+    const nuevoGrupoB = [...imparesB, ...paresA];
+
+
+
+    return { nuevoGrupoA, nuevoGrupoB };
+
+
+
+
+  }
 
   async volverAsorteoGruupos(id: number) {
     const torneo = await this.torneoRepository.findOneBy({ id: id })
