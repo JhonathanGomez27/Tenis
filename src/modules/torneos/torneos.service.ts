@@ -518,28 +518,19 @@ export class TorneosService {
     }
 
 
-    const jornadas = await this.jornadaRepository.find({where: {torneo: torneo}})
+    const jornadas = await this.jornadaRepository.find({ where: { torneo: torneo } })
 
 
-    const jornadaActual = jornada.id
+    if (jornadas[0].id !== jornada.id) {
+      const jornadaActual = jornada.id
 
-    let idAnteriorJornada = await this.obtenerAnteriorIdCercano(jornadaActual, jornadas)
+      let idAnteriorJornada = await this.obtenerAnteriorIdCercano(jornadaActual, jornadas)
 
-    let anteriorJornada = await this.jornadaRepository.findOne({where: {id: idAnteriorJornada}})
-    if(anteriorJornada.finalizado != true){
-      throw new MiExcepcionPersonalizada('No puedes hacer esto, la anterior jornada aun no ha finalizado', 409);
+      let anteriorJornada = await this.jornadaRepository.findOne({ where: { id: idAnteriorJornada } })
+      if (anteriorJornada.finalizado != true) {
+        throw new MiExcepcionPersonalizada('No puedes hacer esto, la anterior jornada aun no ha finalizado', 409);
+      }
     }
-
-
-  
-
-
-
-
-
-
-
-
     let jornadaFound;
     for (let index = 0; index < torneo.jornadas.length; index++) {
       jornadaFound = torneo.jornadas[torneo.jornada_actual - 1];
@@ -623,13 +614,13 @@ export class TorneosService {
     const idsOrdenados = jornadas
       .map((jornada) => jornada.id)
       .sort((a, b) => a - b);
-  
+
     const indiceActual = idsOrdenados.indexOf(idActual);
-  
+
     if (indiceActual !== -1 && indiceActual < idsOrdenados.length - 1) {
       return idsOrdenados[indiceActual - 1];
     }
-  
+
     return null;
   }
 
@@ -958,7 +949,7 @@ export class TorneosService {
 
 
 
-  async programarPartidosFaseGruposJornadaCruzadaRetadoresImpares(grupos, torneo: Torneo, jornada: Jornada){
+  async programarPartidosFaseGruposJornadaCruzadaRetadoresImpares(grupos, torneo: Torneo, jornada: Jornada) {
 
     grupos.forEach((grupo) => {
       grupo.participantes.sort((a, b) => a.ranking - b.ranking);
