@@ -501,10 +501,10 @@ export class TorneosService {
       throw new MiExcepcionPersonalizada(`el torneo es de tipo ${torneo.tipo_torneo} por lo cual no se puede realizar esta acción`, 409);
     }
 
-    if (torneo.estado !== Estado.PROGRAMACION) {
+    /*if (torneo.estado !== Estado.PROGRAMACION) {
       const message = `Este torneo está en estado ${torneo.estado}, por lo cual es imposible realizar esta acción`;
       throw new MiExcepcionPersonalizada(message, 409);
-    }
+    }*/
 
     let jornada = await this.jornadaRepository.findOneBy({ id: jornadaId })
 
