@@ -231,8 +231,11 @@ export class PartidosService {
             perdedor: perdedor,
           };
 
+          //return 'jornada regular'
+
           partido.finalizado = true
 
+          //TODO: descomentar
           const partidoActualizado = await this.partidoRepository.save(partido);
           let cambioRanking = false
           let tipocambio: string;
@@ -241,6 +244,8 @@ export class PartidosService {
 
           if (ganador.tipo == 'jugador') {
             if (partido.jugador1.id == ganador.id) {
+              console.log('si hay cambio')
+              console.log('--------------------------------------------------------------------------------------------------------------------------------------')
               cambioRanking = true
               tipocambio = 'jugador'
             }
@@ -255,38 +260,89 @@ export class PartidosService {
 
 
 
-          if (cambioRanking && tipocambio == 'jugador') {
+          if (cambioRanking && tipocambio === 'jugador') {
 
             //return jornada.participantes
             //buscar el perdedor y el ganador y cambiarlos
             for (const grupo of jornada.participantes) {
-              if (grupo.id == partido.grupo.id) {
+              console.log(grupo.id, 'entro al grupo', grupo.id, partido.grupo.id)
+              if (grupo.id == partido.grupo.id)
+                console.log('----------------------- - -')
+              {
+                // console.log(grupo.participantes)
+                console.log('entro al if grupo')
 
                 const ganadorIndex = grupo.participantes.findIndex(participante => participante.jugador.id === ganador.id);
+                const ganadorRes = grupo.participantes.find(participante => participante.jugador.id === ganador.id);
+                console.log('ganador', ganadorIndex, ganadorRes)
                 const perdedorIndex = grupo.participantes.findIndex(participante => participante.jugador.id === perdedor.id);
+                const perdedorRes = grupo.participantes.find(participante => participante.jugador.id === perdedor.id);
+                console.log('perdedor', perdedorIndex, perdedorRes)
 
                 if (ganadorIndex !== -1 && perdedorIndex !== -1) {
 
+                  //console.log('ganador',grupo.participantes[ganadorIndex], 'perdedor', grupo.participantes[perdedorIndex]  )
                   // Intercambiar los rankings
                   const tempRanking = grupo.participantes[ganadorIndex].ranking;
+                  //console.log('tempranking despues de const',tempRanking, grupo.participantes[ganadorIndex] )
                   grupo.participantes[ganadorIndex].ranking = grupo.participantes[perdedorIndex].ranking;
-                  grupo.participantes[perdedorIndex].ranking = tempRanking;
 
+                  // console.log(' grupo.participantes[ganadorIndex]', grupo.participantes[ganadorIndex])
+                  grupo.participantes[perdedorIndex].ranking = tempRanking;
+                  // console.log(' grupo.participantes[perdedorIndex]', grupo.participantes[perdedorIndex])
+                  //console.log(' grupo.participantes', grupo.participantes)
                   grupoEntidad.participantes = grupo.participantes
 
+                  //console.log('---------')
+                  //console.log('grupoEntidad.participantes', grupoEntidad.participantes)
+
+
+                  //return { grupoEntidad, t: 'algo' }
+
+                  //TODO: descomentar REVISAR LAS CRUZADAS CUANDO HAY GANADOR
                   await this.grupoRepository.save(grupoEntidad)
-
-
                 }
 
               }
             }
+
+
             jornadaEntidad.participantes = jornada.participantes
             jornadaEntidad.posiciones = jornada.participantes
-            await this.jornadaRepository.save(jornadaEntidad)
+
+            console.log('---------')
+
+
+            // for (const jornadaent of jornadaEntidad.participantes) {
+            //   console.log(' jornadaEntidad.participantes', jornadaent.participantes)
+
+            // }
+
+
+
+            // jornadaEntidad.participantes =  grupoEntidad.participantes
+            // jornadaEntidad.posiciones =  grupoEntidad.participantes
+
+            // return {
+            //   pos: jornadaEntidad.posiciones,
+            //   par: jornadaEntidad.participantes,
+            //   grup: grupoEntidad.participantes
+            // }
+            //TODO: descomentar
+            const retorno = await this.jornadaRepository.save(jornadaEntidad)
+
+
+            //  return {
+
+            //   grupo: grupoEntidad,
+            //   retorno: retorno
+
+            // }
           }
 
-          if (cambioRanking && tipocambio == 'pareja') {
+          if (cambioRanking && tipocambio === 'pareja') {
+
+            console.log('parejas')
 
             //return jornada.participantes
             //buscar el perdedor y el ganador y cambiarlos
@@ -318,17 +374,38 @@ export class PartidosService {
           }
 
 
+          // return{
+          //   pos: jornadaEntidad.posiciones,
+          //     par: jornadaEntidad.participantes,
+          //      grup: grupoEntidad.participantes
+
+          // }
+
+
 
           const jornadaActual = partido.jornada.id
           const numeroJornadaActual = partido.torneo.jornada_actual
           const cantidad_jornadas = partido.torneo.cantidad_jornadas_cruzadas + partido.torneo.cantidad_jornadas_regulares
 
-          const todosFinalizados = await this.partidoRepository.find({ where: { jornada: jornada, finalizado: true } })
+          //return
+          //return jornadaActual 
+          // where: { torneo: { id: idTorneo } },
+          const todosFinalizados = await this.partidoRepository.find({ where: { jornada: { id: jornadaActual }, finalizado: true } })
 
-          const partidos = await this.partidoRepository.find({ where: { jornada: jornada } })
+          // return todosFinalizados
+
+
+
+          const partidos = await this.partidoRepository.find({ where: { jornada: { id: jornadaActual } } })
 
           if (todosFinalizados.length == partidos.length) {
+
+            console.log('primer if')
+
             if (numeroJornadaActual <= cantidad_jornadas) {
+
+
+              console.log('segundo if')
 
               //buscar todas las jornadas del torneo
 
@@ -339,17 +416,28 @@ export class PartidosService {
               let siguienteJornada = await this.jornadaRepository.findOne({ where: { id: idSiguienteJornada } })
 
 
-              siguienteJornada.posiciones = jornada.posiciones
+
               siguienteJornada.participantes = jornada.participantes
+              siguienteJornada.posiciones = jornada.participantes
+
+              // return {
+              //   todosFinalizados,siguienteJornada, posi: jornada.posiciones
+              // }
+
 
               await this.jornadaRepository.save(siguienteJornada)
 
 
             }
 
+
+
+
             jornada.finalizado = true
             await this.jornadaRepository.save(jornada)
           }
+
+
 
           return {
             message: 'Partido Editado con exito'
@@ -366,20 +454,18 @@ export class PartidosService {
 
           partido.finalizado = true
 
+          //TODO:Descomentar
           const partidoActualizado = await this.partidoRepository.save(partido);
           let cambioRanking = false
           let tipocambio: string;
 
-
-
-          if (ganador.tipo == 'jugador') {
+          if (ganador.tipo === 'jugador') {
             if (partido.jugador1.id == ganador.id) {
               cambioRanking = true
               tipocambio = 'jugador'
             }
           }
-
-          if (ganador.tipo == 'pareja') {
+          if (ganador.tipo === 'pareja') {
             if (partido.pareja1.id == ganador.id) {
               cambioRanking = true
               tipocambio = 'pareja'
@@ -388,11 +474,8 @@ export class PartidosService {
 
 
           //return jornada.posiciones
-
           //obtener los grupos involucrados
-
           //const grupos = await this.grupoRepository.find({ where: { torneo: partido.torneo}})
-
           //return grupos
 
           let grupo1: number;
@@ -401,90 +484,216 @@ export class PartidosService {
           for (const grupo of jornada.participantes) {
             for (const participante of grupo.participantes) {
               if (ganador.tipo === 'jugador' && ganador.id === participante.jugador.id) {
-
                 grupo1 = grupo.id
               }
               if (perdedor.tipo === 'jugador' && perdedor.id === participante.jugador.id) {
-
                 grupo2 = grupo.id
               }
-
               if (ganador.tipo === 'pareja' && ganador.id === participante.pareja.id) {
-
                 grupo1 = grupo.id
               }
               if (perdedor.tipo === 'pareja' && perdedor.id === participante.pareja.id) {
-
                 grupo2 = grupo.id
               }
-
             }
-
           }
-
-
           //obtener los grupos involucrados
 
           const grupoAEntidad = await this.grupoRepository.findOne({ where: { id: grupo1 } })
           const grupoBEntidad = await this.grupoRepository.findOne({ where: { id: grupo2 } })
 
 
+          grupoAEntidad.participantes.sort((a, b) => a.ranking - b.ranking);
+          grupoBEntidad.participantes.sort((a, b) => a.ranking - b.ranking);
+          // return{
+          //   grupoAEntidad,
+          //   grupoBEntidad
+          // }
+          const jornadaActual = partido.jornada.id
+          const todosFinalizados = await this.partidoRepository.find({ where: { jornada: { id: jornadaActual }, finalizado: true } })
+          const partidos = await this.partidoRepository.find({ where: { jornada: { id: jornadaActual } } })
 
+          /*TODO:DEJAR LA CONDICION ORIGINAL*/
+          /*if (partidos.length - todosFinalizados.length != 0) {/*if (partidos.length - todosFinalizados.length != 1) {
+
+            if (cambioRanking && tipocambio == 'jugador') {
+              let cont: number = 0
+              for (const grupoA of jornada.participantes) {
+                for (const grupoB of jornada.participantes) {
+                  if (grupoA.id !== grupoB.id) {
+
+                    const ganadorIndex = grupoA.participantes.findIndex(participante => participante.jugador.id === ganador.id);
+                    const ganadorRes = grupoA.participantes.find(participante => participante.jugador.id === ganador.id);
+                    console.log('ganador', ganadorIndex, ganadorRes)
+                    const perdedorIndex = grupoB.participantes.findIndex(participante => participante.jugador.id === perdedor.id);
+                    const perdedorRes = grupoB.participantes.find(participante => participante.jugador.id === perdedor.id);
+                    console.log('perdedor', perdedorIndex, perdedorRes)
+
+                    if (ganadorIndex !== -1 && perdedorIndex !== -1) {
+                      console.log('entre a cuando no es la ultima fecha', partidos.length - todosFinalizados.length)
+                      // Intercambiar participantes entre los grupos
+                      const ganadorTemp = grupoA.participantes[ganadorIndex];
+                      const perdedorTemp = grupoB.participantes[perdedorIndex];
+
+
+
+                      const nuevoRankingGanador = perdedorTemp.ranking
+                      const nuevoRankingPerdedor = ganadorTemp.ranking
+
+
+
+                      ganadorTemp.ranking = nuevoRankingGanador
+                      perdedorTemp.ranking = nuevoRankingPerdedor
+
+                      console.log('ganadorTem', ganadorTemp)
+                      console.log('perdedorTemp', perdedorTemp)
+
+                      grupoA.participantes[ganadorIndex] = perdedorTemp;
+                      grupoB.participantes[perdedorIndex] = ganadorTemp;
+
+                      // Actualizar participantes en las entidades de grupo
+                      grupoAEntidad.participantes = grupoA.participantes;
+                      grupoBEntidad.participantes = grupoB.participantes;
+
+                      console.log('entre ', cont, ' veces')
+
+                      cont++
+
+                      // Guardar los cambios en la base de datos
+                      //TODO:DESCOMENTAR
+                      await this.grupoRepository.save(grupoAEntidad);
+                      await this.grupoRepository.save(grupoBEntidad);
+                    }
+                  }
+                }
+              }
+              jornadaEntidad.participantes = jornada.participantes
+
+              // return{
+              //   jornadaEntidad
+              // }
+              //jornadaEntidad.posiciones = jornada.participantes
+              //TODO:DESCOMENTAR
+              await this.jornadaRepository.save(jornadaEntidad)
+            }
+            if (cambioRanking && tipocambio == 'pareja') {
+              for (const grupoA of jornada.participantes) {
+                for (const grupoB of jornada.participantes) {
+                  if (grupoA.id !== grupoB.id) {
+                    const ganadorIndex = grupoA.participantes.findIndex(participante => participante.pareja.id === ganador.id);
+                    const perdedorIndex = grupoB.participantes.findIndex(participante => participante.pareja.id === perdedor.id);
+
+                    if (ganadorIndex !== -1 && perdedorIndex !== -1) { 
+                      // Intercambiar participantes entre los grupos
+                      const ganadorTemp = grupoA.participantes[ganadorIndex];
+                      const perdedorTemp = grupoB.participantes[perdedorIndex];
+                      const nuevoRankingGanador = perdedorTemp.ranking
+                      const nuevoRankingPerdedor = ganadorTemp.ranking
+                      ganadorTemp.ranking = nuevoRankingGanador
+                      perdedorTemp.ranking = nuevoRankingPerdedor
+                      grupoA.participantes[ganadorIndex] = perdedorTemp;
+                      grupoB.participantes[perdedorIndex] = ganadorTemp;
+                      // Actualizar participantes en las entidades de grupo
+                      grupoAEntidad.participantes = grupoA.participantes;
+                      grupoBEntidad.participantes = grupoB.participantes;
+                      // Guardar los cambios en la base de datos
+                      await this.grupoRepository.save(grupoAEntidad);
+                      await this.grupoRepository.save(grupoBEntidad);
+                    }
+                  }
+                }
+              }
+
+              jornadaEntidad.participantes = jornada.participantes
+              //jornadaEntidad.posiciones = jornada.participantes
+              await this.jornadaRepository.save(jornadaEntidad)
+
+
+            }
+          *///}//FIXME:AWQUIDESCOMENTAR* else {
+         
           if (cambioRanking && tipocambio == 'jugador') {
+            let cont: number = 0
             for (const grupoA of jornada.participantes) {
               for (const grupoB of jornada.participantes) {
                 if (grupoA.id !== grupoB.id) {
-                  const ganadorIndex = grupoA.participantes.findIndex(participante => participante.jugador.id === ganador.id);
-                  const perdedorIndex = grupoB.participantes.findIndex(participante => participante.jugador.id === perdedor.id);
+                  if (cont === 0) {
+                    const ganadorIndex = grupoA.participantes.findIndex(participante => participante.jugador.id === ganador.id);
+                    const ganadorRes = grupoA.participantes.find(participante => participante.jugador.id === ganador.id);
+                    console.log('ganador', ganadorIndex, ganadorRes)
+                    const perdedorIndex = grupoB.participantes.findIndex(participante => participante.jugador.id === perdedor.id);
+                    const perdedorRes = grupoB.participantes.find(participante => participante.jugador.id === perdedor.id);
+                    console.log('perdedor', perdedorIndex, perdedorRes)
 
-                  if (ganadorIndex !== -1 && perdedorIndex !== -1) {
-                    // Intercambiar participantes entre los grupos
-                    const ganadorTemp = grupoA.participantes[ganadorIndex];
-                    const perdedorTemp = grupoB.participantes[perdedorIndex];
+                    if (ganadorIndex !== -1 && perdedorIndex !== -1) {
+                      console.log('entre a cambiar rankings')
+                      // Intercambiar participantes entre los grupos
+                      const ganadorTemp = grupoA.participantes[ganadorIndex];
+                      const perdedorTemp = grupoB.participantes[perdedorIndex];
 
-                    grupoA.participantes[ganadorIndex] = perdedorTemp;
-                    grupoB.participantes[perdedorIndex] = ganadorTemp;
+                      const nuevoRankingGanador = perdedorTemp.ranking
+                      const nuevoRankingPerdedor = ganadorTemp.ranking
 
-                    // Actualizar participantes en las entidades de grupo
-                    grupoAEntidad.participantes = grupoA.participantes;
-                    grupoBEntidad.participantes = grupoB.participantes;
+                      ganadorTemp.ranking = nuevoRankingGanador
+                      perdedorTemp.ranking = nuevoRankingPerdedor
 
-                    // Guardar los cambios en la base de datos
-                    await this.grupoRepository.save(grupoAEntidad);
-                    await this.grupoRepository.save(grupoBEntidad);
+                      console.log('ganadorTem', ganadorTemp) 
+                      console.log('perdedorTemp', perdedorTemp)
+
+                      grupoA.participantes[ganadorIndex] = perdedorTemp;
+                      grupoB.participantes[perdedorIndex] = ganadorTemp;
+
+                      // Actualizar participantes en las entidades de grupo
+                      grupoAEntidad.participantes = grupoA.participantes;
+                      grupoBEntidad.participantes = grupoB.participantes;
+
+                      console.log('estoy probando que entra a cambiar rankings ', cont, ' veces')   
+                      cont++
+                      // Guardar los cambios en la base de datos
+                      //TODO:DESCOMENTAR
+                      await this.grupoRepository.save(grupoAEntidad);
+                      await this.grupoRepository.save(grupoBEntidad);
+                    }
                   }
                 }
               }
             }
 
             jornadaEntidad.participantes = jornada.participantes
+            // return{
+            //   jornadaEntidad
+            // }
             //jornadaEntidad.posiciones = jornada.participantes
+
+            //TODO:DESCOMENTAR
             await this.jornadaRepository.save(jornadaEntidad)
-
-
           }
           if (cambioRanking && tipocambio == 'pareja') {
+            let cont: number = 0
             for (const grupoA of jornada.participantes) {
               for (const grupoB of jornada.participantes) {
                 if (grupoA.id !== grupoB.id) {
-                  const ganadorIndex = grupoA.participantes.findIndex(participante => participante.pareja.id === ganador.id);
-                  const perdedorIndex = grupoB.participantes.findIndex(participante => participante.pareja.id === perdedor.id);
+                  if (cont === 0) {
+                    const ganadorIndex = grupoA.participantes.findIndex(participante => participante.pareja.id === ganador.id);
+                    const perdedorIndex = grupoB.participantes.findIndex(participante => participante.pareja.id === perdedor.id);
 
-                  if (ganadorIndex !== -1 && perdedorIndex !== -1) {
-                    // Intercambiar participantes entre los grupos
-                    const ganadorTemp = grupoA.participantes[ganadorIndex];
-                    const perdedorTemp = grupoB.participantes[perdedorIndex];
-
-                    grupoA.participantes[ganadorIndex] = perdedorTemp;
-                    grupoB.participantes[perdedorIndex] = ganadorTemp;
-
-                    // Actualizar participantes en las entidades de grupo
-                    grupoAEntidad.participantes = grupoA.participantes;
-                    grupoBEntidad.participantes = grupoB.participantes;
-
-                    // Guardar los cambios en la base de datos
-                    await this.grupoRepository.save(grupoAEntidad);
-                    await this.grupoRepository.save(grupoBEntidad);
+                    if (ganadorIndex !== -1 && perdedorIndex !== -1) {
+                      // Intercambiar participantes entre los grupos
+                      const ganadorTemp = grupoA.participantes[ganadorIndex];
+                      const perdedorTemp = grupoB.participantes[perdedorIndex];
+                      const nuevoRankingGanador = perdedorTemp.ranking
+                      const nuevoRankingPerdedor = ganadorTemp.ranking
+                      ganadorTemp.ranking = nuevoRankingGanador
+                      perdedorTemp.ranking = nuevoRankingPerdedor
+                      grupoA.participantes[ganadorIndex] = perdedorTemp;
+                      grupoB.participantes[perdedorIndex] = ganadorTemp;
+                      // Actualizar participantes en las entidades de grupo
+                      grupoAEntidad.participantes = grupoA.participantes;
+                      grupoBEntidad.participantes = grupoB.participantes;
+                      // Guardar los cambios en la base de datos
+                      await this.grupoRepository.save(grupoAEntidad);
+                      await this.grupoRepository.save(grupoBEntidad);
+                    }
                   }
                 }
               }
@@ -493,43 +702,37 @@ export class PartidosService {
             jornadaEntidad.participantes = jornada.participantes
             //jornadaEntidad.posiciones = jornada.participantes
             await this.jornadaRepository.save(jornadaEntidad)
-
-
           }
+
+          //FIXME:AWQUIDESCOMENTAR*}
 
           //return{ grupoAEntidad, grupoBEntidad}
-          const jornadaActual = partido.jornada.id
           const numeroJornadaActual = partido.torneo.jornada_actual
           const cantidad_jornadas = partido.torneo.cantidad_jornadas_cruzadas + partido.torneo.cantidad_jornadas_regulares
-
-          const todosFinalizados = await this.partidoRepository.find({ where: { jornada: jornada, finalizado: true } })
-
-          const partidos = await this.partidoRepository.find({ where: { jornada: jornada } })
-
-          if (todosFinalizados.length == partidos.length) {
+          //FIXME:borrar este auxiliar
+          //const aux = 1
+          /*TODO:DEJAR EL IF ORIGINAL*/
+          if (todosFinalizados.length == partidos.length) { /*if (aux == 1) {*/
             if (numeroJornadaActual <= cantidad_jornadas) {
-
+              console.log('--------------')
+              console.log('entre al if de la ultima jornada')
               //buscar todas las jornadas del torneo
-
               const jornadas = await this.jornadaRepository.find({ where: { torneo: partido.torneo } })
-
               let idSiguienteJornada = await this.obtenerSiguienteIdCercano(jornadaActual, jornadas)
-
               let siguienteJornada = await this.jornadaRepository.findOne({ where: { id: idSiguienteJornada } })
-
-
-              siguienteJornada.posiciones = jornada.posiciones
+              //siguienteJornada.posiciones = jornada.posiciones
+              siguienteJornada.posiciones = jornada.participantes
               siguienteJornada.participantes = jornada.participantes
-
+              //TODO:DESCOMENTAR
               await this.jornadaRepository.save(siguienteJornada)
-
-
             }
-
             jornada.finalizado = true
+            //TODO:DESCOMENTAR
             await this.jornadaRepository.save(jornada)
           }
-
+          // return {
+          //   jornadaEntidad   
+          // }
           return {
             message: 'Partido Editado con exito'
           }
@@ -694,14 +897,14 @@ export class PartidosService {
             jugador2 = llave.participante2.id
             //fase = this.obtenerEtapa(llaves.length)
 
-            const llaveCreada =  this.llaveRepository.create({
+            const llaveCreada = this.llaveRepository.create({
               torneo: torneo,
               fase: fase,
               jugador1: jugador1,
               jugador2: jugador2
             })
             const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-            const partidoCreado =  this.partidoRepository.create({
+            const partidoCreado = this.partidoRepository.create({
               fase: fase,
               torneo: torneo,
               jugador1: jugador1,
@@ -712,7 +915,7 @@ export class PartidosService {
           } else {
             pareja1 = llave.participante1.id
             pareja2 = llave.participante2.id
-            const llaveCreada =  this.llaveRepository.create({
+            const llaveCreada = this.llaveRepository.create({
               torneo: torneo,
               fase: fase,
               pareja1: pareja1,
@@ -720,7 +923,7 @@ export class PartidosService {
             })
 
             const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-            const partidoCreado =  this.partidoRepository.create({
+            const partidoCreado = this.partidoRepository.create({
               fase: fase,
               torneo: torneo,
               pareja1: pareja1,
@@ -764,22 +967,29 @@ export class PartidosService {
         // const participantesOrdenados = participantes.sort((a, b) => a.ranking - b.ranking);
         for (const grupo of grupos) {
           //const participantesGrupo = grupo.participantes || [];
-          const participantesGrupo = grupo.posiciones || [];
+          // const participantesGrupo = grupo.posiciones || [];
+          const participantesGrupo = grupo.participantes || [];
 
           const participantesOrdenadosGrupo = participantesGrupo
             .sort((a, b) => a.ranking - b.ranking)
-            .slice(0, cantidadparticipantesclasificanGrupo); // Tomar los dos mejores participantes
+            .slice(0, cantidadparticipantesclasificanGrupo); // Tomar los x mejores participantes
           participantesOrdenados.push(...participantesOrdenadosGrupo);
         }
 
         const participantesOrdenadosGlobal = participantesOrdenados.sort((a, b) => a.ranking - b.ranking)
 
 
+        //return participantesOrdenadosGlobal
+
+
         const llaves = this.organizarLlaves(participantesOrdenadosGlobal);
+
+        //return llaves
         const llavesReturn = []
 
         const modalidad = torneo.modalidad
         const fase = this.obtenerEtapa(llaves.length)
+        //return fase
         for (const llave of llaves) {
 
           let jugador1: any
@@ -788,18 +998,18 @@ export class PartidosService {
           let pareja2: any
           //let fase: any
           if (modalidad === 'singles') {
-            jugador1 = llave.participante1.id
-            jugador2 = llave.participante2.id
+            jugador1 = llave.participante1.jugador.id
+            jugador2 = llave.participante2.jugador.id
             //fase = this.obtenerEtapa(llaves.length)
 
-            const llaveCreada =  this.llaveRepository.create({
+            const llaveCreada = this.llaveRepository.create({
               torneo: torneo,
               fase: fase,
               jugador1: jugador1,
               jugador2: jugador2
             })
             const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-            const partidoCreado =  this.partidoRepository.create({
+            const partidoCreado = this.partidoRepository.create({
               fase: fase,
               torneo: torneo,
               jugador1: jugador1,
@@ -808,9 +1018,9 @@ export class PartidosService {
             const partidoGuardado = await this.partidoRepository.save(partidoCreado)
             llavesReturn.push(llaveGuardada)
           } else {
-            pareja1 = llave.participante1.id
-            pareja2 = llave.participante2.id
-            const llaveCreada =  this.llaveRepository.create({
+            pareja1 = llave.participante1.pareja.id
+            pareja2 = llave.participante2.pareja.id
+            const llaveCreada = this.llaveRepository.create({
               torneo: torneo,
               fase: fase,
               pareja1: pareja1,
@@ -818,7 +1028,7 @@ export class PartidosService {
             })
 
             const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-            const partidoCreado =  this.partidoRepository.create({
+            const partidoCreado = this.partidoRepository.create({
               fase: fase,
               torneo: torneo,
               pareja1: pareja1,
@@ -881,7 +1091,7 @@ export class PartidosService {
           jugador2 = llave.participante2.id
           //fase = this.obtenerEtapa(llaves.length)
 
-          const llaveCreada =  this.llaveRepository.create({
+          const llaveCreada = this.llaveRepository.create({
             torneo: torneo,
             fase: fase,
             jugador1: jugador1,
@@ -890,7 +1100,7 @@ export class PartidosService {
 
           const llaveGuardada = await this.llaveRepository.save(llaveCreada)
 
-          const partidoCreado =  this.partidoRepository.create({
+          const partidoCreado = this.partidoRepository.create({
             fase: fase,
             torneo: torneo,
             jugador1: jugador1,
@@ -906,7 +1116,7 @@ export class PartidosService {
           pareja2 = llave.participante2.id
           //fase = this.obtenerEtapa(llaves.length)
 
-          const llaveCreada =  this.llaveRepository.create({
+          const llaveCreada = this.llaveRepository.create({
             torneo: torneo,
             fase: fase,
             pareja1: pareja1,
@@ -914,7 +1124,7 @@ export class PartidosService {
           })
 
           const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-          const partidoCreado =  this.partidoRepository.create({
+          const partidoCreado = this.partidoRepository.create({
             fase: fase,
             torneo: torneo,
             pareja1: pareja1,

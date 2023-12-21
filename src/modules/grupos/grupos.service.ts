@@ -8,6 +8,7 @@ import { MiExcepcionPersonalizada } from 'src/utils/exception';
 import { Estado, Torneo } from '../torneos/entities/torneo.entity';
 import { ResultadoPartidoDTO } from '../partidos/dto/resultado.dto';
 import { ParticipanteDto } from './dto/participante.dto';
+import { Inscripcion } from '../inscripciones/entities/inscripcione.entity';
 
 @Injectable()
 export class GruposService {
@@ -16,6 +17,7 @@ export class GruposService {
   constructor(
     @InjectRepository(Grupo) private readonly grupoRepository: Repository<Grupo>,
     @InjectRepository(Torneo) private torneoRepository: Repository<Torneo>,
+    @InjectRepository(Inscripcion) private inscripcionRepository: Repository<Inscripcion>
 
   ) { }
 
@@ -30,13 +32,68 @@ export class GruposService {
     }
 
     const grupos = await this.grupoRepository.find({
-      where: { torneo: { id: torneo.id } }
+      where: { torneo: { id: torneo.id } },
+      //relations: []
     });
+
+
 
 
     grupos.forEach((grupo) => {
       grupo.participantes.sort((a, b) => a.ranking - b.ranking);
     });
+
+
+
+    
+
+    const gruposReturn = []
+    if(torneo.modalidad === 'dobles'){
+      for (const grupo of grupos) {
+        
+        let grupoReturn = {
+          id: grupo.id,
+          nombre_grupo: grupo.nombre_grupo,
+          completado : grupo.completado,
+          posiciones: grupo.posiciones,
+          participantes: []
+        }
+        for (const pareja of grupo.participantes) {
+          
+        
+          /*let participanteReturn = {
+            id: pareja.id,            
+            pareja:{
+              id: pareja.pareja.id,
+              rama: pareja.pareja.rama,
+              categoria: pareja.pareja.categoria,
+              ranking: pareja.pareja.ranking,
+              jugador1:{
+                id: '11111'
+              }
+            }
+          } */  
+
+          // const inscripciones = await this.inscripcionRepository.find({ 
+          //   where: {torneo: { id: torneo.id } },
+          //   relations: ['jugador', 'pareja', 'pareja.jugador1', 'pareja.jugador2'],
+          // })
+
+
+          let participanteReturn = await this.inscripcionRepository.findOne({ 
+            where: { id: pareja.id},
+            relations: ['jugador', 'pareja', 'pareja.jugador1', 'pareja.jugador2']
+          })
+          
+          grupoReturn.participantes.push(participanteReturn)
+        }
+
+        gruposReturn.push(grupoReturn)
+        
+        
+      }
+      return gruposReturn
+    }
 
     return grupos
   }

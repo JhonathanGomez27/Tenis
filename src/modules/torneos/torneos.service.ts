@@ -96,6 +96,15 @@ export class TorneosService {
     }
 
 
+    //minimo 4 participantes 
+
+    if(torneo.inscripciones.length < 4){
+      const message = `El torneo debe cumplir un minimo de  participantes inscritos, aun no se ha cumplido esa cuota, por favor revisar`
+      throw new MiExcepcionPersonalizada(message, 409);
+
+    }
+
+
     //TODO:Validaciones torneo escalera, preguntar bien todas las validaciones
 
     if (torneo.tipo_torneo === Tipo.ESCALERA) {
@@ -198,7 +207,8 @@ export class TorneosService {
       }
 
       //torneo.estado = Estado.PROGRAMACION
-      torneo.estado = Estado.SORTEO
+      //torneo.estado = Estado.SORTEO
+      torneo.estado = Estado.PROCESO
       await this.torneoRepository.save(torneo)
       for (const grupo of gruposResponse) {
         grupo['torneo'] = undefined
@@ -501,7 +511,7 @@ export class TorneosService {
       throw new MiExcepcionPersonalizada(`el torneo es de tipo ${torneo.tipo_torneo} por lo cual no se puede realizar esta acción`, 409);
     }
 
-    /*if (torneo.estado !== Estado.PROGRAMACION) {
+    /*if (torneo.estado !== Estado.PROCESO) {
       const message = `Este torneo está en estado ${torneo.estado}, por lo cual es imposible realizar esta acción`;
       throw new MiExcepcionPersonalizada(message, 409);
     }*/
@@ -560,6 +570,7 @@ export class TorneosService {
           for (const grupo of jornada.participantes) {
             partidos = await this.programarPartidosGruposJornadaRegularRetadoresImpares(grupo.participantes, jornada, torneo, grupo.id)
           }
+          //return partidos
           jornada.sorteado = true
           await this.jornadaRepository.save(jornada);
 
