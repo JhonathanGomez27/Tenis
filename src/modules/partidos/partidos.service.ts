@@ -611,7 +611,7 @@ export class PartidosService {
 
             }
           *///}//FIXME:AWQUIDESCOMENTAR* else {
-         
+
           if (cambioRanking && tipocambio == 'jugador') {
             let cont: number = 0
             for (const grupoA of jornada.participantes) {
@@ -637,7 +637,7 @@ export class PartidosService {
                       ganadorTemp.ranking = nuevoRankingGanador
                       perdedorTemp.ranking = nuevoRankingPerdedor
 
-                      console.log('ganadorTem', ganadorTemp) 
+                      console.log('ganadorTem', ganadorTemp)
                       console.log('perdedorTemp', perdedorTemp)
 
                       grupoA.participantes[ganadorIndex] = perdedorTemp;
@@ -647,7 +647,7 @@ export class PartidosService {
                       grupoAEntidad.participantes = grupoA.participantes;
                       grupoBEntidad.participantes = grupoB.participantes;
 
-                      console.log('estoy probando que entra a cambiar rankings ', cont, ' veces')   
+                      console.log('estoy probando que entra a cambiar rankings ', cont, ' veces')
                       cont++
                       // Guardar los cambios en la base de datos
                       //TODO:DESCOMENTAR
@@ -1158,6 +1158,15 @@ export class PartidosService {
           message: `No se ha jugado la final, por favor actualizar resultados`
         }
       } else {
+
+
+        let ranking;
+        if (torneo.tipo_torneo === 'regular') {
+          ranking = await this.actualizarRanking(torneo)
+          return ranking
+        }
+
+
         const partido = partidosJugadosLlaves[0]
         let ganadorNombre = '';
         if (partido.resultado.ganador.tipo === "jugador") {
@@ -1242,6 +1251,119 @@ export class PartidosService {
       default:
         return 'otra';
     }
+  }
+
+
+  async actualizarRanking(torneo: Torneo) {
+
+    //obtener la cantiadad maxima de inscripciones 
+
+    const fases = await this.llaveRepository.find({
+      where: { torneo: torneo },
+      relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2']
+    })
+
+
+
+    //obtener los finalistas
+
+    const final = await this.partidoRepository.findOne({
+      where: { torneo: torneo, fase: 'final' },
+      relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2']
+    })
+
+    const nuevoRanking: any[] = []
+
+    const yaConRanking: number[] = []
+
+
+    const modalidadTorneo = torneo.modalidad
+
+    //actualizar primero y segundo 
+
+    const primero = final.resultado.ganador.id
+    const segundo = final.resultado.perdedor.id
+
+    yaConRanking.push(primero)
+    yaConRanking.push(segundo)
+
+
+
+    if (modalidadTorneo === 'dobles') {
+      await this.actualizarrankingPareja(primero, 1)
+      await this.actualizarrankingPareja(segundo, 2)
+    } else if (modalidadTorneo === 'singles') {
+      await this.actualizarRankingJugador(primero, 1)
+      await this.actualizarRankingJugador(segundo, 2)
+    }
+
+    //saber cuantos mas son
+
+
+    const semifinales = await this.partidoRepository.find({
+      where: { torneo: torneo, fase: 'semifinales' },
+      relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2']
+    })
+
+    for (const semifinal of semifinales) {
+      const tercero = semifinal.resultado.perdedor.id
+      yaConRanking.push(tercero)
+      if (modalidadTorneo === 'dobles') {
+        await this.actualizarrankingPareja(tercero, 3)
+      } else if (modalidadTorneo === 'singles') {
+        await this.actualizarRankingJugador(tercero, 3)
+      }
+    }
+
+    if(fases.length > 3){
+      const cuartos = await this.partidoRepository.find({
+        where: { torneo: torneo, fase: 'cuartos' },
+        relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2']
+      })
+      for (const cuarto of cuartos) {
+        const cuartoRanking = cuarto.resultado.perdedor.id
+        yaConRanking.push(cuartoRanking)
+        if (modalidadTorneo === 'dobles') {
+          await this.actualizarrankingPareja(cuartoRanking, 4)
+        } else if (modalidadTorneo === 'singles') {
+          await this.actualizarRankingJugador(cuartoRanking, 4)
+        }
+      }
+      if (fases.length > 7) {
+        const octavos = await this.partidoRepository.find({
+          where: { torneo: torneo, fase: 'octavos' },
+          relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2']
+        })
+        for (const octavo of octavos) {
+          const quintoRanking = octavo.resultado.perdedor.id
+          yaConRanking.push(quintoRanking)
+          if (modalidadTorneo === 'dobles') {
+            await this.actualizarrankingPareja(quintoRanking, 5)
+          } else if (modalidadTorneo === 'singles') {
+            await this.actualizarRankingJugador(quintoRanking, 5)
+          }
+        }        
+      }
+    }
+
+
+     
+
+
+    return { yaConRanking }
+
+  }
+
+
+
+  async actualizarrankingPareja(idpareja: number, ranking: number) {
+
+  }
+
+
+
+  async actualizarRankingJugador(idjugador: number, ranking: number) {
+
   }
 
 
