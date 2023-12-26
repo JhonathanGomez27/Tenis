@@ -98,7 +98,7 @@ export class TorneosService {
 
     //minimo 4 participantes 
 
-    if(torneo.inscripciones.length < 4){
+    if (torneo.inscripciones.length < 4) {
       const message = `El torneo debe cumplir un minimo de  participantes inscritos, aun no se ha cumplido esa cuota, por favor revisar`
       throw new MiExcepcionPersonalizada(message, 409);
 
@@ -190,8 +190,21 @@ export class TorneosService {
 
 
 
-      const inscripciones = torneo.inscripciones;
+
+      let inscripciones = torneo.inscripciones;
       const modalidad = torneo.modalidad;
+
+      const rankingsRepetidos = await this.verificarRankingDuplicado(inscripciones, modalidad)
+      if (rankingsRepetidos == true) {
+        //inscripciones = await this.reorganizarRankings(inscripciones, modalidad)
+        const message = `Hay participantes con rankings repetidos, para este tipo de torneo se deben reorganizar los rankings`
+        throw new MiExcepcionPersonalizada(message, 409);
+
+      }
+
+
+      //return inscripciones
+
       const jugadoresPorGrupo = torneo.inscripciones.length / torneo.cantidad_grupos
 
       //return jugadoresPorGrupo
@@ -275,6 +288,71 @@ export class TorneosService {
 
   }
 
+
+
+
+  verificarRankingDuplicado(datos, modalidad: string) {
+    const rankings = {};
+
+    for (const item of datos) {
+      if (modalidad === 'singles') {
+        const ranking = item.jugador.ranking;
+        if (rankings[ranking]) {
+          return true
+        } else {
+          rankings[ranking] = true;
+        }
+      } else if (modalidad === 'dobles') {
+        const ranking = item.pareja.ranking;
+        if (rankings[ranking]) {
+          return true
+        } else {
+          rankings[ranking] = true;
+        }
+
+      }
+    }
+  }
+
+
+//TODO: hacerlo funcionar
+  reorganizarRankings(datos, modalidad) {
+
+    console.log('originales', datos)
+
+    const participantes = modalidad === 'singles' ?
+      datos.map(item => item.jugador) :
+      datos.map(item => item.pareja);
+
+    // Ordenar participantes por ranking de manera descendente
+    participantes.sort((a, b) => b.ranking - a.ranking);
+
+    // Asignar nuevos rankings a los participantes
+    let nuevoRanking = 1;
+    for (let i = 0; i < participantes.length; i++) {
+      if (i > 0 && participantes[i].ranking === participantes[i - 1].ranking) {
+        // En caso de empate, asignar un ranking aleatorio entre los participantes empatados
+        participantes[i].ranking = participantes[i - 1].ranking;
+      } else {
+        participantes[i].ranking = nuevoRanking++;
+      }
+    }
+
+    // Actualizar los datos originales con los nuevos rankings
+    if (modalidad === 'singles') {
+      datos.forEach((item, index) => {
+        item.jugador = participantes[index];
+      });
+    } else {
+      datos.forEach((item, index) => {
+        item.pareja = participantes[index];
+      });
+    }
+
+    console.log('nuevos', datos)
+
+    return datos
+  }
 
 
 

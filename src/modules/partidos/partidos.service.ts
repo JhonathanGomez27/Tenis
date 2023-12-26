@@ -10,6 +10,9 @@ import { ResultadoPartidoDTO } from './dto/resultado.dto';
 import { Grupo } from '../grupos/entities/grupo.entity';
 import { Llave } from '../llaves/entities/llave.entity';
 import { Jornada, TipoJornada } from '../jornadas/entities/jornada.entity';
+import { Inscripcion } from '../inscripciones/entities/inscripcione.entity';
+import { Pareja } from '../parejas/entities/pareja.entity';
+import { Jugador } from '../jugadores/entities/jugadore.entity';
 
 @Injectable()
 export class PartidosService {
@@ -21,6 +24,9 @@ export class PartidosService {
     @InjectRepository(Grupo) private grupoRepository: Repository<Grupo>,
     @InjectRepository(Llave) private llaveRepository: Repository<Llave>,
     @InjectRepository(Jornada) private jornadaRepository: Repository<Jornada>,
+    @InjectRepository(Inscripcion) private inscripcionRepository: Repository<Inscripcion>,
+    @InjectRepository(Pareja) private parejaRepository: Repository<Pareja>,
+    @InjectRepository(Jugador) private jugadorRepository: Repository<Jugador>
 
   ) { }
 
@@ -1145,7 +1151,7 @@ export class PartidosService {
 
       const partidosJugadosLlaves = await this.partidoRepository.find({
         where: { torneo: torneo, fase: torneo.fase_actual },
-        relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2'],
+        relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2', 'pareja1.jugador1', 'pareja1.jugador2', 'pareja2.jugador1', 'pareja2.jugador1',],
       })
 
       const todosFinalizados = partidosJugadosLlaves.every(
@@ -1162,20 +1168,19 @@ export class PartidosService {
 
         let ranking;
         if (torneo.tipo_torneo === 'regular') {
-          ranking = await this.actualizarRanking(torneo)
-          return ranking
+          ranking = await this.actualizarRanking(torneo)          
         }
-
-
         const partido = partidosJugadosLlaves[0]
         let ganadorNombre = '';
         if (partido.resultado.ganador.tipo === "jugador") {
           if (partido.jugador1 && partido.jugador1.id === partido.resultado.ganador.id) {
+            
             ganadorNombre = partido.jugador1.nombre;
           } else if (partido.jugador2 && partido.jugador2.id === partido.resultado.ganador.id) {
             ganadorNombre = partido.jugador2.nombre;
           }
         } else if (partido.resultado.ganador.tipo === "pareja") {
+         
           if (partido.pareja1 && partido.pareja1.id === partido.resultado.ganador.id) {
             ganadorNombre = partido.pareja1.jugador1.nombre + ' - ' + partido.pareja1.jugador2.nombre
           } else if (partido.pareja2 && partido.pareja2.id === partido.resultado.ganador.id) {
@@ -1272,7 +1277,7 @@ export class PartidosService {
       relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2']
     })
 
-    const nuevoRanking: any[] = []
+    //const nuevoRanking: any[] = []
 
     const yaConRanking: number[] = []
 
@@ -1298,6 +1303,8 @@ export class PartidosService {
     }
 
     //saber cuantos mas son
+
+    let rankingGrupos = 4;
 
 
     const semifinales = await this.partidoRepository.find({
@@ -1329,6 +1336,7 @@ export class PartidosService {
           await this.actualizarRankingJugador(cuartoRanking, 4)
         }
       }
+      rankingGrupos = 5
       if (fases.length > 7) {
         const octavos = await this.partidoRepository.find({
           where: { torneo: torneo, fase: 'octavos' },
@@ -1342,28 +1350,59 @@ export class PartidosService {
           } else if (modalidadTorneo === 'singles') {
             await this.actualizarRankingJugador(quintoRanking, 5)
           }
-        }        
+        }       
+        rankingGrupos = 6 
       }
+    }
+
+
+    const inscripciones = await this.inscripcionRepository.find({
+      where: {torneo: torneo},
+      relations: ['jugador','pareja']
+    })
+
+
+    for (const inscripcion of inscripciones) {
+      if(modalidadTorneo === 'dobles'){
+        if(!yaConRanking.includes(inscripcion.pareja.id)){
+          await this.actualizarrankingPareja(inscripcion.pareja.id, rankingGrupos)
+          yaConRanking.push(inscripcion.pareja.id)
+        }
+      }else  if(modalidadTorneo === 'singles'){
+        if(!yaConRanking.includes(inscripcion.jugador.id)){
+          await this.actualizarRankingJugador(inscripcion.jugador.id, rankingGrupos)
+          yaConRanking.push(inscripcion.jugador.id)
+        }
+      }
+      
     }
 
 
      
 
 
-    return { yaConRanking }
+    return yaConRanking
 
   }
 
 
 
   async actualizarrankingPareja(idpareja: number, ranking: number) {
-
+    const pareja = await this.parejaRepository.findOne({
+      where: {id: idpareja}
+    })
+    pareja.ranking = ranking
+    await this.parejaRepository.save(pareja)
   }
 
 
 
   async actualizarRankingJugador(idjugador: number, ranking: number) {
-
+    const jugador = await this.jugadorRepository.findOne({
+      where: {id: idjugador}
+    })
+    jugador.ranking = ranking
+    await this.jugadorRepository.save(jugador)
   }
 
 

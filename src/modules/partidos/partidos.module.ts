@@ -7,9 +7,12 @@ import { Torneo } from '../torneos/entities/torneo.entity';
 import { Grupo } from '../grupos/entities/grupo.entity';
 import { Llave } from '../llaves/entities/llave.entity';
 import { Jornada } from '../jornadas/entities/jornada.entity';
+import { Inscripcion } from '../inscripciones/entities/inscripcione.entity';
+import { Pareja } from '../parejas/entities/pareja.entity';
+import { Jugador } from '../jugadores/entities/jugadore.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Partido, Torneo, Grupo, Llave, Jornada])],
+  imports: [TypeOrmModule.forFeature([Partido, Torneo, Grupo, Llave, Jornada, Inscripcion, Pareja, Jugador])],
   controllers: [PartidosController],
   providers: [PartidosService],
   exports: [PartidosService]
