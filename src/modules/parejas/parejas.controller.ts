@@ -8,6 +8,7 @@ import { JwtAuthAccessGuard } from '../iam/guards/jwt-auth.guard';
 import { RolesGuard } from '../iam/guards/roles.guard';
 import { Role } from '../iam/models/roles.model';
 import { FiltersPaginatedQuery } from 'src/common/FiltersPaginatedQuery';
+import { FiltersParejaDto } from './dto/filters.pareja.dto';
 
 @ApiTags('parejas')
 @Controller('parejas')
@@ -64,11 +65,12 @@ export class ParejasController {
   @Get('filtersPaginated')
   async getParejasPaginated(
     @Query() query: FiltersPaginatedQuery,
-    @Query('ranking') ranking?: number,
-    @Query('rama') rama?: string,
-    @Query('categoria') categoria?: string
+    @Body() filters: FiltersParejaDto
+    // @Query('ranking') ranking?: number,
+    // @Query('rama') rama?: string,
+    // @Query('categoria') categoria?: string
   ) {
-    return this.parejasService.findParejasByFiltersPaginated(query.page, query.limit, ranking, rama, categoria);
+    return this.parejasService.findParejasByFiltersPaginated(query.page, query.limit, filters);
   }
 
 

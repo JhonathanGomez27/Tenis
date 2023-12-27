@@ -6,6 +6,7 @@ import { Pareja } from './entities/pareja.entity';
 import { Repository } from 'typeorm';
 import { handleDbError } from 'src/utils/error.message';
 import { MiExcepcionPersonalizada } from 'src/utils/exception';
+import { FiltersParejaDto } from './dto/filters.pareja.dto';
 
 @Injectable()
 export class ParejasService {
@@ -196,24 +197,25 @@ export class ParejasService {
   async findParejasByFiltersPaginated(
     page: number,
     limit: number,
-    ranking?: number,
-    rama?: string,
-    categoria?: string   
+    filters: FiltersParejaDto
+    // ranking?: number,
+    // rama?: string,
+    // categoria?: string   
   ){
 
     const whereConditions: Record<string, any> = {};
 
 
-    if (ranking) {
-      whereConditions.ranking = ranking;
+    if (filters.ranking) {
+      whereConditions.ranking = filters.ranking;
     }
 
-    if (rama) {
-      whereConditions.rama = rama;
+    if (filters.rama) {
+      whereConditions.rama = filters.rama;
     }
 
-    if (categoria) {
-      whereConditions.categoria = categoria;
+    if (filters.categoria) {
+      whereConditions.categoria = filters.categoria;
     }   
 
     const [parejas, total] = await this.parejaRepository.findAndCount({

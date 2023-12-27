@@ -6,6 +6,7 @@ import { Jugador } from './entities/jugadore.entity';
 import { ILike, Repository } from 'typeorm';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 import { UsuarioResponseDto } from '../usuarios/dto/UsuarioResponse.dto';
+import { FiltersJugadorDto } from './dto/filters.jugador.dto';
 
 @Injectable()
 export class JugadoresService {
@@ -113,23 +114,25 @@ export class JugadoresService {
   async findJugadoresByFiltersPaginated(
     page: number,
     limit: number,
-    nombre?: string,
-    rama?: string,
-    categoria?: string
+    filters: FiltersJugadorDto
+  
   ) {
     const whereConditions: Record<string, any> = {};
 
-    if (rama) {
-      whereConditions.rama = rama;
+
+  
+
+    if (filters.rama) {
+      whereConditions.rama = filters.rama;
     }
 
-    if (categoria) {
-      whereConditions.categoria = categoria;
+    if (filters.categoria) {
+      whereConditions.categoria = filters.categoria;
     }
 
     // Búsqueda por coincidencia parcial en el nombre
-    if (nombre) {
-      whereConditions.nombre = ILike(`%${nombre}%`);
+    if (filters.nombre) {
+      whereConditions.nombre = ILike(`%${filters.nombre}%`);
     }
 
     const [jugadores, total] = await this.jugadorRepository.findAndCount({

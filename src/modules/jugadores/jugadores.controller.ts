@@ -2,12 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } f
 import { JugadoresService } from './jugadores.service';
 import { CreateJugadorDto } from './dto/create-jugadore.dto';
 import { UpdateJugadorDto } from './dto/update-jugadore.dto';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthAccessGuard } from '../iam/guards/jwt-auth.guard';
 import { RolesGuard } from '../iam/guards/roles.guard';
 import { Roles } from '../iam/decorators';
 import { Role } from '../iam/models/roles.model';
 import { FiltersPaginatedQuery } from 'src/common/FiltersPaginatedQuery';
+import { FiltersJugadorDto } from './dto/filters.jugador.dto';
 
 @ApiTags('jugadores')
 @Controller('jugadores')
@@ -38,18 +39,40 @@ export class JugadoresController {
     return this.jugadoresService.findJugadoresByFilters(nombre, rama, categoria);
   }
 
+  // @Roles(Role.ADMIN)
+  // @UseGuards(JwtAuthAccessGuard, RolesGuard)
+  // @Get('filtersPaginated')
+  // @ApiQuery({ name: 'page', type: Number, required: true })
+  // @ApiQuery({ name: 'limit', type: Number, required: true })
+  // async getJugadoresPaginated(
+  //   @Query() query: FiltersPaginatedQuery,
+  //   // @Query('nombre') nombre?: string,
+  //   // @Query('rama') rama?: string,
+  //   // @Query('categoria') categoria?: string
+  // ) {
+  //   return this.jugadoresService.findJugadoresByFiltersPaginated(query.page, query.limit, nombre, rama, categoria);
+  // }
+
+
+
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
-  @Get('filtersPaginated')
+  @Post('filtersPaginated')
   @ApiQuery({ name: 'page', type: Number, required: true })
   @ApiQuery({ name: 'limit', type: Number, required: true })
+  @ApiBody({
+    type: FiltersJugadorDto,
+    required: false,
+    description: 'filtros'
+  })
   async getJugadoresPaginated(
     @Query() query: FiltersPaginatedQuery,
-    @Query('nombre') nombre?: string,
-    @Query('rama') rama?: string,
-    @Query('categoria') categoria?: string
+    @Body() filters: FiltersJugadorDto
+    // @Query('nombre') nombre?: string,
+    // @Query('rama') rama?: string,
+    // @Query('categoria') categoria?: string
   ) {
-    return this.jugadoresService.findJugadoresByFiltersPaginated(query.page, query.limit, nombre, rama, categoria);
+    return this.jugadoresService.findJugadoresByFiltersPaginated(query.page, query.limit, filters);
   }
 
 
