@@ -62,7 +62,7 @@ export class ParejasController {
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
   @ApiQuery({ name: 'page', type: Number, required: true })
   @ApiQuery({ name: 'limit', type: Number, required: true })
-  @Get('filtersPaginated')
+  @Post('filtersPaginated')
   async getParejasPaginated(
     @Query() query: FiltersPaginatedQuery,
     @Body() filters: FiltersParejaDto
