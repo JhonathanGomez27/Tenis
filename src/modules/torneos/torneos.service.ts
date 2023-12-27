@@ -9,6 +9,7 @@ import { MiExcepcionPersonalizada } from 'src/utils/exception';
 import { Grupo } from '../grupos/entities/grupo.entity';
 import { Partido } from '../partidos/entities/partido.entity';
 import { Jornada, Retadores, TipoJornada } from '../jornadas/entities/jornada.entity';
+import { number } from 'joi';
 
 
 @Injectable()
@@ -196,9 +197,9 @@ export class TorneosService {
 
       const rankingsRepetidos = await this.verificarRankingDuplicado(inscripciones, modalidad)
       if (rankingsRepetidos == true) {
-        //inscripciones = await this.reorganizarRankings(inscripciones, modalidad)
-        const message = `Hay participantes con rankings repetidos, para este tipo de torneo se deben reorganizar los rankings`
-        throw new MiExcepcionPersonalizada(message, 409);
+        inscripciones = await this.reorganizarRankings(inscripciones, modalidad)
+        // const message = `Hay participantes con rankings repetidos, para este tipo de torneo se deben reorganizar los rankings`
+        // throw new MiExcepcionPersonalizada(message, 409);
 
       }
 
@@ -315,45 +316,101 @@ export class TorneosService {
   }
 
 
-//TODO: hacerlo funcionar
+  //TODO: hacerlo funcionar
+  // reorganizarRankings(datos, modalidad) {
+  //   // Obtener los rankings actuales
+  //   const rankings = datos.map(obj => obj.jugador.ranking);
+
+  //   // Crear un array de rankings únicos ordenados de menor a mayor
+  //   const uniqueRankings = [...new Set(rankings)].sort((a, b) => a - b);
+
+  //   // Asignar nuevos rankings a los participantes
+  //   datos.forEach(obj => {
+  //     const ranking = obj.jugador.ranking;
+  //     const index = uniqueRankings.indexOf(ranking);
+
+  //     if (index !== -1) {
+  //       // El ranking ya está definido
+  //       uniqueRankings.splice(index, 1);
+  //     } else {
+  //       // El ranking debe ser asignado
+  //       const newRanking = uniqueRankings.shift();
+  //       obj.jugador.ranking = newRanking;
+  //     }
+  //   });
+
+  //   console.log(datos);
+  //   return datos;
+  // }
+
+
+
   reorganizarRankings(datos, modalidad) {
 
-    console.log('originales', datos)
+    //const uniqueRankings = [...new Set(rankings)].sort((a: number, b:number) => a - b);
 
-    const participantes = modalidad === 'singles' ?
-      datos.map(item => item.jugador) :
-      datos.map(item => item.pareja);
+    const uniqueRankings = Array.from({ length: datos.length }, (_, index) => index + 1);
 
-    // Ordenar participantes por ranking de manera descendente
-    participantes.sort((a, b) => b.ranking - a.ranking);
-
-    // Asignar nuevos rankings a los participantes
-    let nuevoRanking = 1;
-    for (let i = 0; i < participantes.length; i++) {
-      if (i > 0 && participantes[i].ranking === participantes[i - 1].ranking) {
-        // En caso de empate, asignar un ranking aleatorio entre los participantes empatados
-        participantes[i].ranking = participantes[i - 1].ranking;
-      } else {
-        participantes[i].ranking = nuevoRanking++;
-      }
-    }
-
-    // Actualizar los datos originales con los nuevos rankings
     if (modalidad === 'singles') {
-      datos.forEach((item, index) => {
-        item.jugador = participantes[index];
+      datos.forEach(obj => {
+        const ranking = obj.jugador.ranking;
+
+        const index = uniqueRankings.indexOf(ranking);   
+
+        if (index !== -1) {
+          uniqueRankings.splice(index, 1);
+        } else {
+          const newRanking = uniqueRankings.shift();
+          obj.jugador.ranking = newRanking;
+        }
       });
+      return datos;
     } else {
-      datos.forEach((item, index) => {
-        item.pareja = participantes[index];
-      });
+      datos.forEach(obj => {
+        const ranking = obj.pareja.ranking;
+        const index = uniqueRankings.indexOf(ranking);      
+
+        if (index !== -1) {
+          uniqueRankings.splice(index, 1);
+        } else {
+          const newRanking = uniqueRankings.shift();
+          obj.pareja.ranking = newRanking;
+        }
+      });     
+      return datos;
+
     }
 
-    console.log('nuevos', datos)
 
-    return datos
   }
 
+
+  // reorganizarRankings(datos, modalidad) {
+  //   const rankings = datos.map(obj => obj.jugador.ranking);
+
+  //   const uniqueRankings = [...new Set(rankings)].sort((a: number, b: number) => a - b);
+  //   //const uniqueRankings = Array.from({ length: datos.length }, (_, index) => index + 1);
+
+  //   uniqueRankings.forEach((ranking, index) => {
+  //     const playersWithRanking = datos.filter(obj => obj.jugador.ranking === ranking);
+  //     const randomIndex = Math.floor(Math.random() * playersWithRanking.length);
+  //     const selectedPlayer = playersWithRanking[randomIndex];
+
+  //     selectedPlayer.jugador.ranking = index + 1;
+
+  //     for (let i = index + 1; i < uniqueRankings.length; i++) {
+  //       const higherRanking = uniqueRankings[i];
+  //       const playersToMove = datos.filter(obj => obj.jugador.ranking === higherRanking);
+
+  //       playersToMove.forEach(obj => {
+  //         obj.jugador.ranking++;
+  //       });
+  //     }
+  //   });
+
+  //   console.log(datos);
+  //   return datos;
+  // }
 
 
 
