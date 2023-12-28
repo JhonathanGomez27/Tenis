@@ -950,9 +950,20 @@ export class PartidosService {
         });
 
         //return grupos
-        const todosFinalizados = grupos.every((grupo) =>
-          grupo.partidos.every((partido) => partido.finalizado)
+        // const todosFinalizados = grupos.every((grupo) =>       
+        //   grupo.partidos.every((partido) => partido.finalizado)
+        // );
+
+
+        const partidosJugadosGrupos = await this.partidoRepository.find({
+          where: { torneo: torneo, fase: 'grupos' }
+        })
+
+        const todosFinalizados = partidosJugadosGrupos.every(
+          (partido) => partido.finalizado
         );
+
+        console.log('todosFinalizados', todosFinalizados)
 
         if (!todosFinalizados) {
           throw new MiExcepcionPersonalizada('No todos los partidos de la fase de grupos han finalizado.', 400);
