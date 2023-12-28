@@ -658,13 +658,17 @@ export class TorneosService {
 
     const jornadas = await this.jornadaRepository.find({ where: { torneo: torneo } })
 
+    console.log('jornadas',jornadas)
+
 
     if (jornadas[0].id !== jornada.id) {
       const jornadaActual = jornada.id
 
       let idAnteriorJornada = await this.obtenerAnteriorIdCercano(jornadaActual, jornadas)
+      console.log('id',idAnteriorJornada)
 
       let anteriorJornada = await this.jornadaRepository.findOne({ where: { id: idAnteriorJornada } })
+      console.log('anterior',anteriorJornada)
       if (anteriorJornada.finalizado != true) {
         throw new MiExcepcionPersonalizada('No puedes hacer esto, la anterior jornada aun no ha finalizado', 409);
       }
@@ -754,9 +758,15 @@ export class TorneosService {
       .map((jornada) => jornada.id)
       .sort((a, b) => a - b);
 
+
+    console.log('ordenados', idsOrdenados, 'actual', idActual)
+
     const indiceActual = idsOrdenados.indexOf(idActual);
 
-    if (indiceActual !== -1 && indiceActual < idsOrdenados.length - 1) {
+    console.log('indice actual',indiceActual )
+
+    //TODO: si algo se daña fue aqui
+    if (indiceActual !== -1 && indiceActual < idsOrdenados.length/* - 1*/) {
       return idsOrdenados[indiceActual - 1];
     }
 
