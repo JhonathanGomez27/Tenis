@@ -58,32 +58,20 @@ export class GruposService {
           posiciones: grupo.posiciones,
           participantes: []
         }
-        for (const pareja of grupo.participantes) {
-          
-        
-          /*let participanteReturn = {
-            id: pareja.id,            
-            pareja:{
-              id: pareja.pareja.id,
-              rama: pareja.pareja.rama,
-              categoria: pareja.pareja.categoria,
-              ranking: pareja.pareja.ranking,
-              jugador1:{
-                id: '11111'
-              }
-            }
-          } */  
-
-          // const inscripciones = await this.inscripcionRepository.find({ 
-          //   where: {torneo: { id: torneo.id } },
-          //   relations: ['jugador', 'pareja', 'pareja.jugador1', 'pareja.jugador2'],
-          // })
+        for (const pareja of grupo.participantes) { 
 
 
           let participanteReturn = await this.inscripcionRepository.findOne({ 
             where: { id: pareja.id},
             relations: ['jugador', 'pareja', 'pareja.jugador1', 'pareja.jugador2']
           })
+
+          if(pareja.pareja.id == participanteReturn.pareja.id)
+          {
+            participanteReturn['ranking'] = pareja.ranking
+          }
+
+          
           
           grupoReturn.participantes.push(participanteReturn)
         }

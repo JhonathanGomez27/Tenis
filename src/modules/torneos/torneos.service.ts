@@ -197,6 +197,7 @@ export class TorneosService {
 
       const rankingsRepetidos = await this.verificarRankingDuplicado(inscripciones, modalidad)
       if (rankingsRepetidos == true) {
+        console.log('entre al reorganizar')
         inscripciones = await this.reorganizarRankings(inscripciones, modalidad)
         // const message = `Hay participantes con rankings repetidos, para este tipo de torneo se deben reorganizar los rankings`
         // throw new MiExcepcionPersonalizada(message, 409);
@@ -207,6 +208,8 @@ export class TorneosService {
       //return inscripciones
 
       const jugadoresPorGrupo = torneo.inscripciones.length / torneo.cantidad_grupos
+
+      console.log('ins',inscripciones)
 
       //return jugadoresPorGrupo
 
@@ -265,29 +268,12 @@ export class TorneosService {
         }
 
       }
-
-
-
-
-
-
-
-
-
-
-
       return {
         gruposResponse,
         jornadas
       }
-
-
-
     }
-
-
-
-  }
+   }
 
 
 
@@ -488,6 +474,8 @@ export class TorneosService {
 
   async asignacionGruposTorneoEscalera(inscripciones: Array<any>, cantidadGrupos: number, jugadoresPorGrupo: number, modalidad: string, torneo: Torneo) {
 
+    console.log('asi llegan', inscripciones)
+
 
     const inscripcionesRankingPares = []
     const inscripcionesRankingImpares = []
@@ -544,7 +532,7 @@ export class TorneosService {
     } //TODO: hacer esto
     else if (cantidadGrupos == 4) {
 
-
+ 
     } else if (cantidadGrupos == 6) {
 
     } else if (cantidadGrupos == 8) {
@@ -556,8 +544,13 @@ export class TorneosService {
       grupo.participantes.reverse()
       grupo.participantes.forEach((participante, index) => {
         participante.ranking = index + 1;
+        console.log('particioante',participante)
       });
     }
+
+    console.log('asi se van', grupos)
+
+
     return grupos;
   }
 
