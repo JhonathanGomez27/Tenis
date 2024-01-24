@@ -24,9 +24,9 @@ export class Usuario {
   })
   rol: 'admin' | 'user'; 
 
-  @Column() 
+  @Column({nullable: true}) 
   contrasena: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   correo: string;
 }

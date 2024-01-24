@@ -7,6 +7,9 @@ import { handleDbError } from 'src/utils/error.message';
 import { HashingService } from 'src/providers/hashing.service';
 import { JugadoresService } from '../jugadores/jugadores.service';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
+import { parse } from 'csv-parse';
+import { categoria } from '../jugadores/entities/jugadore.entity';
+
 
 
 @Injectable()
@@ -141,6 +144,80 @@ export class UsuariosService {
 
     return datos;
 
+  }
+
+
+
+  async cargarHistoricos(fileBuffer: Buffer) {
+
+    const results = [];
+    const csvString = fileBuffer.toString('utf-8');
+
+    const jsonData = await this.parseCSVToJson(csvString);
+    const usuarios = []
+
+    for (const dato of jsonData) {
+      if (dato.rama === '1') {
+        dato.rama = 'masculina'
+      } else if (dato.rama === '2') {
+        dato.rama = 'femenina'
+      }
+
+      const createUsuarioDto = {
+        nombre: dato.nombre,
+        rol: rolEnum.USER,
+        correo: null,
+        contrasena: null
+      }
+
+      if(dato.id_jugador === '1'){
+        createUsuarioDto.correo = 'admin@admin.com',
+        createUsuarioDto.contrasena = 'Abcd1234.'
+        createUsuarioDto.contrasena = await this.hashingService.hash(createUsuarioDto.contrasena.trim());
+      }
+
+      
+      const usuario = this.usuarioRepository.create(createUsuarioDto);
+      const usuarioGuardado = await this.usuarioRepository.save(usuario);
+
+      if (usuarioGuardado.rol === rolEnum.USER) {
+        const jugadorDto = {
+          nombre: createUsuarioDto.nombre,
+          //ranking: createUsuarioDto.ranking,
+          rama: dato.rama,
+          categoria: categoria.A,
+          categoria_dobles: categoria.A,
+          userid: usuarioGuardado,
+        }
+        const jugador = await this.jugadoresService.create(jugadorDto)
+      }
+   
+      usuarios.push(usuarioGuardado)
+
+
+
+
+
+    }
+
+    return jsonData
+
+  }
+
+
+  private async parseCSVToJson(csvString: string): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      parse(csvString, {
+        columns: true, // Trata la primera fila como encabezados
+        skip_empty_lines: true,
+      }, (err, output) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(output);
+        }
+      });
+    });
   }
 
 
