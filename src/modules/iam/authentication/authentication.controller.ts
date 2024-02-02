@@ -49,8 +49,7 @@ export class AuthenticationController {
     
     @UseGuards(JwtAuthRefreshGuard)
     @Get("refresh")
-    async refreshToken(@Req() req: Request) {
-     
+    async refreshToken(@Req() req: Request) {     
       const user = req.user as Usuario;
       const refreshToken = req.headers.authorization.split(" ")[1];  
       

@@ -7,10 +7,13 @@ import { IamModule } from '../iam/iam.module';
 import { Grupo } from '../grupos/entities/grupo.entity';
 import { Partido } from '../partidos/entities/partido.entity';
 import { Jornada } from '../jornadas/entities/jornada.entity';
+import { Usuario } from '../usuarios/entities/usuario.entity';
+import { Jugador } from '../jugadores/entities/jugadore.entity';
+import { Inscripcion } from '../inscripciones/entities/inscripcione.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Torneo, Grupo, Partido, Jornada]),
+    TypeOrmModule.forFeature([Torneo, Grupo, Partido, Jornada, Usuario, Jugador, Inscripcion]),
     IamModule
   ],
   controllers: [TorneosController],

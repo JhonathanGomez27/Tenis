@@ -3,13 +3,16 @@ import { CreateTorneoDto } from './dto/create-torneo.dto';
 import { UpdateTorneoDto } from './dto/update-torneo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Estado, Modalidad, Tipo, Torneo } from './entities/torneo.entity';
-import { EntityManager, Repository, Transaction } from 'typeorm';
+import { EntityManager, Not, Repository, Transaction } from 'typeorm';
 import { handleDbError } from 'src/utils/error.message';
 import { MiExcepcionPersonalizada } from 'src/utils/exception';
 import { Grupo } from '../grupos/entities/grupo.entity';
 import { Partido } from '../partidos/entities/partido.entity';
 import { Jornada, Retadores, TipoJornada } from '../jornadas/entities/jornada.entity';
 import { number } from 'joi';
+import { Usuario } from '../usuarios/entities/usuario.entity';
+import { Jugador } from '../jugadores/entities/jugadore.entity';
+import { Inscripcion } from '../inscripciones/entities/inscripcione.entity';
 
 
 @Injectable()
@@ -20,6 +23,9 @@ export class TorneosService {
     @InjectRepository(Grupo) private grupoRepository: Repository<Grupo>,
     @InjectRepository(Partido) private partidoRepository: Repository<Partido>,
     @InjectRepository(Jornada) private jornadaRepository: Repository<Jornada>,
+    @InjectRepository(Usuario) private usuarioRepository: Repository<Usuario>,
+    @InjectRepository(Jugador) private jugadorRepository: Repository<Jugador>,
+    @InjectRepository(Inscripcion) private inscripcionRepository: Repository<Inscripcion>,
 
   ) { }
 
@@ -64,6 +70,8 @@ export class TorneosService {
     const torneo = await this.torneoRepository.findOneBy({ id: id })
     return torneo
   }
+
+
 
   enumToJsonArray(enumObj: any): { nombre: string, descripcion: string }[] {
     const enumKeys = Object.keys(enumObj);
@@ -209,7 +217,7 @@ export class TorneosService {
 
       const jugadoresPorGrupo = torneo.inscripciones.length / torneo.cantidad_grupos
 
-      console.log('ins',inscripciones)
+      console.log('ins', inscripciones)
 
       //return jugadoresPorGrupo
 
@@ -273,7 +281,7 @@ export class TorneosService {
         jornadas
       }
     }
-   }
+  }
 
 
 
@@ -341,7 +349,7 @@ export class TorneosService {
       datos.forEach(obj => {
         const ranking = obj.jugador.ranking;
 
-        const index = uniqueRankings.indexOf(ranking);   
+        const index = uniqueRankings.indexOf(ranking);
 
         if (index !== -1) {
           uniqueRankings.splice(index, 1);
@@ -354,7 +362,7 @@ export class TorneosService {
     } else {
       datos.forEach(obj => {
         const ranking = obj.pareja.ranking;
-        const index = uniqueRankings.indexOf(ranking);      
+        const index = uniqueRankings.indexOf(ranking);
 
         if (index !== -1) {
           uniqueRankings.splice(index, 1);
@@ -362,7 +370,7 @@ export class TorneosService {
           const newRanking = uniqueRankings.shift();
           obj.pareja.ranking = newRanking;
         }
-      });     
+      });
       return datos;
 
     }
@@ -532,7 +540,7 @@ export class TorneosService {
     } //TODO: hacer esto
     else if (cantidadGrupos == 4) {
 
- 
+
     } else if (cantidadGrupos == 6) {
 
     } else if (cantidadGrupos == 8) {
@@ -544,7 +552,7 @@ export class TorneosService {
       grupo.participantes.reverse()
       grupo.participantes.forEach((participante, index) => {
         participante.ranking = index + 1;
-        console.log('particioante',participante)
+        console.log('particioante', participante)
       });
     }
 
@@ -658,17 +666,17 @@ export class TorneosService {
 
     const jornadas = await this.jornadaRepository.find({ where: { torneo: torneo } })
 
-    console.log('jornadas',jornadas)
+    console.log('jornadas', jornadas)
 
 
     if (jornadas[0].id !== jornada.id) {
       const jornadaActual = jornada.id
 
       let idAnteriorJornada = await this.obtenerAnteriorIdCercano(jornadaActual, jornadas)
-      console.log('id',idAnteriorJornada)
+      console.log('id', idAnteriorJornada)
 
       let anteriorJornada = await this.jornadaRepository.findOne({ where: { id: idAnteriorJornada } })
-      console.log('anterior',anteriorJornada)
+      console.log('anterior', anteriorJornada)
       if (anteriorJornada.finalizado != true) {
         throw new MiExcepcionPersonalizada('No puedes hacer esto, la anterior jornada aun no ha finalizado', 409);
       }
@@ -763,7 +771,7 @@ export class TorneosService {
 
     const indiceActual = idsOrdenados.indexOf(idActual);
 
-    console.log('indice actual',indiceActual )
+    console.log('indice actual', indiceActual)
 
     //TODO: si algo se daña fue aqui
     if (indiceActual !== -1 && indiceActual < idsOrdenados.length/* - 1*/) {
@@ -1318,6 +1326,80 @@ export class TorneosService {
 
 
   }
+
+
+  async obtenerTorneos(usuario: Usuario) {
+
+    //obtener el id del jugador a través del usuario
+
+    //return usuario
+    const jugador = await this.jugadorRepository.findOne({ where: { userid: { id: usuario.id } } })
+
+    //se van a devolver 3 objetos, torneos en los que el jugador esta inscrito, torneos proximos y torneos finalizados, torneos proximos son los mas faciles de obtener ya que es solo buscar los torneos que estan en estado Inicial y que coincidan con la categoria y la rama del jugador
+
+    const torneosProximos = (await this.torneoRepository.find({ where: { estado: Estado.INICIAL, categoria: jugador.categoria, rama: jugador.rama } })).sort((a, b) => Number(a.fecha_inicio) - Number(b.fecha_inicio))
+
+
+    //para obtener los torneos en los que el jugador esta inscrito, se debe buscar en la tabla de inscripciones, y buscar las inscripciones que coincidan con el id del jugador, y luego buscar el torneo al que pertenece esa inscripcion, el estado del torneo debe ser diferente de finalizado
+
+    const inscripciones = await this.inscripcionRepository.find(
+      {
+        where: { jugador: jugador },
+        relations: ['torneo']
+      })
+
+    let torneosInscrito = []
+
+    for (const inscripcion of inscripciones) {
+      const torneo = await this.torneoRepository.findOne({ where: { id: inscripcion.torneo.id, estado: Not(Estado.FINALIZADO) } })
+      if (torneo) {
+        torneosInscrito.push(torneo)
+      }
+    }
+
+
+    //para obtener los torneos finalizados, se debe buscar en la tabla de inscripciones, y buscar las inscripciones que coincidan con el id del jugador, y luego buscar el torneo al que pertenece esa inscripcion, el estado del torneo debe ser finalizado
+
+    const inscripcionesFinalizadas = await this.inscripcionRepository.find(
+      {
+        where: { jugador: jugador },
+        relations: ['torneo']
+      })
+
+    let torneosFinalizados = []
+
+    for (const inscripcion of inscripcionesFinalizadas) {
+      const torneo = await this.torneoRepository.findOne({ where: { id: inscripcion.torneo.id, estado: Estado.FINALIZADO } })
+      if (torneo) {
+        torneosFinalizados.push(torneo)
+      }
+    }
+
+
+
+    return {
+      torneosInscrito: torneosInscrito,
+      torneosProximos: torneosProximos,
+      torneosFinalizados: torneosFinalizados
+    }
+
+  }
+  async obtenerTorneoByid(id: number) {
+
+    const torneo = await this.torneoRepository.findOne({
+      where: { id: id },
+      relations: ['grupos', 'jornadas', 'partidos', 'llaves']
+    })
+
+    if (!torneo) {
+      throw new MiExcepcionPersonalizada('No se encontro el Torneo', 404);
+    }
+
+    return torneo
+   
+  }
+
+  
 
 
 

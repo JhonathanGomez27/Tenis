@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Request } from '@nestjs/common';
 import { TorneosService } from './torneos.service';
 import { CreateTorneoDto } from './dto/create-torneo.dto';
 import { UpdateTorneoDto } from './dto/update-torneo.dto';
@@ -183,7 +183,27 @@ export class TorneosController {
   @Get('volverAsorteoGruupos')
   volverAsorteoGruupos(@Query('torneoId') torneoId : number){
     return this.torneosService.volverAsorteoGruupos(torneoId)
+  }
 
+
+  //obtiene los torneos de la categoria del usuario, trae tres objetos, torneos activos, proximos torneos y torneos finalizados
+  @UseGuards(JwtAuthAccessGuard)
+  @Get('ObtenerTorneos')
+  misDatos(@Request() req) {    
+    return this.torneosService.obtenerTorneos(req.user)
+  }
+
+
+  
+  @UseGuards(JwtAuthAccessGuard)
+  @Get('App/byid')
+  @ApiQuery({
+    name: 'id',
+    type: Number,
+    required: true
+  })
+  ObtenerTorneoByIdApp(@Query('id') id) {
+    return this.torneosService.obtenerTorneoByid(id)
   }
 
 
