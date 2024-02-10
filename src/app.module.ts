@@ -32,9 +32,11 @@ import { JornadasModule } from './modules/jornadas/jornadas.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true, // Solo para desarrollo, desactiva en producción  
     }),
+
+   
   
     ConfigModule.forRoot({
-      envFilePath: enviroments[process.env.NODE_ENV ?? "dev"],
+      envFilePath: enviroments[process.env.NODE_ENV ?? ".dev.env"],      
       load: [config],
       isGlobal: true,
       validationSchema: Joi.object({
