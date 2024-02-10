@@ -8,18 +8,7 @@ import { UsuariosModule } from 'src/modules/usuarios/usuarios.module';
 
 @Module({
   imports: [
-    ConfigModule,
-    // TypeOrmModule.forRoot({
-    //   type: 'mysql', // o el tipo de tu base de datos
-    //   host: ConfigService.
-    //   port: configService.get<number>('config.database.port'),
-    //   username: configService.get<string>('config.database.user'),
-    //   password: configService.get<string>('config.database.password'),
-    //   database: configService.get<string>('config.database.dbname'),
-    //   entities: [Usuario],
-    //   synchronize: true, // Solo para desarrollo, desactiva en producción
-    // })
-
+    ConfigModule, 
     TypeOrmModule.forRoot({
       type: 'mysql', // o el tipo de tu base de datos
       host: 'localhost',
@@ -42,14 +31,3 @@ import { UsuariosModule } from 'src/modules/usuarios/usuarios.module';
 export class DatabaseModule { }
 
 
-// inject: [ConfigService],
-// useFactory: async (configService: ConfigService) => ({
-//   type: 'mysql', // o el tipo de tu base de datos
-//   host: configService.get<string>('config.database.hostname'),
-//   port: configService.get<number>('config.database.port'),
-//   username: configService.get<string>('config.database.user'),
-//   password: configService.get<string>('config.database.password'),
-//   database: configService.get<string>('config.database.dbname'),
-//   entities: [Usuario],
-//   synchronize: true, // Solo para desarrollo, desactiva en producción
-// }),

@@ -26,8 +26,8 @@ import { JornadasModule } from './modules/jornadas/jornadas.module';
       type: 'mysql', // o el tipo de tu base de datos
       host: 'localhost',
       port: 3306,
-      username: 'root',
-      password: '',
+      username: 'admin_tenis',
+      password: 'QTCZyH6i',
       database:  'admin_tenis',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true, // Solo para desarrollo, desactiva en producción  
