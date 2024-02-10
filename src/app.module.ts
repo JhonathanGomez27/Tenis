@@ -18,7 +18,7 @@ import { GruposModule } from './modules/grupos/grupos.module';
 import { LlavesModule } from './modules/llaves/llaves.module';
 import { JornadasModule } from './modules/jornadas/jornadas.module';
 
-
+console.log(process.env.NODE_ENV)
 
 @Module({
   imports: [ 
