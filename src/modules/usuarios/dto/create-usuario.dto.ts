@@ -18,10 +18,11 @@ export class CreateUsuarioDto {
     @ApiProperty({
         name: 'correo',
         type: String,
-        required: true
+        required: false
     })
-    @IsEmail()
-    readonly correo: string;
+   // @IsEmail()
+    @IsOptional()
+    readonly correo?: string;
   
     // @IsEnum(['admin', 'user'])
     // readonly rol: 'admin' | 'user';
@@ -29,11 +30,12 @@ export class CreateUsuarioDto {
     @ApiProperty({
         name: 'contrasena',
         type: String,
-        required: true,
+        required: false,
         minLength: 6
     })
-    @MinLength(6)
-    contrasena: string;
+    //@MinLength(6)
+    @IsOptional()
+    contrasena?: string;
         
 
     @ApiProperty({

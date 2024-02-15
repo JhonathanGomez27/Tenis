@@ -26,7 +26,10 @@ export class UsuariosService {
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario | { message: string }> {
     try {
 
-      createUsuarioDto.contrasena = await this.hashingService.hash(createUsuarioDto.contrasena.trim());
+      if (createUsuarioDto.contrasena) {
+        createUsuarioDto.contrasena = await this.hashingService.hash(createUsuarioDto.contrasena.trim());
+      }
+
       const usuario = this.usuarioRepository.create(createUsuarioDto);
       const usuarioGuardado = await this.usuarioRepository.save(usuario);
 
@@ -93,6 +96,10 @@ export class UsuariosService {
 
         if (editUsuarioDto.correo)
           userFound.correo = editUsuarioDto.correo
+
+        if (editUsuarioDto.contrasena) {
+          userFound.contrasena = await this.hashingService.hash(editUsuarioDto.contrasena.trim());
+        }
 
 
         //hacer el update de jugador
@@ -170,13 +177,13 @@ export class UsuariosService {
         contrasena: null
       }
 
-      if(dato.id_jugador === '1'){
+      if (dato.id_jugador === '1') {
         createUsuarioDto.correo = 'admin@admin.com',
-        createUsuarioDto.contrasena = 'Abcd1234.'
+          createUsuarioDto.contrasena = 'Abcd1234.'
         createUsuarioDto.contrasena = await this.hashingService.hash(createUsuarioDto.contrasena.trim());
       }
 
-      
+
       const usuario = this.usuarioRepository.create(createUsuarioDto);
       const usuarioGuardado = await this.usuarioRepository.save(usuario);
 
@@ -191,7 +198,7 @@ export class UsuariosService {
         }
         const jugador = await this.jugadoresService.create(jugadorDto)
       }
-   
+
       usuarios.push(usuarioGuardado)
 
 
