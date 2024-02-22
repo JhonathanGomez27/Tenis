@@ -13,6 +13,7 @@ import { Jornada, TipoJornada } from '../jornadas/entities/jornada.entity';
 import { Inscripcion } from '../inscripciones/entities/inscripcione.entity';
 import { Pareja } from '../parejas/entities/pareja.entity';
 import { Jugador } from '../jugadores/entities/jugadore.entity';
+import { Usuario } from '../usuarios/entities/usuario.entity';
 
 @Injectable()
 export class PartidosService {
@@ -36,18 +37,9 @@ export class PartidosService {
     if (!idTorneo) {
       throw new MiExcepcionPersonalizada('No se Proporciono un id de Torneo', 400);
     }
-
-
-    // const torneo = await manager.findOneOrFail(Torneo, idTorneo, { relations: ['grupos'] });
-
     const torneo = await this.torneoRepository.findOne({
       where: { id: idTorneo }
     });
-
-
-    // return 
-
-
     if (!torneo) {
       throw new MiExcepcionPersonalizada('No se encontro el Torneo', 404);
     }
@@ -1433,6 +1425,36 @@ export class PartidosService {
       potencia *= 2;
     }
     return potencia;
+  }
+
+
+  //Obtener los proximos partidos de un usuario
+  async obtenerProximosPartidos(usuario: Usuario,  /*page: number,limit: number*/ ){
+
+    const jugador = await this.jugadorRepository.findOne({ where: { userid: { id: usuario.id } } })
+
+    if (!jugador) {
+      throw new MiExcepcionPersonalizada('El usuario no es un jugador', 404);
+    }
+
+    // primero los partidos de singles
+
+   //obtener los partidos donde el jugador participe y no hayan finalizado del mas reciente al mas antiguo, para eso se tiene que hacer un or con jugador1 y jugador2
+
+    const partidosSingles = await this.partidoRepository.find({
+      where: [
+        { jugador1: jugador, finalizado: false },
+        { jugador2: jugador, finalizado: false }
+      ],
+      order: { date: 'DESC' },
+      relations: ['jugador1', 'jugador2',  'torneo']
+    })
+        
+    return partidosSingles
+
+    
+
+    
   }
 
 

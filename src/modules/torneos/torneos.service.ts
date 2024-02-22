@@ -764,15 +764,9 @@ export class TorneosService {
   async obtenerAnteriorIdCercano(idActual: number, jornadas: any[]): Promise<number> {
     const idsOrdenados = jornadas
       .map((jornada) => jornada.id)
-      .sort((a, b) => a - b);
+      .sort((a, b) => a - b);  
 
-
-    console.log('ordenados', idsOrdenados, 'actual', idActual)
-
-    const indiceActual = idsOrdenados.indexOf(idActual);
-
-    console.log('indice actual', indiceActual)
-
+    const indiceActual = idsOrdenados.indexOf(idActual); 
     //TODO: si algo se daña fue aqui
     if (indiceActual !== -1 && indiceActual < idsOrdenados.length/* - 1*/) {
       return idsOrdenados[indiceActual - 1];
@@ -1388,12 +1382,56 @@ export class TorneosService {
 
     const torneo = await this.torneoRepository.findOne({
       where: { id: id },
-      relations: ['grupos', 'jornadas', 'partidos', 'llaves']
+      relations: ['grupos', 'jornadas', 'partidos', 'partidos.jugador1', 'partidos.jugador2', 'partidos.pareja1', 'partidos.pareja2', 'llaves', 'partidos.grupo']
     })
 
     if (!torneo) {
       throw new MiExcepcionPersonalizada('No se encontro el Torneo', 404);
     }
+
+   
+
+    const partidosFormateados = []
+
+    for (const partido of torneo.partidos) {
+      console.log(partido)
+
+      let partidoFormateado = {
+        id: partido.id,
+        fase: partido.fase,
+        resultado: partido.resultado,
+        date: partido.date,
+        jornada: partido.jornada,
+        grupo: {
+          id: partido.grupo ? partido.grupo.id : undefined,   //partido.jugador1 ? partido.jugador1.id : undefined,
+          nombre_grupo: partido.grupo ? partido.grupo.nombre_grupo : undefined
+        },
+        jugador1: {
+          id: partido.jugador1 ? partido.jugador1.id : undefined,
+          nombre: partido.jugador1 ? partido.jugador1.nombre : undefined,
+        },
+        jugador2: {
+          id: partido.jugador2 ? partido.jugador2.id : undefined,
+          nombre: partido.jugador2 ? partido.jugador2.nombre : undefined,
+        },
+        pareja1: {
+          id: partido.pareja1 ? partido.pareja1.id : undefined,
+          nombre: partido.pareja1
+            ? partido.pareja1.jugador1.nombre + ' - ' + partido.pareja1.jugador2.nombre
+            : undefined,
+        },
+        pareja2: {
+          id: partido.pareja2 ? partido.pareja2.id : undefined,
+          nombre: partido.pareja2
+            ? partido.pareja2.jugador1.nombre + ' - ' + partido.pareja2.jugador2.nombre
+            : undefined,
+        }
+      }
+      partidosFormateados.push(partidoFormateado)
+
+    }
+
+    torneo.partidos = partidosFormateados
 
     return torneo
    

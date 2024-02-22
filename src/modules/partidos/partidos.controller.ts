@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Request } from '@nestjs/common';
 import { PartidosService } from './partidos.service';
 import { CreatePartidoDto } from './dto/create-partido.dto';
 import { UpdatePartidoDto } from './dto/update-partido.dto';
 import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ResultadoPartidoDTO } from './dto/resultado.dto';
+import { JwtAuthAccessGuard } from '../iam/guards/jwt-auth.guard';
+import { FiltersPaginatedQuery } from 'src/common/FiltersPaginatedQuery';
 
 @ApiTags('partidos')
 @Controller('partidos')
@@ -49,6 +51,19 @@ export class PartidosController {
     return this.partidosService.sortearSiguienteFase(torneoId)
 
   }
+
+
+ 
+
+
+  @UseGuards(JwtAuthAccessGuard)
+  //@ApiQuery({ name: 'page', type: Number, required: true })
+ // @ApiQuery({ name: 'limit', type: Number, required: true })
+  @Get('App/ProximosPartidos')
+  obtenerProximosPartidos(@Request() req, /* @Query() query: FiltersPaginatedQuery*/){
+    return this.partidosService.obtenerProximosPartidos(req.user, /*query.page, query.limit*/)
+  }
+ 
 
   
 }
