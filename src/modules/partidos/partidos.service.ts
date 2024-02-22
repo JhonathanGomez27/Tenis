@@ -1449,8 +1449,10 @@ export class PartidosService {
       order: { date: 'DESC' },
       relations: ['jugador1', 'jugador2',  'torneo']
     })
+
+
         
-    return partidosSingles
+    return { partidosSingles: partidosSingles, partidosDobles: [] }
 
     
 
