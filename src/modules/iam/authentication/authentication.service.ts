@@ -3,6 +3,9 @@ import { AuthenticationCommonService } from "./authentication.common.service";
 import { SigninPayload } from "../models/signin.model";
 import { PayloadToken } from "../models/token.model";
 import { handleDbError } from "src/utils/error.message";
+import { Jugador } from "src/modules/jugadores/entities/jugadore.entity";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 
 
 
@@ -10,6 +13,7 @@ import { handleDbError } from "src/utils/error.message";
 export class AuthenticationService {
     constructor(
         private readonly authcommonService: AuthenticationCommonService,
+        @InjectRepository(Jugador) private jugadorRepository: Repository<Jugador>,
 
     ) { }
 
@@ -23,11 +27,22 @@ export class AuthenticationService {
 
             payload.contrasena = undefined;
 
+            const user = await this.authcommonService.findUserAutenticated(payload.id);
+            let jugador = null;
+
+
+            if(user.rol === 'user'){
+                jugador = await this.jugadorRepository.findOne({where: {userid: {id: user.id}}})
+            }
+
+
+
             return {
                 message: "Acceso autorizado",
                 accessToken,
                 refreshToken,
-                user: payload
+                user: payload,
+                jugador: jugador
             };
         } catch (error) {
             console.log('error', error)

@@ -12,10 +12,11 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtAccessTokenStrategy } from './strategies/jwt-auth-access.strategy';
 import { JwtRefreshTokenStrategy } from './strategies/jwt-auth-refresh.strategy ';
 import { AuthenticationController } from './authentication/authentication.controller';
+import { Jugador } from '../jugadores/entities/jugadore.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Usuario]),
+        TypeOrmModule.forFeature([Usuario, Jugador]),
         JwtModule.registerAsync({
             imports: [ConfigModule],
             inject: [config.KEY],
