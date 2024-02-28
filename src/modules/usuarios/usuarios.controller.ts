@@ -44,6 +44,13 @@ export class UsuariosController {
     return this.usuariosService.cargarHistoricos(fileBuffer);
   }
 
+  @Post('/actualizarHistoricos')
+  @UseInterceptors(FileInterceptor('file'))
+  async actualizarHistoricos(@UploadedFile() file: Express.Multer.File) {
+    const fileBuffer = file.buffer; // Accede al buffer del archivo
+    return this.usuariosService.ActualizarNombresYApellidos(fileBuffer);
+  }
+
 
 
 

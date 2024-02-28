@@ -17,6 +17,9 @@ export class Usuario {
   @Column()
   nombre: string;
 
+  @Column()
+  apellido: string;
+
   @Column({
     type: 'enum',
     enum: rolEnum,

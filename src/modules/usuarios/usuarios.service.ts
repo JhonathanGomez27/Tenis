@@ -35,7 +35,7 @@ export class UsuariosService {
 
       if (usuarioGuardado.rol === rolEnum.USER) {
         const jugadorDto = {
-          nombre: createUsuarioDto.nombre,
+          nombre: createUsuarioDto.nombre + ' ' + createUsuarioDto.apellido,
           //ranking: createUsuarioDto.ranking,
           rama: createUsuarioDto.rama,
           categoria: createUsuarioDto.categoria,
@@ -56,10 +56,7 @@ export class UsuariosService {
   }
 
 
-  async editarInfo(id: number, editUsuarioDto: UpdateUsuarioDto) {
-
-
-    console.log('editUsuarioDto', editUsuarioDto)
+  async editarInfo(id: number, editUsuarioDto: UpdateUsuarioDto) {   
 
     try {
       //buscar si existe
@@ -89,8 +86,13 @@ export class UsuariosService {
           jugador.ranking = editUsuarioDto.ranking
 
 
+        if (editUsuarioDto.apellido) {
+          userFound.nombre = editUsuarioDto.apellido
+        }
+
+
         if (editUsuarioDto.nombre) {
-          jugador.nombre = editUsuarioDto.nombre
+          jugador.nombre = editUsuarioDto.nombre + ' ' + editUsuarioDto.apellido
           userFound.nombre = editUsuarioDto.nombre
         }
 
@@ -225,6 +227,48 @@ export class UsuariosService {
         }
       });
     });
+  }
+
+
+  async ActualizarNombresYApellidos(fileBuffer: Buffer) {
+
+    const results = [];
+    const csvString = fileBuffer.toString('utf-8');
+
+    const jsonData = await this.parseCSVToJson(csvString);
+    const usuarios = []
+
+    for (const dato of jsonData) {
+
+      const user = await this.usuarioRepository.findOneBy({ id: dato.id_jugador })
+
+      if (user) {
+        user.nombre = dato.nombre
+        user.apellido = dato.Apellido
+        await this.usuarioRepository.save(user);
+
+        //actualizar el nombre del jugador
+
+        const jugador = await this.jugadoresService.getJugadorByUserId(user);
+        jugador.nombre = dato.nombre + ' ' + dato.Apellido
+        await this.jugadoresService.actualizarJugador(jugador);
+
+        usuarios.push(user)
+      }
+
+
+
+
+    }
+
+    return{
+      message: 'Usuarios actualizados correctamente' + usuarios.length,
+      usuarios
+    }
+
+
+
+
   }
 
 

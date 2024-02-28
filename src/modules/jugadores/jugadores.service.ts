@@ -173,7 +173,7 @@ export class JugadoresService {
       throw new NotFoundException('El jugador buscado no existe')
 
     jugador.userid.contrasena = undefined
-    jugador.userid.nombre = undefined
+    //jugador.userid.nombre = undefined
 
     return jugador;
   }
@@ -188,7 +188,7 @@ export class JugadoresService {
       throw new NotFoundException('El jugador buscado no existe')
 
     jugador.userid.contrasena = undefined
-    jugador.userid.nombre = undefined
+    //jugador.userid.nombre = undefined
 
     return jugador
   }

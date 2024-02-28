@@ -1382,7 +1382,7 @@ export class TorneosService {
 
     const torneo = await this.torneoRepository.findOne({
       where: { id: id },
-      relations: ['grupos', 'jornadas', 'partidos', 'partidos.jugador1', 'partidos.jugador2', 'partidos.pareja1', 'partidos.pareja2', 'llaves', 'partidos.grupo']
+      relations: ['grupos', 'jornadas', 'partidos', 'partidos.jugador1', 'partidos.jugador2', 'partidos.pareja1', 'partidos.pareja2', 'llaves', 'partidos.grupo', 'inscripciones', 'inscripciones.jugador', 'inscripciones.pareja']
     })
 
     if (!torneo) {
@@ -1394,7 +1394,7 @@ export class TorneosService {
     const partidosFormateados = []
 
     for (const partido of torneo.partidos) {
-      console.log(partido)
+      console.log(partido.grupo)
 
       let partidoFormateado = {
         id: partido.id,

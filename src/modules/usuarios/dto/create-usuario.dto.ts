@@ -13,6 +13,14 @@ export class CreateUsuarioDto {
     })
     @IsString()
     readonly nombre: string;
+
+    @ApiProperty({
+        name: 'apellido',
+        type: String,
+        required: true
+    })
+    @IsString()
+    readonly apellido: string;
   
 
     @ApiProperty({
