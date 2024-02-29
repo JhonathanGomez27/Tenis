@@ -87,7 +87,7 @@ export class UsuariosService {
 
 
         if (editUsuarioDto.apellido) {
-          userFound.nombre = editUsuarioDto.apellido
+          userFound.apellido = editUsuarioDto.apellido
         }
 
 
