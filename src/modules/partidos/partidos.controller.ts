@@ -63,6 +63,16 @@ export class PartidosController {
   obtenerProximosPartidos(@Request() req, /* @Query() query: FiltersPaginatedQuery*/){
     return this.partidosService.obtenerProximosPartidos(req.user, /*query.page, query.limit*/)
   }
+
+  @Patch('/EditarJugador1/:idPartido/:idJugador')
+  editarJugador1(@Param('idPartido') idPartido: number, @Param('idJugador') idJugador: number){
+    return this.partidosService.editarJugador1Partido(idPartido, idJugador)
+  }
+
+  @Patch('/EditarJugador2/:idPartido/:idJugador')
+  editarJugador2(@Param('idPartido') idPartido: number, @Param('idJugador') idJugador: number){
+    return this.partidosService.editarJugador2Partido(idPartido, idJugador)
+  }
  
 
   

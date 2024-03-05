@@ -1459,6 +1459,38 @@ export class PartidosService {
     
   }
 
+  async editarJugador1Partido(idPartido: number, idJugador: number) {
+    const partido = await this.partidoRepository.findOne({ where: { id: idPartido } })
+    if (!partido) {
+      throw new MiExcepcionPersonalizada('El partido no existe', 404);
+    }
+    const jugador = await this.jugadorRepository.findOne({ where: { id: idJugador } })
+    if (!jugador) {
+      throw new MiExcepcionPersonalizada('El jugador no existe', 404);
+    }
+    partido.jugador1 = jugador
+    await this.partidoRepository.save(partido)
+    return {
+      message: 'Jugador 1 del partido editado con exito'
+    }
+  }
+
+  async editarJugador2Partido(idPartido: number, idJugador: number) {
+    const partido = await this.partidoRepository.findOne({ where: { id: idPartido } })
+    if (!partido) {
+      throw new MiExcepcionPersonalizada('El partido no existe', 404);
+    }
+    const jugador = await this.jugadorRepository.findOne({ where: { id: idJugador } })
+    if (!jugador) {
+      throw new MiExcepcionPersonalizada('El jugador no existe', 404);
+    }
+    partido.jugador2 = jugador
+    await this.partidoRepository.save(partido)
+    return {
+      message: 'Jugador 2 del partido editado con exito'
+    }
+  }
+
 
 
 
