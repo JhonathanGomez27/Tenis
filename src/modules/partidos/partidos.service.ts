@@ -1171,19 +1171,19 @@ export class PartidosService {
 
         let ranking;
         if (torneo.tipo_torneo === 'regular') {
-          ranking = await this.actualizarRanking(torneo)          
+          ranking = await this.actualizarRanking(torneo)
         }
         const partido = partidosJugadosLlaves[0]
         let ganadorNombre = '';
         if (partido.resultado.ganador.tipo === "jugador") {
           if (partido.jugador1 && partido.jugador1.id === partido.resultado.ganador.id) {
-            
+
             ganadorNombre = partido.jugador1.nombre;
           } else if (partido.jugador2 && partido.jugador2.id === partido.resultado.ganador.id) {
             ganadorNombre = partido.jugador2.nombre;
           }
         } else if (partido.resultado.ganador.tipo === "pareja") {
-         
+
           if (partido.pareja1 && partido.pareja1.id === partido.resultado.ganador.id) {
             ganadorNombre = partido.pareja1.jugador1.nombre + ' - ' + partido.pareja1.jugador2.nombre
           } else if (partido.pareja2 && partido.pareja2.id === partido.resultado.ganador.id) {
@@ -1201,7 +1201,107 @@ export class PartidosService {
   }
 
 
-  // astnc sortearSiguienteFase
+  async obtenerTodasLasPoscionesFaseGrupos(torneoId: number) {
+    if (!torneoId) {
+      throw new MiExcepcionPersonalizada('No se Proporciono un id del Torneo', 404);
+    }
+    const torneo = await this.torneoRepository.findOne({
+      where: { id: torneoId }
+    })
+
+    if (!torneo) {
+      throw new MiExcepcionPersonalizada('El torneo buscado No existe', 404);
+    }
+
+    if (torneo.estado !== 'En Proceso') {
+      throw new MiExcepcionPersonalizada(`El torneo buscado esta en estado ${torneo.estado} por lo cual no se puede sortear la siguiente fase`, 409);
+    }
+
+    const grupos = await this.grupoRepository.find({
+      where: { torneo: torneo },
+      relations: ['partidos'],
+    });
+
+    const participantesOrdenados = [];
+    for (const grupo of grupos) {
+      //const participantesGrupo = grupo.participantes || [];
+      const participantesGrupo = grupo.posiciones || [];
+
+      const participantesOrdenadosGrupo = participantesGrupo
+        .sort((a, b) => {
+          // Lógica de ordenación basada en los resultados de la fase de grupos
+          if (b.puntos !== a.puntos) {
+
+            return b.puntos - a.puntos;
+          }
+          if (b.puntosSets !== a.puntosSets) {
+
+            return b.puntosSets - a.puntosSets;
+          }
+          if (b.setsGanados !== a.setsGanados) {
+
+            return b.setsGanados - a.setsGanados;
+          }
+          return a.setsPerdidos - b.setsPerdidos;
+        })
+        .slice(0, 2); // Tomar los dos mejores participantes
+
+      participantesOrdenados.push(...participantesOrdenadosGrupo);
+    }
+
+    //return participantesOrdenados
+
+    // Ordenar los participantes globales para sortear la fase de llaves
+    const participantesOrdenadosGlobal = participantesOrdenados.sort((a, b) => {
+      // Lógica de ordenación basada en los resultados de la fase de grupos
+      if (b.puntos !== a.puntos) {
+        return b.puntos - a.puntos;
+      }
+      if (b.puntosSets !== a.puntosSets) {
+        return b.puntosSets - a.puntosSets;
+      }
+      if (b.setsGanados !== a.setsGanados) {
+        return b.setsGanados - a.setsGanados;
+      }
+      return a.setsPerdidos - b.setsPerdidos;
+    });
+
+    //saber quienes son, el nombre de los participantes
+
+    const participantesOrdenadosGlobalConNombre = []
+
+    for (const participante of participantesOrdenadosGlobal) {
+      if (torneo.modalidad === 'singles') {
+        let jugador = {
+          "nombre": "",
+          "puntos": 0,
+          "puntosSets": 0,
+          "setsGanados": 0,
+          "setsPerdidos": 0
+        }
+        const jg = await this.jugadorRepository.findOne({
+          where: { id: participante.id },
+          select: ['nombre']
+        })
+        console.log(jg)
+        jugador['nombre'] = jg.nombre
+        jugador.puntos = participante.puntos
+        jugador.puntosSets = participante.puntosSets
+        jugador.setsGanados = participante.setsGanados
+        jugador.setsPerdidos = participante.setsPerdidos
+        participantesOrdenadosGlobalConNombre.push(jugador)
+      } else if (torneo.modalidad === 'dobles') {
+        const pareja = await this.parejaRepository.findOne({
+          where: { id: participante.id }
+        })
+        participantesOrdenadosGlobalConNombre.push(pareja)
+      }
+    }
+
+    return participantesOrdenadosGlobalConNombre;
+
+
+  }
 
 
   organizarLlaves(participantesOrdenados) {
@@ -1325,7 +1425,7 @@ export class PartidosService {
       }
     }
 
-    if(fases.length > 3){
+    if (fases.length > 3) {
       const cuartos = await this.partidoRepository.find({
         where: { torneo: torneo, fase: 'cuartos' },
         relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2']
@@ -1353,35 +1453,35 @@ export class PartidosService {
           } else if (modalidadTorneo === 'singles') {
             await this.actualizarRankingJugador(quintoRanking, 5)
           }
-        }       
-        rankingGrupos = 6 
+        }
+        rankingGrupos = 6
       }
     }
 
 
     const inscripciones = await this.inscripcionRepository.find({
-      where: {torneo: torneo},
-      relations: ['jugador','pareja']
+      where: { torneo: torneo },
+      relations: ['jugador', 'pareja']
     })
 
 
     for (const inscripcion of inscripciones) {
-      if(modalidadTorneo === 'dobles'){
-        if(!yaConRanking.includes(inscripcion.pareja.id)){
+      if (modalidadTorneo === 'dobles') {
+        if (!yaConRanking.includes(inscripcion.pareja.id)) {
           await this.actualizarrankingPareja(inscripcion.pareja.id, rankingGrupos)
           yaConRanking.push(inscripcion.pareja.id)
         }
-      }else  if(modalidadTorneo === 'singles'){
-        if(!yaConRanking.includes(inscripcion.jugador.id)){
+      } else if (modalidadTorneo === 'singles') {
+        if (!yaConRanking.includes(inscripcion.jugador.id)) {
           await this.actualizarRankingJugador(inscripcion.jugador.id, rankingGrupos)
           yaConRanking.push(inscripcion.jugador.id)
         }
       }
-      
+
     }
 
 
-     
+
 
 
     return yaConRanking
@@ -1392,7 +1492,7 @@ export class PartidosService {
 
   async actualizarrankingPareja(idpareja: number, ranking: number) {
     const pareja = await this.parejaRepository.findOne({
-      where: {id: idpareja}
+      where: { id: idpareja }
     })
     pareja.ranking = ranking
     await this.parejaRepository.save(pareja)
@@ -1402,7 +1502,7 @@ export class PartidosService {
 
   async actualizarRankingJugador(idjugador: number, ranking: number) {
     const jugador = await this.jugadorRepository.findOne({
-      where: {id: idjugador}
+      where: { id: idjugador }
     })
     jugador.ranking = ranking
     await this.jugadorRepository.save(jugador)
@@ -1429,7 +1529,7 @@ export class PartidosService {
 
 
   //Obtener los proximos partidos de un usuario
-  async obtenerProximosPartidos(usuario: Usuario,  /*page: number,limit: number*/ ){
+  async obtenerProximosPartidos(usuario: Usuario,  /*page: number,limit: number*/) {
 
     const jugador = await this.jugadorRepository.findOne({ where: { userid: { id: usuario.id } } })
 
@@ -1439,7 +1539,7 @@ export class PartidosService {
 
     // primero los partidos de singles
 
-   //obtener los partidos donde el jugador participe y no hayan finalizado del mas reciente al mas antiguo, para eso se tiene que hacer un or con jugador1 y jugador2
+    //obtener los partidos donde el jugador participe y no hayan finalizado del mas reciente al mas antiguo, para eso se tiene que hacer un or con jugador1 y jugador2
 
     const partidosSingles = await this.partidoRepository.find({
       where: [
@@ -1447,16 +1547,16 @@ export class PartidosService {
         { jugador2: jugador, finalizado: false }
       ],
       order: { date: 'DESC' },
-      relations: ['jugador1', 'jugador2',  'torneo']
+      relations: ['jugador1', 'jugador2', 'torneo']
     })
 
 
-        
+
     return { partidosSingles: partidosSingles, partidosDobles: [] }
 
-    
 
-    
+
+
   }
 
   async editarJugador1Partido(idPartido: number, idJugador: number) {

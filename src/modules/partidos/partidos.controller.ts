@@ -73,6 +73,11 @@ export class PartidosController {
   editarJugador2(@Param('idPartido') idPartido: number, @Param('idJugador') idJugador: number){
     return this.partidosService.editarJugador2Partido(idPartido, idJugador)
   }
+
+  @Get('PosicionesGlobalesGrupos/:idTorneo')
+  obtenerPosicionesGlobalesGrupos(@Param('idTorneo') idTorneo: number){
+    return this.partidosService.obtenerTodasLasPoscionesFaseGrupos(idTorneo)
+  }
  
 
   
