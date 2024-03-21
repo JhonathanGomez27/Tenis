@@ -766,12 +766,16 @@ export class PartidosService {
           posicion.puntos += 1;
           posicion.setsGanados += ganador.setsGanados;
           posicion.setsPerdidos += ganador.setsPerdidos;
+          posicion.juegosGanados += 1;
+          posicion.juegosPerdidos += 0
           posicion.puntosSets += ganador.puntosSets;
         }
         if (posicion.id === perdedorId) {
           posicion.puntos += 0;
           posicion.setsGanados += perdedor.setsGanados;
           posicion.setsPerdidos += perdedor.setsPerdidos;
+          posicion.juegosGanados += 0;
+          posicion.juegosPerdidos += 1;
           posicion.puntosSets += perdedor.puntosSets;
         }
       }
@@ -1234,18 +1238,24 @@ export class PartidosService {
 
             return b.puntos - a.puntos;
           }
-          if (b.puntosSets !== a.puntosSets) {
+          //porcentaje de sets ganados osea sets ganados/sets perdidos
+          //sacar el porcentaje de sets ganados de cada participante
 
-            return b.puntosSets - a.puntosSets;
+          let porcentajeSetsGanadosA = a.setsGanados / a.setsPerdidos
+          let porcentajeSetsGanadosB = b.setsGanados / b.setsPerdidos
+          if (porcentajeSetsGanadosA !== porcentajeSetsGanadosB) {
+            return porcentajeSetsGanadosB - porcentajeSetsGanadosA;
           }
-          if (b.setsGanados !== a.setsGanados) {
-
-            return b.setsGanados - a.setsGanados;
+          //porcentaje de juegos ganados osea juegos ganados/juegos perdidos
+          //sacar el porcentaje de juegos ganados de cada participante
+          let porcentajeJuegosGanadosA = a.juegosGanados / a.juegosPerdidos
+          let porcentajeJuegosGanadosB = b.juegosGanados / b.juegosPerdidos
+          if (porcentajeJuegosGanadosA !== porcentajeJuegosGanadosB) {
+            return porcentajeJuegosGanadosB - porcentajeJuegosGanadosA;
           }
-          return a.setsPerdidos - b.setsPerdidos;
-        })
-        .slice(0, 2); // Tomar los dos mejores participantes
-
+          return a.juegosPerdidos - b.juegosPerdidos;
+        }
+        ).slice(0, 2); // Tomar los dos mejores participantes 
       participantesOrdenados.push(...participantesOrdenadosGrupo);
     }
 
@@ -1257,14 +1267,23 @@ export class PartidosService {
       if (b.puntos !== a.puntos) {
         return b.puntos - a.puntos;
       }
-      if (b.puntosSets !== a.puntosSets) {
-        return b.puntosSets - a.puntosSets;
+      //porcentaje de sets ganados osea sets ganados/sets perdidos
+      //sacar el porcentaje de sets ganados de cada participante
+
+      let porcentajeSetsGanadosA = a.setsGanados / a.setsPerdidos
+      let porcentajeSetsGanadosB = b.setsGanados / b.setsPerdidos
+      if (porcentajeSetsGanadosA !== porcentajeSetsGanadosB) {
+        return porcentajeSetsGanadosB - porcentajeSetsGanadosA;
       }
-      if (b.setsGanados !== a.setsGanados) {
-        return b.setsGanados - a.setsGanados;
+      //porcentaje de juegos ganados osea juegos ganados/juegos perdidos
+      //sacar el porcentaje de juegos ganados de cada participante
+      let porcentajeJuegosGanadosA = a.juegosGanados / a.juegosPerdidos
+      let porcentajeJuegosGanadosB = b.juegosGanados / b.juegosPerdidos
+      if (porcentajeJuegosGanadosA !== porcentajeJuegosGanadosB) {
+        return porcentajeJuegosGanadosB - porcentajeJuegosGanadosA;
       }
-      return a.setsPerdidos - b.setsPerdidos;
-    });
+      return a.juegosPerdidos - b.juegosPerdidos;
+    });  
 
     //saber quienes son, el nombre de los participantes
 
@@ -1275,9 +1294,9 @@ export class PartidosService {
         let jugador = {
           "nombre": "",
           "puntos": 0,
-          "puntosSets": 0,
-          "setsGanados": 0,
-          "setsPerdidos": 0
+          "porcentajeSetsGanados": 0,
+          "porcentajeJuegosGanados": 0,   
+          "juegosPerdidos": 0,
         }
         const jg = await this.jugadorRepository.findOne({
           where: { id: participante.id },
@@ -1286,9 +1305,9 @@ export class PartidosService {
         console.log(jg)
         jugador['nombre'] = jg.nombre
         jugador.puntos = participante.puntos
-        jugador.puntosSets = participante.puntosSets
-        jugador.setsGanados = participante.setsGanados
-        jugador.setsPerdidos = participante.setsPerdidos
+        jugador.porcentajeSetsGanados = participante.setsGanados / participante.setsPerdidos
+        jugador.porcentajeJuegosGanados = participante.juegosGanados / participante.juegosPerdidos
+        jugador.juegosPerdidos = participante.juegosPerdidos
         participantesOrdenadosGlobalConNombre.push(jugador)
       } else if (torneo.modalidad === 'dobles') {
         const pareja = await this.parejaRepository.findOne({
