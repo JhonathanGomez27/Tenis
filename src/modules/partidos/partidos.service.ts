@@ -1136,6 +1136,8 @@ export class PartidosService {
           jugador2: jugador2
         })
         const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+        torneo.fase_actual = 'final'
+        await this.torneoRepository.save(torneo)
         return llaveGuardada
       } else {
         const pareja1 = ganadores[0].id
@@ -1154,8 +1156,13 @@ export class PartidosService {
           pareja2: pareja2
         })
         const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+        torneo.fase_actual = 'final';
+        await this.torneoRepository.save(torneo);
+
         return llaveGuardada
       }
+     
+  
     }
 
     // Crear un mapa para almacenar las nuevas llaves y evitar duplicados
@@ -1185,6 +1192,12 @@ export class PartidosService {
 
           // Buscar la llave que tenga el proximoRivalIdentificador
           const llaveProximoRival = llaves.find(llave => llave.identificador === proximoRivalIdentificador);
+          //return llaveProximoRival
+          const proximoRivalGanador1 = ganadores.find(gana => gana.id === llaveProximoRival.jugador1.id)
+          const proximoRivalGanador2 = ganadores.find(gana => gana.id === llaveProximoRival.jugador2.id)
+          
+          const proximoRivalGanador = proximoRivalGanador1 || proximoRivalGanador2
+          
 
           // Verificar si se encontró la llave del próximo rival
           if (llaveProximoRival) {
@@ -1198,20 +1211,22 @@ export class PartidosService {
               jugador2 = ganador.id;
             }*/
 
-            if (llaveParticipacion.jugador1 && llaveParticipacion.jugador1.id === ganador.id) {
+            if (llaveParticipacion.jugador1 && llaveParticipacion.jugador1.id === ganador.id) {              
               jugador1 = ganador.id;
-              if (llaveProximoRival.jugador1 && llaveProximoRival.jugador1.id !== ganador.id) {
-                jugador2 =llaveProximoRival.jugador1.id;
+              jugador2 = proximoRivalGanador.id;
+              /*if (llaveProximoRival.jugador1 && llaveProximoRival.jugador1.id === proximoRivalGanador.id) {
+                jugador2 = proximoRivalGanador.id//llaveProximoRival.jugador1.id;//llaveProximoRival.jugador1.id;
               } else {
-                jugador2 = llaveProximoRival.jugador2.id;
-              }
+                jugador2 = llaveProximoRival.jugador2.id;//llaveProximoRival.jugador2.id;
+              }*/
             } else {
               jugador2 = ganador.id;
-              if (llaveProximoRival.jugador1 && llaveProximoRival.jugador1.id !== ganador.id) {
-                jugador1 = llaveProximoRival.jugador1.id;
+              jugador1 = proximoRivalGanador.id;
+              /*if (llaveProximoRival.jugador1 && llaveProximoRival.jugador1.id === proximoRivalGanador.id) {
+                jugador1 = llaveProximoRival.jugador1.id; //llaveProximoRival.jugador1.id;
               } else {
-                jugador1 = llaveProximoRival.jugador2.id;
-              }
+                jugador1 = llaveProximoRival.jugador2.id;//llaveProximoRival.jugador2.id;
+              }*/
             }
 
             // Verificar si se encontró al otro participante
@@ -1321,7 +1336,7 @@ export class PartidosService {
 
     // Convertir el mapa de nuevas llaves a un arreglo
     const nuevasLlaves = Array.from(nuevasLlavesMap.values());
-    return nuevasLlaves;
+    //return nuevasLlaves;
 
     // Asignar identificadores y próximos rivales identificadores a las nuevas llaves
     let identificadorIzquierda = 1;
