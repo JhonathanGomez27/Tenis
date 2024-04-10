@@ -37,8 +37,14 @@ export class Llave {
     @ManyToOne(() => Jugador, { nullable: true })
     @JoinColumn({ name: 'jugador2Id' })
     jugador2: Jugador;
-
-
+  
+    @Column({ nullable: true })
+    identificador: number;
     
+    @Column({ nullable: true })
+    proximoRivalIdentificador: number;
+
+    @Column({ nullable: true })
+    lado: 'izquierda' | 'derecha';
 
 }

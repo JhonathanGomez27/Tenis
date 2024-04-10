@@ -17,26 +17,28 @@ import { InscripcionesModule } from './modules/inscripciones/inscripciones.modul
 import { GruposModule } from './modules/grupos/grupos.module';
 import { LlavesModule } from './modules/llaves/llaves.module';
 import { JornadasModule } from './modules/jornadas/jornadas.module';
+import { BracketModule } from './modules/bracket/bracket.module';
 
 console.log(process.env.NODE_ENV)
 
 @Module({
-  imports: [ 
+  imports: [
+    BracketModule,
     TypeOrmModule.forRoot({
       type: 'mysql', // o el tipo de tu base de datos
       host: 'localhost',
       port: 3306,
       username: 'admin_tenis',
       password: 'QTCZyH6i',
-      database:  'admin_tenis',
+      database: 'admin_tenis',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true, // Solo para desarrollo, desactiva en producción  
     }),
 
-   
-  
+
+
     ConfigModule.forRoot({
-      envFilePath: enviroments[process.env.NODE_ENV ?? ".dev.env"],      
+      envFilePath: enviroments[process.env.NODE_ENV ?? ".dev.env"],
       load: [config],
       isGlobal: true,
       validationSchema: Joi.object({
@@ -44,7 +46,7 @@ console.log(process.env.NODE_ENV)
         DATABASE_PORT: Joi.number().required(),
       })
     }),
-   
+
     UsuariosModule,
     IamModule,
     JugadoresModule,
@@ -55,10 +57,10 @@ console.log(process.env.NODE_ENV)
     GruposModule,
     LlavesModule,
     JornadasModule
-   
-    
+
+
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

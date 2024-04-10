@@ -171,9 +171,10 @@ export class UsuariosService {
       } else if (dato.rama === '2') {
         dato.rama = 'femenina'
       }
-
+      console.log(dato)
       const createUsuarioDto = {
         nombre: dato.nombre,
+        apellido: dato.Apellido,
         rol: rolEnum.USER,
         correo: null,
         contrasena: null
@@ -191,7 +192,7 @@ export class UsuariosService {
 
       if (usuarioGuardado.rol === rolEnum.USER) {
         const jugadorDto = {
-          nombre: createUsuarioDto.nombre,
+          nombre: createUsuarioDto.nombre + ' ' + createUsuarioDto.apellido,
           //ranking: createUsuarioDto.ranking,
           rama: dato.rama,
           categoria: categoria.A,

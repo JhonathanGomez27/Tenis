@@ -31,6 +31,57 @@ export class PartidosService {
 
   ) { }
 
+  generarBracketsPredefinidos(fase: string) {
+    // Lógica para generar los brackets predefinidos según la fase
+    const brackets = [];
+
+    // Ejemplo: Generar brackets para cuartos de final
+    if (fase === 'cuartos') {
+      // Lado A
+      brackets.push({ fase, lado: 'izquierda', participante1: 1, participante2: 8, identificador: 1, proximoRival: 2 });
+      brackets.push({ fase, lado: 'izquierda', participante1: 4, participante2: 5, identificador: 2, proximoRival: 1 });
+      // Lado B
+      brackets.push({ fase, lado: 'derecha', participante1: 2, participante2: 7, identificador: 3, proximoRival: 4 });
+      brackets.push({ fase, lado: 'derecha', participante1: 3, participante2: 6, identificador: 4, proximoRival: 3 });
+    }
+    //caso de octavos
+    if (fase === 'octavos') {
+      // Lado A
+      brackets.push({ fase, lado: 'izquierda', participante1: 1, participante2: 16, identificador: 1, proximoRival: 2 });
+      brackets.push({ fase, lado: 'izquierda', participante1: 8, participante2: 9, identificador: 2, proximoRival: 1 });
+      brackets.push({ fase, lado: 'izquierda', participante1: 4, participante2: 13, identificador: 3, proximoRival: 4 });
+      brackets.push({ fase, lado: 'izquierda', participante1: 5, participante2: 12, identificador: 4, proximoRival: 3 });
+      // Lado B
+      brackets.push({ fase, lado: 'derecha', participante1: 2, participante2: 15, identificador: 5, proximoRival: 6 });
+      brackets.push({ fase, lado: 'derecha', participante1: 7, participante2: 10, identificador: 6, proximoRival: 5 });
+      brackets.push({ fase, lado: 'derecha', participante1: 3, participante2: 14, identificador: 7, proximoRival: 8 });
+      brackets.push({ fase, lado: 'derecha', participante1: 6, participante2: 11, identificador: 8, proximoRival: 7 });
+    }
+
+    //dieciseisavos
+    if (fase === 'dieciseisavos') {
+      // Lado A
+      brackets.push({ fase, lado: 'izquierda', participante1: 1, participante2: 32, identificador: 1, proximoRival: 2 });
+      brackets.push({ fase, lado: 'izquierda', participante1: 16, participante2: 17, identificador: 2, proximoRival: 1 });
+      brackets.push({ fase, lado: 'izquierda', participante1: 8, participante2: 25, identificador: 3, proximoRival: 4 });
+      brackets.push({ fase, lado: 'izquierda', participante1: 9, participante2: 24, identificador: 4, proximoRival: 3 });
+      brackets.push({ fase, lado: 'izquierda', participante1: 4, participante2: 29, identificador: 5, proximoRival: 6 });
+      brackets.push({ fase, lado: 'izquierda', participante1: 13, participante2: 20, identificador: 6, proximoRival: 5 });
+      brackets.push({ fase, lado: 'izquierda', participante1: 5, participante2: 28, identificador: 7, proximoRival: 8 });
+      brackets.push({ fase, lado: 'izquierda', participante1: 12, participante2: 21, identificador: 8, proximoRival: 7 });
+      // Lado B
+      brackets.push({ fase, lado: 'derecha', participante1: 2, participante2: 31, identificador: 9, proximoRival: 10 });
+      brackets.push({ fase, lado: 'derecha', participante1: 15, participante2: 18, identificador: 10, proximoRival: 9 });
+      brackets.push({ fase, lado: 'derecha', participante1: 7, participante2: 26, identificador: 11, proximoRival: 12 });
+      brackets.push({ fase, lado: 'derecha', participante1: 10, participante2: 23, identificador: 12, proximoRival: 11 });
+      brackets.push({ fase, lado: 'derecha', participante1: 3, participante2: 30, identificador: 13, proximoRival: 14 });
+      brackets.push({ fase, lado: 'derecha', participante1: 14, participante2: 19, identificador: 14, proximoRival: 13 });
+      brackets.push({ fase, lado: 'derecha', participante1: 6, participante2: 27, identificador: 15, proximoRival: 16 });
+      brackets.push({ fase, lado: 'derecha', participante1: 11, participante2: 22, identificador: 16, proximoRival: 15 });
+    }
+
+    return brackets;
+  }
 
 
   async obtenerPartidosTorneo(idTorneo: number) {
@@ -89,13 +140,6 @@ export class PartidosService {
     return partidosFormateados
   }
 
-
-
-
-
-
-
-
   async actualizarResultado(id: number, nuevoResultado: ResultadoPartidoDTO) {
     if (!id) {
       throw new MiExcepcionPersonalizada('No se Proporciono un id del partido', 400);
@@ -109,25 +153,15 @@ export class PartidosService {
       throw new MiExcepcionPersonalizada('No se encontro el partido', 404);
     }
 
-
-
-
     if (partido.torneo.estado === 'Finalizado') {
       throw new MiExcepcionPersonalizada('No Se puede actualizar un partido de un Torneo Finalizado', 403);
     }
-
-
-
-
     const { sets, ganador, perdedor } = nuevoResultado;
-
 
     if (partido.torneo.tipo_torneo === Tipo.REGULAR) {
       if (partido.fase === 'grupos') {
         // Obtener las posiciones actuales del grupo
         const posicionesActuales = partido.grupo.posiciones || {};
-
-
         if (Object.keys(posicionesActuales).length === 0) {
 
           if (ganador) {
@@ -137,6 +171,11 @@ export class PartidosService {
             posicionesActuales[ganadorId].setsGanados = (posicionesActuales[ganadorId]?.setsGanados || 0) + ganador.setsGanados;
             posicionesActuales[ganadorId].setsPerdidos = (posicionesActuales[ganadorId]?.setsPerdidos || 0) + ganador.setsPerdidos;
             posicionesActuales[ganadorId].puntosSets = (posicionesActuales[ganadorId]?.puntosSets || 0) + ganador.puntosSets;
+            posicionesActuales[ganadorId].partidosJugados = (posicionesActuales[ganadorId]?.partidosJugados || 0) + 1;
+
+            posicionesActuales[ganadorId].juegosGanados = (posicionesActuales[ganadorId]?.juegosGanados || 0) + ganador.puntosSets;
+            posicionesActuales[ganadorId].juegosPerdidos = (posicionesActuales[ganadorId]?.juegosPerdidos || 0) + perdedor.puntosSets;
+
           }
 
           // Incrementar los valores del perdedor
@@ -147,17 +186,16 @@ export class PartidosService {
             posicionesActuales[perdedorId].setsGanados = (posicionesActuales[perdedorId]?.setsGanados || 0) + perdedor.setsGanados;
             posicionesActuales[perdedorId].setsPerdidos = (posicionesActuales[perdedorId]?.setsPerdidos || 0) + perdedor.setsPerdidos;
             posicionesActuales[perdedorId].puntosSets = (posicionesActuales[perdedorId]?.puntosSets || 0) + perdedor.puntosSets;
+            posicionesActuales[perdedorId].partidosJugados = (posicionesActuales[perdedorId]?.partidosJugados || 0) + 1;
+            posicionesActuales[perdedorId].juegosGanados = (posicionesActuales[perdedorId]?.juegosGanados || 0) + perdedor.puntosSets;
+            posicionesActuales[perdedorId].juegosPerdidos = (posicionesActuales[perdedorId]?.juegosPerdidos || 0) + ganador.puntosSets;
           }
-
-
 
           const participantesOrdenados = partido.grupo.participantes.sort((a, b) => {
             const puntosA = posicionesActuales[a.jugador?.id || a.pareja?.id]?.puntos || 0;
             const puntosB = posicionesActuales[b.jugador?.id || b.pareja?.id]?.puntos || 0;
             return puntosB - puntosA;
           });
-
-          // return posicionesActuales
 
           // Actualizar las posiciones en el grupo
           partido.grupo.posiciones = participantesOrdenados.map((participante) => {
@@ -168,11 +206,13 @@ export class PartidosService {
               setsGanados: posicionesActuales[participanteId]?.setsGanados || 0,
               setsPerdidos: posicionesActuales[participanteId]?.setsPerdidos || 0,
               puntosSets: posicionesActuales[participanteId]?.puntosSets || 0,
+              partidosJugados: posicionesActuales[participanteId]?.partidosJugados || 0,
+              juegosGanados: posicionesActuales[participanteId]?.juegosGanados || 0,
+              juegosPerdidos: posicionesActuales[participanteId]?.juegosPerdidos || 0
             };
           });
 
         } else {
-
           if (ganador && perdedor) {
             partido.grupo.posiciones = await this.actualizarDatos(posicionesActuales, nuevoResultado);
           }
@@ -766,24 +806,25 @@ export class PartidosService {
           posicion.puntos += 1;
           posicion.setsGanados += ganador.setsGanados;
           posicion.setsPerdidos += ganador.setsPerdidos;
-          posicion.juegosGanados += 1;
-          posicion.juegosPerdidos += 0
+          posicion.juegosGanados += ganador.puntosSets;
+          posicion.juegosPerdidos += perdedor.puntosSets;
           posicion.puntosSets += ganador.puntosSets;
+          posicion.partidosJugados += 1;
         }
         if (posicion.id === perdedorId) {
           posicion.puntos += 0;
           posicion.setsGanados += perdedor.setsGanados;
           posicion.setsPerdidos += perdedor.setsPerdidos;
-          posicion.juegosGanados += 0;
-          posicion.juegosPerdidos += 1;
+          posicion.juegosGanados += perdedor.puntosSets;
+          posicion.juegosPerdidos += ganador.puntosSets;
           posicion.puntosSets += perdedor.puntosSets;
+          posicion.partidosJugados += 1;
         }
       }
     }
 
     return posiciones;
   }
-
 
   async obtenerSiguienteIdCercano(idActual: number, jornadas: any[]): Promise<number> {
     const idsOrdenados = jornadas
@@ -798,9 +839,6 @@ export class PartidosService {
 
     return null;
   }
-
-
-
 
   async sortearSiguienteFase(torneoId: number) {
     // Verificar que todos los partidos de la fase de grupos estén finalizados
@@ -820,387 +858,599 @@ export class PartidosService {
       throw new MiExcepcionPersonalizada(`El torneo buscado esta en estado ${torneo.estado} por lo cual no se puede sortear la siguiente fase`, 409);
     }
 
-
-    if (torneo.fase_actual === 'grupos') {
-      if (torneo.tipo_torneo === 'regular') {
-        const grupos = await this.grupoRepository.find({
-          where: { torneo: torneo },
-          relations: ['partidos'],
-        });
-
-        //return grupos
-        const todosFinalizados = grupos.every((grupo) =>
-          grupo.partidos.every((partido) => partido.finalizado)
-        );
-
-        if (!todosFinalizados) {
-          throw new MiExcepcionPersonalizada('No todos los partidos de la fase de grupos han finalizado.', 400);
+    switch (torneo.fase_actual) {
+      case 'grupos':
+        if (torneo.tipo_torneo === 'regular') {
+          return this.sortearSiguienteFaseTorneoRegularFaseGrupos(torneo)
+        } else if (torneo.tipo_torneo === 'escalera') {
+          return this.sortearSiguienteFaseTorneoEscaleraFaseGrupos(torneo)
         }
-        // return todosFinalizados
-        // Obtener los dos mejores participantes de cada grupo
-        const participantesOrdenados = [];
-        for (const grupo of grupos) {
-          //const participantesGrupo = grupo.participantes || [];
-          const participantesGrupo = grupo.posiciones || [];
-
-          const participantesOrdenadosGrupo = participantesGrupo
-            .sort((a, b) => {
-              // Lógica de ordenación basada en los resultados de la fase de grupos
-              if (b.puntos !== a.puntos) {
-
-                return b.puntos - a.puntos;
-              }
-              if (b.puntosSets !== a.puntosSets) {
-
-                return b.puntosSets - a.puntosSets;
-              }
-              if (b.setsGanados !== a.setsGanados) {
-
-                return b.setsGanados - a.setsGanados;
-              }
-              return a.setsPerdidos - b.setsPerdidos;
-            })
-            .slice(0, 2); // Tomar los dos mejores participantes
-
-          participantesOrdenados.push(...participantesOrdenadosGrupo);
-        }
-
-        //return participantesOrdenados
-
-        // Ordenar los participantes globales para sortear la fase de llaves
-        const participantesOrdenadosGlobal = participantesOrdenados.sort((a, b) => {
-          // Lógica de ordenación basada en los resultados de la fase de grupos
-          if (b.puntos !== a.puntos) {
-            return b.puntos - a.puntos;
-          }
-          if (b.puntosSets !== a.puntosSets) {
-            return b.puntosSets - a.puntosSets;
-          }
-          if (b.setsGanados !== a.setsGanados) {
-            return b.setsGanados - a.setsGanados;
-          }
-          return a.setsPerdidos - b.setsPerdidos;
-        });
-        // Organizar la fase de llaves
-        const llaves = this.organizarLlaves(participantesOrdenadosGlobal);
-        const llavesReturn = []
-        // guardar las llaves en la bd
-        const modalidad = torneo.modalidad
-        const fase = this.obtenerEtapa(llaves.length)
-        for (const llave of llaves) {
-
-          let jugador1: any
-          let jugador2: any
-          let pareja1: any
-          let pareja2: any
-          //let fase: any
-          if (modalidad === 'singles') {
-            jugador1 = llave.participante1.id
-            jugador2 = llave.participante2.id
-            //fase = this.obtenerEtapa(llaves.length)
-
-            const llaveCreada = this.llaveRepository.create({
-              torneo: torneo,
-              fase: fase,
-              jugador1: jugador1,
-              jugador2: jugador2
-            })
-            const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-            const partidoCreado = this.partidoRepository.create({
-              fase: fase,
-              torneo: torneo,
-              jugador1: jugador1,
-              jugador2: jugador2
-            })
-            const partidoGuardado = await this.partidoRepository.save(partidoCreado)
-            llavesReturn.push(llaveGuardada)
-          } else {
-            pareja1 = llave.participante1.id
-            pareja2 = llave.participante2.id
-            const llaveCreada = this.llaveRepository.create({
-              torneo: torneo,
-              fase: fase,
-              pareja1: pareja1,
-              pareja2: pareja2
-            })
-
-            const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-            const partidoCreado = this.partidoRepository.create({
-              fase: fase,
-              torneo: torneo,
-              pareja1: pareja1,
-              pareja2: pareja2
-            })
-            const partidoGuardado = await this.partidoRepository.save(partidoCreado)
-            llavesReturn.push(llaveGuardada)
-          }
-        }
-        torneo.fase_actual = fase
-        await this.torneoRepository.save(torneo)
-        return llavesReturn;
-      } else if (torneo.tipo_torneo === 'escalera') {
-
-        const grupos = await this.grupoRepository.find({
-          where: { torneo: torneo },
-          relations: ['partidos'],
-        });
-
-        //return grupos
-        // const todosFinalizados = grupos.every((grupo) =>       
-        //   grupo.partidos.every((partido) => partido.finalizado)
-        // );
+        break;
+      case 'final':
+        return this.jugarFinal(torneo)
+        break;
+      default:
+        return this.sortearFasesIntermedias(torneo)
+        break;
+    }
 
 
-        const partidosJugadosGrupos = await this.partidoRepository.find({
-          where: { torneo: torneo, fase: 'grupos' }
+  }
+
+  async sortearSiguienteFaseTorneoRegularFaseGrupos(torneo: Torneo) {
+    const grupos = await this.grupoRepository.find({
+      where: { torneo: torneo },
+      relations: ['partidos'],
+    });
+
+    //return grupos
+    const todosFinalizados = grupos.every((grupo) =>
+      grupo.partidos.every((partido) => partido.finalizado)
+    );
+    //obtener los partidos no finalizados
+    const noFinalizados = grupos.filter((grupo) =>
+      grupo.partidos.some((partido) => !partido.finalizado)
+    );
+
+    //return noFinalizados
+
+    if (!todosFinalizados) {
+      throw new MiExcepcionPersonalizada('No todos los partidos de la fase de grupos han finalizado.', 400);
+    }
+    // return todosFinalizados
+    // Obtener los dos mejores participantes de cada grupo
+    const participantesOrdenados = this.ordenarPosicionesGrupos(grupos);
+    //return participantesOrdenados
+    // Ordenar los participantes globales para sortear la fase de llaves
+    const participantesOrdenadosGlobal = this.ordenarPosicionesGlobales(participantesOrdenados);
+    // Organizar la fase de llaves
+    const llaves = this.organizarLlaves(participantesOrdenadosGlobal);
+    //return llaves;
+    const llavesReturn = []
+    // guardar las llaves en la bd
+    const modalidad = torneo.modalidad
+    const fase = this.obtenerEtapa(llaves.length)
+    //return fase
+    for (const llave of llaves) {
+      let jugador1: any
+      let jugador2: any
+      let pareja1: any
+      let pareja2: any
+      const generarBracketsPredefinidos = this.generarBracketsPredefinidos(fase)
+      //let fase: any
+      if (modalidad === 'singles') {
+        jugador1 = llave.participante1.id
+        jugador2 = llave.participante2.id
+
+        let semiidentificador = llave.semiidentificadorpt1
+        let semiidentificador2 = llave.semiidentificadorpt2 //aunque solo con el primero es suficiente
+
+        const bracket = generarBracketsPredefinidos.find((bracket) => bracket.participante1 === semiidentificador)
+        //return bracket
+
+        const llaveCreada = this.llaveRepository.create({
+          torneo: torneo,
+          fase: fase,
+          jugador1: jugador1,
+          jugador2: jugador2,
+          identificador: bracket.identificador,
+          lado: bracket.lado,
+          proximoRivalIdentificador: bracket.proximoRival
+
+        })
+        //console.log('llaveCreada', llaveCreada)     
+
+
+        const llaveGuardada = await this.llaveRepository.save(llaveCreada)
+        const partidoCreado = this.partidoRepository.create({
+          fase: fase,
+          torneo: torneo,
+          jugador1: jugador1,
+          jugador2: jugador2
+        })
+        const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+        llavesReturn.push(llaveGuardada)
+      } else {
+        let semiidentificador = llave.semiidentificadorpt1
+        let semiidentificador2 = llave.semiidentificadorpt2 //aunque solo con el primero es suficiente
+
+        const bracket = generarBracketsPredefinidos.find((bracket) => bracket.participante1 === semiidentificador)
+
+        pareja1 = llave.participante1.id
+        pareja2 = llave.participante2.id
+        const llaveCreada = this.llaveRepository.create({
+          torneo: torneo,
+          fase: fase,
+          pareja1: pareja1,
+          pareja2: pareja2,
+          identificador: bracket.identificador,
+          lado: bracket.lado,
+          proximoRivalIdentificador: bracket.proximoRival
         })
 
-        const todosFinalizados = partidosJugadosGrupos.every(
-          (partido) => partido.finalizado
-        );
-
-        console.log('todosFinalizados', todosFinalizados)
-
-        if (!todosFinalizados) {
-          throw new MiExcepcionPersonalizada('No todos los partidos de la fase de grupos han finalizado.', 400);
-        }
-
-        let cantidadparticipantesclasificanGrupo = 0
-
-        if (torneo.cantidad_grupos === 2) {
-          cantidadparticipantesclasificanGrupo = 4
-        } else {
-          cantidadparticipantesclasificanGrupo = 2
-        }
-
-
-
-        const participantesOrdenados = [];
-
-        // const participantesOrdenados = participantes.sort((a, b) => a.ranking - b.ranking);
-        for (const grupo of grupos) {
-          //const participantesGrupo = grupo.participantes || [];
-          // const participantesGrupo = grupo.posiciones || [];
-          const participantesGrupo = grupo.participantes || [];
-
-          const participantesOrdenadosGrupo = participantesGrupo
-            .sort((a, b) => a.ranking - b.ranking)
-            .slice(0, cantidadparticipantesclasificanGrupo); // Tomar los x mejores participantes
-          participantesOrdenados.push(...participantesOrdenadosGrupo);
-        }
-
-        const participantesOrdenadosGlobal = participantesOrdenados.sort((a, b) => a.ranking - b.ranking)
-
-
-        //return participantesOrdenadosGlobal
-
-
-        const llaves = this.organizarLlaves(participantesOrdenadosGlobal);
-
-        //return llaves
-        const llavesReturn = []
-
-        const modalidad = torneo.modalidad
-        const fase = this.obtenerEtapa(llaves.length)
-        //return fase
-        for (const llave of llaves) {
-
-          let jugador1: any
-          let jugador2: any
-          let pareja1: any
-          let pareja2: any
-          //let fase: any
-          if (modalidad === 'singles') {
-            jugador1 = llave.participante1.jugador.id
-            jugador2 = llave.participante2.jugador.id
-            //fase = this.obtenerEtapa(llaves.length)
-
-            const llaveCreada = this.llaveRepository.create({
-              torneo: torneo,
-              fase: fase,
-              jugador1: jugador1,
-              jugador2: jugador2
-            })
-            const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-            const partidoCreado = this.partidoRepository.create({
-              fase: fase,
-              torneo: torneo,
-              jugador1: jugador1,
-              jugador2: jugador2
-            })
-            const partidoGuardado = await this.partidoRepository.save(partidoCreado)
-            llavesReturn.push(llaveGuardada)
-          } else {
-            pareja1 = llave.participante1.pareja.id
-            pareja2 = llave.participante2.pareja.id
-            const llaveCreada = this.llaveRepository.create({
-              torneo: torneo,
-              fase: fase,
-              pareja1: pareja1,
-              pareja2: pareja2
-            })
-
-            const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-            const partidoCreado = this.partidoRepository.create({
-              fase: fase,
-              torneo: torneo,
-              pareja1: pareja1,
-              pareja2: pareja2
-            })
-            const partidoGuardado = await this.partidoRepository.save(partidoCreado)
-            llavesReturn.push(llaveGuardada)
-          }
-        }
-        torneo.fase_actual = fase
-        await this.torneoRepository.save(torneo)
-        return llavesReturn;
-
+        const llaveGuardada = await this.llaveRepository.save(llaveCreada)
+        const partidoCreado = this.partidoRepository.create({
+          fase: fase,
+          torneo: torneo,
+          pareja1: pareja1,
+          pareja2: pareja2
+        })
+        const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+        llavesReturn.push(llaveGuardada)
       }
-    } else if (torneo.fase_actual === 'octavos' || torneo.fase_actual === 'cuartos' || torneo.fase_actual === 'semifinales') {
-      const llavesJugadas = await this.llaveRepository.find({
-        where: { torneo: torneo }
-      })
-      const partidosJugadosLlaves = await this.partidoRepository.find({
-        where: { torneo: torneo, fase: torneo.fase_actual }
-      })
-      const todosFinalizados = partidosJugadosLlaves.every(
-        (partido) => partido.finalizado
-      );
-      if (!todosFinalizados) {
-        throw new MiExcepcionPersonalizada(`No todos los partidos de la fase ${torneo.fase_actual} han finalizado.`, 400);
-      }
-      const participantesOrdenados = []
-      for (const partido of partidosJugadosLlaves) {
-        let participante = partido.resultado.ganador
-        participantesOrdenados.push(participante)
-      }
-      const participantesOrdenadosGlobal = participantesOrdenados.sort((a, b) => {
-        // Lógica de ordenación basada en los resultados de la fase de grupos
-        if (b.puntos !== a.puntos) {
-          return b.puntos - a.puntos;
-        }
-        if (b.puntosSets !== a.puntosSets) {
-          return b.puntosSets - a.puntosSets;
-        }
-        if (b.setsGanados !== a.setsGanados) {
-          return b.setsGanados - a.setsGanados;
-        }
-        return a.setsPerdidos - b.setsPerdidos;
-      });
-      const llaves = this.organizarLlaves(participantesOrdenadosGlobal);
-      const llavesReturn = []
-      // guardar las llaves en la bd
-      const modalidad = torneo.modalidad
-      const fase = this.obtenerEtapa(llaves.length)
-      for (const llave of llaves) {
-
-        let jugador1: any
-        let jugador2: any
-        let pareja1: any
-        let pareja2: any
-        //let fase: any
-        if (modalidad === 'singles') {
-          jugador1 = llave.participante1.id
-          jugador2 = llave.participante2.id
-          //fase = this.obtenerEtapa(llaves.length)
-
-          const llaveCreada = this.llaveRepository.create({
-            torneo: torneo,
-            fase: fase,
-            jugador1: jugador1,
-            jugador2: jugador2
-          })
-
-          const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-
-          const partidoCreado = this.partidoRepository.create({
-            fase: fase,
-            torneo: torneo,
-            jugador1: jugador1,
-            jugador2: jugador2
-          })
-          const partidoGuardado = await this.partidoRepository.save(partidoCreado)
-          llavesReturn.push(llaveGuardada)
+    }
+    torneo.fase_actual = fase
+    await this.torneoRepository.save(torneo)
 
 
+    return llavesReturn;
 
-        } else {
-          pareja1 = llave.participante1.id
-          pareja2 = llave.participante2.id
-          //fase = this.obtenerEtapa(llaves.length)
+  }
 
-          const llaveCreada = this.llaveRepository.create({
-            torneo: torneo,
-            fase: fase,
-            pareja1: pareja1,
-            pareja2: pareja2
-          })
+  async sortearSiguienteFaseTorneoEscaleraFaseGrupos(torneo: Torneo) {
 
-          const llaveGuardada = await this.llaveRepository.save(llaveCreada)
-          const partidoCreado = this.partidoRepository.create({
-            fase: fase,
-            torneo: torneo,
-            pareja1: pareja1,
-            pareja2: pareja2
-          })
-          const partidoGuardado = await this.partidoRepository.save(partidoCreado)
-          llavesReturn.push(llaveGuardada)
-        }
-      }
+    const grupos = await this.grupoRepository.find({
+      where: { torneo: torneo },
+      relations: ['partidos'],
+    });
 
+    const partidosJugadosGrupos = await this.partidoRepository.find({
+      where: { torneo: torneo, fase: 'grupos' }
+    })
 
-      torneo.fase_actual = fase
-      await this.torneoRepository.save(torneo)
+    const todosFinalizados = partidosJugadosGrupos.every(
+      (partido) => partido.finalizado
+    );
+    if (!todosFinalizados) {
+      throw new MiExcepcionPersonalizada('No todos los partidos de la fase de grupos han finalizado.', 400);
+    }
 
-      return llavesReturn;
+    let cantidadparticipantesclasificanGrupo = 0
 
-    } else if (torneo.fase_actual === 'final') {
+    if (torneo.cantidad_grupos === 2) {
+      cantidadparticipantesclasificanGrupo = 4
+    } else {
+      cantidadparticipantesclasificanGrupo = 2
+    }
+    const participantesOrdenados = [];
+    for (const grupo of grupos) {
+      const participantesGrupo = grupo.participantes || [];
 
-      const partidosJugadosLlaves = await this.partidoRepository.find({
-        where: { torneo: torneo, fase: torneo.fase_actual },
-        relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2', 'pareja1.jugador1', 'pareja1.jugador2', 'pareja2.jugador1', 'pareja2.jugador1',],
-      })
+      const participantesOrdenadosGrupo = participantesGrupo
+        .sort((a, b) => a.ranking - b.ranking)
+        .slice(0, cantidadparticipantesclasificanGrupo); // Tomar los x mejores participantes
+      participantesOrdenados.push(...participantesOrdenadosGrupo);
+    }
 
-      const todosFinalizados = partidosJugadosLlaves.every(
-        (partido) => partido.finalizado
+    const participantesOrdenadosGlobal = participantesOrdenados.sort((a, b) => a.ranking - b.ranking)
+    const llaves = this.organizarLlaves(participantesOrdenadosGlobal);
 
-      );
+    const llavesReturn = []
 
-      if (!todosFinalizados) {
-        return {
-          message: `No se ha jugado la final, por favor actualizar resultados`
-        }
+    const modalidad = torneo.modalidad
+    const fase = this.obtenerEtapa(llaves.length)
+
+    for (const llave of llaves) {
+
+      let jugador1: any
+      let jugador2: any
+      let pareja1: any
+      let pareja2: any
+      //let fase: any
+      if (modalidad === 'singles') {
+        jugador1 = llave.participante1.jugador.id
+        jugador2 = llave.participante2.jugador.id
+        //fase = this.obtenerEtapa(llaves.length)
+
+        const llaveCreada = this.llaveRepository.create({
+          torneo: torneo,
+          fase: fase,
+          jugador1: jugador1,
+          jugador2: jugador2
+        })
+        const llaveGuardada = await this.llaveRepository.save(llaveCreada)
+        const partidoCreado = this.partidoRepository.create({
+          fase: fase,
+          torneo: torneo,
+          jugador1: jugador1,
+          jugador2: jugador2
+        })
+        const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+        llavesReturn.push(llaveGuardada)
       } else {
+        pareja1 = llave.participante1.pareja.id
+        pareja2 = llave.participante2.pareja.id
+        const llaveCreada = this.llaveRepository.create({
+          torneo: torneo,
+          fase: fase,
+          pareja1: pareja1,
+          pareja2: pareja2
+        })
+
+        const llaveGuardada = await this.llaveRepository.save(llaveCreada)
+        const partidoCreado = this.partidoRepository.create({
+          fase: fase,
+          torneo: torneo,
+          pareja1: pareja1,
+          pareja2: pareja2
+        })
+        const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+        llavesReturn.push(llaveGuardada)
+      }
+    }
+    torneo.fase_actual = fase
+    await this.torneoRepository.save(torneo)
+    return llavesReturn;
 
 
-        let ranking;
-        if (torneo.tipo_torneo === 'regular') {
-          ranking = await this.actualizarRanking(torneo)
-        }
-        const partido = partidosJugadosLlaves[0]
-        let ganadorNombre = '';
-        if (partido.resultado.ganador.tipo === "jugador") {
-          if (partido.jugador1 && partido.jugador1.id === partido.resultado.ganador.id) {
+  }
 
-            ganadorNombre = partido.jugador1.nombre;
-          } else if (partido.jugador2 && partido.jugador2.id === partido.resultado.ganador.id) {
-            ganadorNombre = partido.jugador2.nombre;
+  async sortearFasesIntermedias(torneo: Torneo) {
+
+    const llavesJugadas = await this.llaveRepository.find({
+      where: { torneo: torneo }
+    })
+    const partidosJugadosLlaves = await this.partidoRepository.find({
+      where: { torneo: torneo, fase: torneo.fase_actual }
+    })
+    const todosFinalizados = partidosJugadosLlaves.every(
+      (partido) => partido.finalizado
+    );
+    if (!todosFinalizados) {
+      throw new MiExcepcionPersonalizada(`No todos los partidos de la fase ${torneo.fase_actual} han finalizado.`, 400);
+    }
+
+    const llaves = await this.llaveRepository.find({
+      where: { torneo: torneo, fase: torneo.fase_actual },
+      relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2', 'pareja1.jugador1', 'pareja1.jugador2', 'pareja2.jugador1', 'pareja2.jugador1',],
+    })
+
+    const ganadores = []
+    for (const partido of partidosJugadosLlaves) {
+      let participante = partido.resultado.ganador
+      //let llave = partido.llave
+      ganadores.push(participante)
+    }
+
+    //return {ganadores, llaves}
+    const nuevaFase = this.obtenerSiguienteFase(torneo.fase_actual)
+
+    // validar si la nueva fase es la final, no se hace todo el proceso de llaves sino que simplemente se obtiene el ganador de las dos llaves y se crea una llave final y un partido final y se retorna
+
+    if (nuevaFase === 'final') {
+      //validar si es singles o dobles
+      if (torneo.modalidad === 'singles') {
+        const jugador1 = ganadores[0].id
+        const jugador2 = ganadores[1].id
+        const llaveCreada = this.llaveRepository.create({
+          torneo: torneo,
+          fase: nuevaFase,
+          jugador1: jugador1,
+          jugador2: jugador2
+        })
+        const llaveGuardada = await this.llaveRepository.save(llaveCreada)
+        const partidoCreado = this.partidoRepository.create({
+          fase: nuevaFase,
+          torneo: torneo,
+          jugador1: jugador1,
+          jugador2: jugador2
+        })
+        const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+        return llaveGuardada
+      } else {
+        const pareja1 = ganadores[0].id
+        const pareja2 = ganadores[1].id
+        const llaveCreada = this.llaveRepository.create({
+          torneo: torneo,
+          fase: nuevaFase,
+          pareja1: pareja1,
+          pareja2: pareja2
+        })
+        const llaveGuardada = await this.llaveRepository.save(llaveCreada)
+        const partidoCreado = this.partidoRepository.create({
+          fase: nuevaFase,
+          torneo: torneo,
+          pareja1: pareja1,
+          pareja2: pareja2
+        })
+        const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+        return llaveGuardada
+      }
+    }
+
+    // Crear un mapa para almacenar las nuevas llaves y evitar duplicados
+    const nuevasLlavesMap = new Map();
+
+    if (torneo.modalidad === 'singles') {
+      // Iterar sobre el arreglo de ganadores
+      for (const ganador of ganadores) {
+        // Verificar si el ganador ya fue asignado a alguna llave
+        if (nuevasLlavesMap.size > 0) {
+          const jugadorAsignado = Array.from(nuevasLlavesMap.values()).find(llave => llave.jugador1 === ganador.id || llave.jugador2 === ganador.id);
+          if (jugadorAsignado) {
+            continue; // Pasar a la siguiente iteración si el ganador ya ha sido asignado a otra llave
           }
-        } else if (partido.resultado.ganador.tipo === "pareja") {
-
-          if (partido.pareja1 && partido.pareja1.id === partido.resultado.ganador.id) {
-            ganadorNombre = partido.pareja1.jugador1.nombre + ' - ' + partido.pareja1.jugador2.nombre
-          } else if (partido.pareja2 && partido.pareja2.id === partido.resultado.ganador.id) {
-            ganadorNombre = partido.pareja2.jugador1.nombre + ' - ' + partido.pareja2.jugador2.nombre
-          }
         }
-        torneo.estado = 'Finalizado';
-        await this.torneoRepository.save(torneo)
-        return {
-          message: `EL TORNEO YA FINALIZO`,
-          ganador: ganadorNombre
+
+        // Buscar la participación del ganador en el arreglo de llaves
+        const llaveParticipacion = llaves.find(llave => {
+          // Verificar si el ganador participó como jugador1 o jugador2 en la llave
+          return llave.jugador1?.id === ganador.id || llave.jugador2?.id === ganador.id;
+        });
+
+        // Verificar si se encontró la llave de participación del ganador
+        if (llaveParticipacion) {
+          // Obtener el proximoRivalIdentificador de la llave de participación
+          const proximoRivalIdentificador = llaveParticipacion.proximoRivalIdentificador;
+
+          // Buscar la llave que tenga el proximoRivalIdentificador
+          const llaveProximoRival = llaves.find(llave => llave.identificador === proximoRivalIdentificador);
+
+          // Verificar si se encontró la llave del próximo rival
+          if (llaveProximoRival) {
+            // Determinar quién es el otro participante de la llave del próximo rival
+            let jugador1, jugador2;
+            /*if (llaveParticipacion.jugador1?.id === ganador.id) {
+              jugador1 = ganador.id;
+              jugador2 = llaveProximoRival.jugador1?.id !== ganador.id ? llaveProximoRival.jugador1?.id : llaveProximoRival.jugador2?.id;
+            } else {
+              jugador1 = llaveProximoRival.jugador1?.id !== ganador.id ? llaveProximoRival.jugador1?.id : llaveProximoRival.jugador2?.id;
+              jugador2 = ganador.id;
+            }*/
+
+            if (llaveParticipacion.jugador1 && llaveParticipacion.jugador1.id === ganador.id) {
+              jugador1 = ganador.id;
+              if (llaveProximoRival.jugador1 && llaveProximoRival.jugador1.id !== ganador.id) {
+                jugador2 =llaveProximoRival.jugador1.id;
+              } else {
+                jugador2 = llaveProximoRival.jugador2.id;
+              }
+            } else {
+              jugador2 = ganador.id;
+              if (llaveProximoRival.jugador1 && llaveProximoRival.jugador1.id !== ganador.id) {
+                jugador1 = llaveProximoRival.jugador1.id;
+              } else {
+                jugador1 = llaveProximoRival.jugador2.id;
+              }
+            }
+
+            // Verificar si se encontró al otro participante
+            if (jugador1 && jugador2) {
+              // Determinar el lado de la nueva llave como el lado de la llave original
+              const lado = llaveParticipacion.lado;
+
+              // Crear una clave única para la nueva llave
+              const nuevaLlaveKey = `${jugador1}_${jugador2}_${lado}`;
+
+              // Verificar si la nueva llave ya existe en el mapa
+              if (!nuevasLlavesMap.has(nuevaLlaveKey)) {
+                // Crear una nueva llave con los ganadores de las llaves anteriores
+                const nuevaLlave = {
+                  fase: nuevaFase,
+                  identificador: null, // Esto se asignará más adelante
+                  proximoRivalIdentificador: null, // Esto se asignará más adelante
+                  lado: lado,
+                  jugador1: jugador1,
+                  jugador2: jugador2
+                };
+
+                // Agregar la nueva llave al mapa de nuevas llaves
+                nuevasLlavesMap.set(nuevaLlaveKey, nuevaLlave);
+              }
+            } else {
+              console.log("No se pudo encontrar al otro participante de la llave del próximo rival.");
+            }
+          } else {
+            console.log("No se pudo encontrar la llave del próximo rival.");
+          }
+        } else {
+          console.log("No se pudo encontrar la llave de participación del ganador.");
         }
       }
+
+    } else if (torneo.modalidad === 'dobles') {
+      for (const ganador of ganadores) {
+        // Verificar si el ganador ya fue asignado a alguna llave
+        if (nuevasLlavesMap.size > 0) {
+          const parejaAsignada = Array.from(nuevasLlavesMap.values()).find(llave => llave.pareja1 === ganador.id || llave.pareja2 === ganador.id);
+          if (parejaAsignada) {
+            continue; // Pasar a la siguiente iteración si el ganador ya ha sido asignado a otra llave
+          }
+        }
+
+        // Buscar la participación del ganador en el arreglo de llaves
+        const llaveParticipacion = llaves.find(llave => {
+          // Verificar si el ganador participó como pareja1 o pareja2 en la llave
+          return llave.pareja1?.id === ganador.id || llave.pareja2?.id === ganador.id;
+        });
+
+        // Verificar si se encontró la llave de participación del ganador
+        if (llaveParticipacion) {
+          // Obtener el proximoRivalIdentificador de la llave de participación
+          const proximoRivalIdentificador = llaveParticipacion.proximoRivalIdentificador;
+
+          // Buscar la llave que tenga el proximoRivalIdentificador
+          const llaveProximoRival = llaves.find(llave => llave.identificador === proximoRivalIdentificador);
+
+          // Verificar si se encontró la llave del próximo rival
+          if (llaveProximoRival) {
+            // Determinar quién es el otro participante de la llave del próximo rival
+            let pareja1, pareja2;
+            if (llaveParticipacion.pareja1?.id === ganador.id) {
+              pareja1 = ganador.id;
+              pareja2 = llaveProximoRival.pareja1?.id !== ganador.id ? llaveProximoRival.pareja1?.id : llaveProximoRival.pareja2?.id;
+            } else {
+              pareja1 = llaveProximoRival.pareja1?.id !== ganador.id ? llaveProximoRival.pareja1?.id : llaveProximoRival.pareja2?.id;
+              pareja2 = ganador.id;
+            }
+
+            // Verificar si se encontró al otro participante
+            if (pareja1 && pareja2) {
+              // Determinar el lado de la nueva llave como el lado de la llave original
+              const lado = llaveParticipacion.lado;
+
+              // Crear una clave única para la nueva llave
+              const nuevaLlaveKey = `${pareja1}_${pareja2}_${lado}`;
+
+              // Verificar si la nueva llave ya existe en el mapa
+              if (!nuevasLlavesMap.has(nuevaLlaveKey)) {
+                // Crear una nueva llave con los ganadores de las llaves anteriores
+                const nuevaLlave = {
+                  fase: nuevaFase,
+                  identificador: null, // Esto se asignará más adelante
+                  proximoRivalIdentificador: null, // Esto se asignará más adelante
+                  lado: lado,
+                  pareja1: pareja1,
+                  pareja2: pareja2
+                };
+
+                // Agregar la nueva llave al mapa de nuevas llaves
+                nuevasLlavesMap.set(nuevaLlaveKey, nuevaLlave);
+              }
+            } else {
+              console.log("No se pudo encontrar al otro participante de la llave del próximo rival.");
+            }
+          } else {
+            console.log("No se pudo encontrar la llave del próximo rival.");
+          }
+        } else {
+          console.log("No se pudo encontrar la llave de participación del ganador.");
+        }
+      }
+    }
+
+    // Convertir el mapa de nuevas llaves a un arreglo
+    const nuevasLlaves = Array.from(nuevasLlavesMap.values());
+    return nuevasLlaves;
+
+    // Asignar identificadores y próximos rivales identificadores a las nuevas llaves
+    let identificadorIzquierda = 1;
+    let identificadorDerecha = nuevasLlaves.length / 2 + 1;
+
+    for (const nuevaLlave of nuevasLlaves) {
+      if (nuevaLlave.lado === "izquierda") {
+        // Asignar identificador ascendente para las llaves del lado izquierdo
+        nuevaLlave.identificador = identificadorIzquierda;
+        // Asignar próximo rival identificador descendente para las llaves del lado izquierdo
+        nuevaLlave.proximoRivalIdentificador = identificadorIzquierda % 2 === 1 ? identificadorIzquierda + 1 : identificadorIzquierda - 1;
+        identificadorIzquierda++;
+      } else if (nuevaLlave.lado === "derecha") {
+        // Asignar identificador descendente para las llaves del lado derecho
+        nuevaLlave.identificador = identificadorDerecha;
+        // Asignar próximo rival identificador ascendente para las llaves del lado derecho
+        nuevaLlave.proximoRivalIdentificador = identificadorDerecha % 2 === 1 ? identificadorDerecha + 1 : identificadorDerecha - 1;
+        identificadorDerecha++;
+      }
+    }
+    //aqui se deben guardar las llaves en la base de datos
+
+    //para no hacer mas grande la funcion se creara una funcion que se encargue de guardar las llaves
+
+    const llavesGuardadas = await this.guardarLLavesIntermedias(torneo, nuevasLlaves)
+    //actualizar la fase actual del torneo
+
+    torneo.fase_actual = nuevaFase
+    await this.torneoRepository.save(torneo)
+
+
+    return llavesGuardadas
+  }
+
+  async guardarLLavesIntermedias(torneo: Torneo, llaves: any[]) {
+    const llavesGuardadas = []
+    for (const llave of llaves) {
+      const llaveCreada = this.llaveRepository.create({
+        torneo: torneo,
+        fase: llave.fase,
+        jugador1: llave.jugador1,
+        jugador2: llave.jugador2,
+        pareja1: llave.pareja1,
+        pareja2: llave.pareja2,
+        identificador: llave.identificador,
+        lado: llave.lado,
+        proximoRivalIdentificador: llave.proximoRivalIdentificador
+      })
+      const llaveGuardada = await this.llaveRepository.save(llaveCreada)
+      llavesGuardadas.push(llaveGuardada)
+
+      const partidoCreado = this.partidoRepository.create({
+        fase: llave.fase,
+        torneo: torneo,
+        jugador1: llave.jugador1,
+        jugador2: llave.jugador2,
+        pareja1: llave.pareja1,
+        pareja2: llave.pareja2
+      })
+      const partidoGuardado = await this.partidoRepository.save(partidoCreado)
+    }
+    return llavesGuardadas
+  }
+
+  async jugarFinal(torneo: Torneo) {
+
+    const partidosJugadosLlaves = await this.partidoRepository.find({
+      where: { torneo: torneo, fase: torneo.fase_actual },
+      relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2', 'pareja1.jugador1', 'pareja1.jugador2', 'pareja2.jugador1', 'pareja2.jugador1',],
+    })
+
+    const todosFinalizados = partidosJugadosLlaves.every(
+      (partido) => partido.finalizado
+
+    );
+
+    if (!todosFinalizados) {
+      return {
+        message: `No se ha jugado la final, por favor actualizar resultados`
+      }
+    } else {
+
+
+      let ranking;
+      if (torneo.tipo_torneo === 'regular') {
+        ranking = await this.actualizarRanking(torneo)
+      }
+      const partido = partidosJugadosLlaves[0]
+      let ganadorNombre = '';
+      if (partido.resultado.ganador.tipo === "jugador") {
+        if (partido.jugador1 && partido.jugador1.id === partido.resultado.ganador.id) {
+
+          ganadorNombre = partido.jugador1.nombre;
+        } else if (partido.jugador2 && partido.jugador2.id === partido.resultado.ganador.id) {
+          ganadorNombre = partido.jugador2.nombre;
+        }
+      } else if (partido.resultado.ganador.tipo === "pareja") {
+
+        if (partido.pareja1 && partido.pareja1.id === partido.resultado.ganador.id) {
+          ganadorNombre = partido.pareja1.jugador1.nombre + ' - ' + partido.pareja1.jugador2.nombre
+        } else if (partido.pareja2 && partido.pareja2.id === partido.resultado.ganador.id) {
+          ganadorNombre = partido.pareja2.jugador1.nombre + ' - ' + partido.pareja2.jugador2.nombre
+        }
+      }
+      torneo.estado = 'Finalizado';
+      await this.torneoRepository.save(torneo)
+      return {
+        message: `EL TORNEO YA FINALIZO`,
+        ganador: ganadorNombre
+      }
+    }
+  }
+
+
+  //esto solo aplica en fases de mata mata
+  obtenerSiguienteFase(faseActual: string) {
+    switch (faseActual) {
+      case 'dieciseisavos':
+        return 'octavos'
+        break;
+      case 'octavos':
+        return 'cuartos'
+        break;
+      case 'cuartos':
+        return 'semifinales'
+        break;
+      case 'semifinales':
+        return 'final'
+        break;
     }
   }
 
@@ -1226,6 +1476,17 @@ export class PartidosService {
       relations: ['partidos'],
     });
 
+    const participantesOrdenados = this.ordenarPosicionesGrupos(grupos)
+    //return participantesOrdenados
+    // Ordenar los participantes globales para sortear la fase de llaves
+    const participantesOrdenadosGlobal = this.ordenarPosicionesGlobales(participantesOrdenados)
+    //saber quienes son, el nombre de los participantes
+    const participantesOrdenadosGlobalConNombre = await this.obtenerNombresParticipantesOrdenados(participantesOrdenadosGlobal, torneo)
+    return participantesOrdenadosGlobalConNombre;
+  }
+
+
+  ordenarPosicionesGrupos(grupos) {
     const participantesOrdenados = [];
     for (const grupo of grupos) {
       //const participantesGrupo = grupo.participantes || [];
@@ -1235,33 +1496,34 @@ export class PartidosService {
         .sort((a, b) => {
           // Lógica de ordenación basada en los resultados de la fase de grupos
           if (b.puntos !== a.puntos) {
-
             return b.puntos - a.puntos;
           }
           //porcentaje de sets ganados osea sets ganados/sets perdidos
           //sacar el porcentaje de sets ganados de cada participante
 
-          let porcentajeSetsGanadosA = a.setsGanados / a.setsPerdidos
-          let porcentajeSetsGanadosB = b.setsGanados / b.setsPerdidos
+          let porcentajeSetsGanadosA = a.setsGanados / (a.setsGanados + a.setsPerdidos)
+          let porcentajeSetsGanadosB = b.setsGanados / (b.setsGanados + b.setsPerdidos)
+
           if (porcentajeSetsGanadosA !== porcentajeSetsGanadosB) {
             return porcentajeSetsGanadosB - porcentajeSetsGanadosA;
           }
           //porcentaje de juegos ganados osea juegos ganados/juegos perdidos
           //sacar el porcentaje de juegos ganados de cada participante
-          let porcentajeJuegosGanadosA = a.juegosGanados / a.juegosPerdidos
-          let porcentajeJuegosGanadosB = b.juegosGanados / b.juegosPerdidos
+          let porcentajeJuegosGanadosA = a.juegosGanados / (a.juegosGanados + a.juegosPerdidos)
+          let porcentajeJuegosGanadosB = b.juegosGanados / (b.juegosGanados + b.juegosPerdidos)
           if (porcentajeJuegosGanadosA !== porcentajeJuegosGanadosB) {
             return porcentajeJuegosGanadosB - porcentajeJuegosGanadosA;
           }
           return a.juegosPerdidos - b.juegosPerdidos;
         }
-        ).slice(0, 2); // Tomar los dos mejores participantes 
+        ).slice(0, 2);
       participantesOrdenados.push(...participantesOrdenadosGrupo);
     }
 
-    //return participantesOrdenados
+    return participantesOrdenados;
+  }
 
-    // Ordenar los participantes globales para sortear la fase de llaves
+  ordenarPosicionesGlobales(participantesOrdenados) {
     const participantesOrdenadosGlobal = participantesOrdenados.sort((a, b) => {
       // Lógica de ordenación basada en los resultados de la fase de grupos
       if (b.puntos !== a.puntos) {
@@ -1270,43 +1532,43 @@ export class PartidosService {
       //porcentaje de sets ganados osea sets ganados/sets perdidos
       //sacar el porcentaje de sets ganados de cada participante
 
-      let porcentajeSetsGanadosA = a.setsGanados / a.setsPerdidos
-      let porcentajeSetsGanadosB = b.setsGanados / b.setsPerdidos
+      let porcentajeSetsGanadosA = a.setsGanados / (a.setsGanados + a.setsPerdidos)
+      let porcentajeSetsGanadosB = b.setsGanados / (b.setsGanados + b.setsPerdidos)
       if (porcentajeSetsGanadosA !== porcentajeSetsGanadosB) {
         return porcentajeSetsGanadosB - porcentajeSetsGanadosA;
       }
       //porcentaje de juegos ganados osea juegos ganados/juegos perdidos
       //sacar el porcentaje de juegos ganados de cada participante
-      let porcentajeJuegosGanadosA = a.juegosGanados / a.juegosPerdidos
-      let porcentajeJuegosGanadosB = b.juegosGanados / b.juegosPerdidos
+      let porcentajeJuegosGanadosA = a.juegosGanados / (a.juegosGanados + a.juegosPerdidos)
+      let porcentajeJuegosGanadosB = b.juegosGanados / (b.juegosGanados + b.juegosPerdidos)
       if (porcentajeJuegosGanadosA !== porcentajeJuegosGanadosB) {
         return porcentajeJuegosGanadosB - porcentajeJuegosGanadosA;
       }
       return a.juegosPerdidos - b.juegosPerdidos;
-    });  
+    });
 
-    //saber quienes son, el nombre de los participantes
+    return participantesOrdenadosGlobal;
+  }
 
+  async obtenerNombresParticipantesOrdenados(participantesOrdenadosGlobal, torneo: Torneo) {
     const participantesOrdenadosGlobalConNombre = []
-
     for (const participante of participantesOrdenadosGlobal) {
       if (torneo.modalidad === 'singles') {
         let jugador = {
           "nombre": "",
           "puntos": 0,
           "porcentajeSetsGanados": 0,
-          "porcentajeJuegosGanados": 0,   
+          "porcentajeJuegosGanados": 0,
           "juegosPerdidos": 0,
         }
         const jg = await this.jugadorRepository.findOne({
           where: { id: participante.id },
           select: ['nombre']
         })
-        console.log(jg)
         jugador['nombre'] = jg.nombre
         jugador.puntos = participante.puntos
-        jugador.porcentajeSetsGanados = participante.setsGanados / participante.setsPerdidos
-        jugador.porcentajeJuegosGanados = participante.juegosGanados / participante.juegosPerdidos
+        jugador.porcentajeSetsGanados = participante.setsGanados / (participante.setsGanados + participante.setsPerdidos)
+        jugador.porcentajeJuegosGanados = participante.juegosGanados / (participante.juegosGanados + participante.juegosPerdidos)
         jugador.juegosPerdidos = participante.juegosPerdidos
         participantesOrdenadosGlobalConNombre.push(jugador)
       } else if (torneo.modalidad === 'dobles') {
@@ -1318,10 +1580,7 @@ export class PartidosService {
     }
 
     return participantesOrdenadosGlobalConNombre;
-
-
   }
-
 
   organizarLlaves(participantesOrdenados) {
     const numParticipantes = participantesOrdenados.length;
@@ -1354,7 +1613,9 @@ export class PartidosService {
       console.log(participante1.id, 'vs', participante2.id)
       const llave = {
         participante1,
-        participante2,
+        participante2,//borra lo siguiente
+        semiidentificadorpt1: i + 1,
+        semiidentificadorpt2: participantesOrdenados.length - i,
       };
 
       llaves.push(llave);
@@ -1527,11 +1788,6 @@ export class PartidosService {
     await this.jugadorRepository.save(jugador)
   }
 
-
-
-
-
-
   // Función para verificar si un número es una potencia de 2
   esPotenciaDeDos(numero: number): boolean {
     return (numero & (numero - 1)) === 0 && numero !== 0;
@@ -1545,7 +1801,6 @@ export class PartidosService {
     }
     return potencia;
   }
-
 
   //Obtener los proximos partidos de un usuario
   async obtenerProximosPartidos(usuario: Usuario,  /*page: number,limit: number*/) {

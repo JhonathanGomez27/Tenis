@@ -19,6 +19,9 @@ lerna-debug.log*
 .dev.env
 .prod.env
 
+# ignorar ecosystem.config.js
+ecosystem.config.js
+
 # Tests
 /coverage
 /.nyc_output
