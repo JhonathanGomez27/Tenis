@@ -32,6 +32,7 @@ export class PartidosService {
   ) { }
 
   generarBracketsPredefinidos(fase: string) {
+    console.log(fase);
     // Lógica para generar los brackets predefinidos según la fase
     const brackets = [];
 
@@ -78,6 +79,20 @@ export class PartidosService {
       brackets.push({ fase, lado: 'derecha', participante1: 14, participante2: 19, identificador: 14, proximoRival: 13 });
       brackets.push({ fase, lado: 'derecha', participante1: 6, participante2: 27, identificador: 15, proximoRival: 16 });
       brackets.push({ fase, lado: 'derecha', participante1: 11, participante2: 22, identificador: 16, proximoRival: 15 });
+    }
+
+    //semifinal
+    if( fase === 'semifinales'){
+      // Lado A
+      brackets.push({ fase, lado: 'izquierda', participante1: 1, participante2: 4, identificador: 1, proximoRival: 2 });
+      
+      // Lado B
+      brackets.push({ fase, lado: 'derecha', participante1: 2, participante2: 3, identificador: 2, proximoRival: 1 });
+    }
+
+    //final
+    if( fase === 'final'){
+      brackets.push({ fase, lado: 'final', participante1: 1, participante2: 2, identificador: 1, proximoRival: 2 });
     }
 
     return brackets;
@@ -916,7 +931,7 @@ export class PartidosService {
       let jugador2: any
       let pareja1: any
       let pareja2: any
-      const generarBracketsPredefinidos = this.generarBracketsPredefinidos(fase)
+      const generarBracketsPredefinidos = this.generarBracketsPredefinidos(fase);
       //let fase: any
       if (modalidad === 'singles') {
         jugador1 = llave.participante1.id
