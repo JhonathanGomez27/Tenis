@@ -35,7 +35,7 @@ export class UsuariosService {
 
       if (usuarioGuardado.rol === rolEnum.USER) {
         const jugadorDto = {
-          nombre: createUsuarioDto.nombre + ' ' + createUsuarioDto.apellido,
+          nombre: createUsuarioDto.nombre + ' ' + createUsuarioDto.nombre_a_mostrar,
           //ranking: createUsuarioDto.ranking,
           rama: createUsuarioDto.rama,
           categoria: createUsuarioDto.categoria,
@@ -86,13 +86,13 @@ export class UsuariosService {
           jugador.ranking = editUsuarioDto.ranking
 
 
-        if (editUsuarioDto.apellido) {
-          userFound.apellido = editUsuarioDto.apellido
+        if (editUsuarioDto.nombre_a_mostrar) {
+          userFound.nombre_a_mostrar = editUsuarioDto.nombre_a_mostrar
         }
 
 
         if (editUsuarioDto.nombre) {
-          jugador.nombre = editUsuarioDto.nombre + ' ' + editUsuarioDto.apellido
+          jugador.nombre = editUsuarioDto.nombre + ' ' + editUsuarioDto.nombre_a_mostrar
           userFound.nombre = editUsuarioDto.nombre
         }
 
@@ -245,7 +245,7 @@ export class UsuariosService {
 
       if (user) {
         user.nombre = dato.nombre
-        user.apellido = dato.Apellido
+        user.nombre_a_mostrar = dato.Apellido
         await this.usuarioRepository.save(user);
 
         //actualizar el nombre del jugador
