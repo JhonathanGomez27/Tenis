@@ -19,7 +19,7 @@ import { LlavesModule } from './modules/llaves/llaves.module';
 import { JornadasModule } from './modules/jornadas/jornadas.module';
 import { BracketModule } from './modules/bracket/bracket.module';
 
-console.log(process.env.NODE_ENV)
+console.log(process.env.NODE_ENV);
 
 @Module({
   imports: [
@@ -38,15 +38,16 @@ console.log(process.env.NODE_ENV)
 
 
     ConfigModule.forRoot({
-      envFilePath: enviroments[process.env.NODE_ENV ?? ".dev.env"],
+      envFilePath: enviroments[process.env.NODE_ENV ?? '.dev.env'],
       load: [config],
       isGlobal: true,
       validationSchema: Joi.object({
         DATABASE_NAME: Joi.string().required(),
         DATABASE_PORT: Joi.number().required(),
-      })
+      }),
     }),
-
+    DatabaseModule,
+    BracketModule,
     UsuariosModule,
     IamModule,
     JugadoresModule,
@@ -56,11 +57,9 @@ console.log(process.env.NODE_ENV)
     InscripcionesModule,
     GruposModule,
     LlavesModule,
-    JornadasModule
-
-
+    JornadasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

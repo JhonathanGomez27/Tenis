@@ -16,6 +16,7 @@ lerna-debug.log*
 
 
 # Ignorar archivos de entorno
+.env
 .dev.env
 .prod.env
 

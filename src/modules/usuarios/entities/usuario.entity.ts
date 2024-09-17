@@ -18,7 +18,7 @@ export class Usuario {
   nombre: string;
 
   @Column()
-  apellido: string;
+  nombre_a_mostrar: string;
 
   @Column({
     type: 'enum',
