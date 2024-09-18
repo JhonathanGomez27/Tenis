@@ -24,19 +24,6 @@ console.log(process.env.NODE_ENV);
 @Module({
   imports: [
     BracketModule,
-    TypeOrmModule.forRoot({
-      type: 'mysql', // o el tipo de tu base de datos
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '123456789',
-      database: 'mx_tenis_db',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true, // Solo para desarrollo, desactiva en producción  
-    }),
-
-
-
     ConfigModule.forRoot({
       envFilePath: enviroments[process.env.NODE_ENV ?? '.dev.env'],
       load: [config],
