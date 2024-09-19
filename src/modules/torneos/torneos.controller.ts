@@ -25,14 +25,16 @@ export class TorneosController {
     return this.torneosService.create(createTorneoDto);
   }
 
-  @Roles(Role.ADMIN)
+  // @Roles(Role.ADMIN)
+  @Roles(Role.USER)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
   @Get()
   findAll() {
     return this.torneosService.findAll();
   }
 
-  @Roles(Role.ADMIN)
+  // @Roles(Role.ADMIN && Role.USER)
+  @Roles(Role.USER)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
   @Get('byId')
   @ApiQuery({
