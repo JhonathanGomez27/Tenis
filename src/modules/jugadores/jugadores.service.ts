@@ -42,7 +42,7 @@ export class JugadoresService {
 
     const jugadoresResponse = jugadores.map(jugador => ({
       id: jugador.id,
-      nombre: jugador.nombre,
+      nombre_a_mostrar: jugador.nombre_a_mostrar,
       ranking: jugador.ranking,
       rama: jugador.rama,
       categoria: jugador.categoria,
@@ -92,7 +92,7 @@ export class JugadoresService {
 
     const jugadoresResponse = jugadores.map(jugador => ({
       id: jugador.id,
-      nombre: jugador.nombre,
+      nombre_a_mostrar: jugador.nombre_a_mostrar,
       ranking: jugador.ranking,
       rama: jugador.rama,
       categoria: jugador.categoria,
@@ -145,7 +145,7 @@ export class JugadoresService {
 
     const jugadoresResponse = jugadores.map(jugador => ({
       id: jugador.id,
-      nombre: jugador.nombre,
+      nombre_a_mostrar: jugador.nombre_a_mostrar,
       ranking: jugador.ranking,
       rama: jugador.rama,
       categoria: jugador.categoria,

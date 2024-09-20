@@ -9,7 +9,7 @@ import { Usuario } from 'src/modules/usuarios/entities/usuario.entity';
 
 export class CreateJugadorDto {
   @IsString()
-  readonly nombre: string;
+  readonly nombre_a_mostrar: string;
 
   @IsEnum(['masculina', 'femenina'])
   readonly rama: 'masculina' | 'femenina';

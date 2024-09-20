@@ -37,8 +37,8 @@ export class UsuariosService {
 
       if (usuarioGuardado.rol === rolEnum.USER) {
         const jugadorDto = {
-          nombre:
-            createUsuarioDto.nombre + ' ' + createUsuarioDto.nombre_a_mostrar,
+          nombre_a_mostrar:
+            createUsuarioDto.nombre_a_mostrar,
           //ranking: createUsuarioDto.ranking,
           rama: createUsuarioDto.rama,
           categoria: createUsuarioDto.categoria ?? null,
@@ -91,7 +91,7 @@ export class UsuariosService {
         }
 
         if (editUsuarioDto.nombre) {
-          jugador.nombre =
+          jugador.nombre_a_mostrar =
             editUsuarioDto.nombre + ' ' + editUsuarioDto.nombre_a_mostrar;
           userFound.nombre = editUsuarioDto.nombre;
         }
@@ -141,7 +141,7 @@ export class UsuariosService {
     if (userFound.rol === rolEnum.USER) {
       const jugador = await this.jugadoresService.getJugadorByUserId(userFound);
       jugador.id = undefined;
-      jugador.nombre = undefined;
+      jugador.nombre_a_mostrar = undefined;
       additionalInfo = { jugador };
     }
 
@@ -185,7 +185,7 @@ export class UsuariosService {
 
       if (usuarioGuardado.rol === rolEnum.USER) {
         const jugadorDto = {
-          nombre: createUsuarioDto.nombre + ' ' + createUsuarioDto.apellido,
+          nombre_a_mostrar: createUsuarioDto.nombre + ' ' + createUsuarioDto.apellido,
           //ranking: createUsuarioDto.ranking,
           rama: dato.rama,
           categoria: categoria.A,
@@ -240,7 +240,7 @@ export class UsuariosService {
         //actualizar el nombre del jugador
 
         const jugador = await this.jugadoresService.getJugadorByUserId(user);
-        jugador.nombre = dato.nombre + ' ' + dato.Apellido;
+        jugador.nombre_a_mostrar = dato.nombre + ' ' + dato.Apellido;
         await this.jugadoresService.actualizarJugador(jugador);
 
         usuarios.push(user);

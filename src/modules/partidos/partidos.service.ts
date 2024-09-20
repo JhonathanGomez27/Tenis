@@ -130,22 +130,22 @@ export class PartidosService {
         },
         jugador1: {
           id: partido.jugador1 ? partido.jugador1.id : undefined,
-          nombre: partido.jugador1 ? partido.jugador1.nombre : undefined,
+          nombre: partido.jugador1 ? partido.jugador1.nombre_a_mostrar : undefined,
         },
         jugador2: {
           id: partido.jugador2 ? partido.jugador2.id : undefined,
-          nombre: partido.jugador2 ? partido.jugador2.nombre : undefined,
+          nombre: partido.jugador2 ? partido.jugador2.nombre_a_mostrar : undefined,
         },
         pareja1: {
           id: partido.pareja1 ? partido.pareja1.id : undefined,
           nombre: partido.pareja1
-            ? partido.pareja1.jugador1.nombre + ' - ' + partido.pareja1.jugador2.nombre
+            ? partido.pareja1.jugador1.nombre_a_mostrar + ' - ' + partido.pareja1.jugador2.nombre_a_mostrar
             : undefined,
         },
         pareja2: {
           id: partido.pareja2 ? partido.pareja2.id : undefined,
           nombre: partido.pareja2
-            ? partido.pareja2.jugador1.nombre + ' - ' + partido.pareja2.jugador2.nombre
+            ? partido.pareja2.jugador1.nombre_a_mostrar + ' - ' + partido.pareja2.jugador2.nombre_a_mostrar
             : undefined,
         }
       }
@@ -1444,16 +1444,16 @@ export class PartidosService {
       if (partido.resultado.ganador.tipo === "jugador") {
         if (partido.jugador1 && partido.jugador1.id === partido.resultado.ganador.id) {
 
-          ganadorNombre = partido.jugador1.nombre;
+          ganadorNombre = partido.jugador1.nombre_a_mostrar;
         } else if (partido.jugador2 && partido.jugador2.id === partido.resultado.ganador.id) {
-          ganadorNombre = partido.jugador2.nombre;
+          ganadorNombre = partido.jugador2.nombre_a_mostrar;
         }
       } else if (partido.resultado.ganador.tipo === "pareja") {
 
         if (partido.pareja1 && partido.pareja1.id === partido.resultado.ganador.id) {
-          ganadorNombre = partido.pareja1.jugador1.nombre + ' - ' + partido.pareja1.jugador2.nombre
+          ganadorNombre = partido.pareja1.jugador1.nombre_a_mostrar + ' - ' + partido.pareja1.jugador2.nombre_a_mostrar
         } else if (partido.pareja2 && partido.pareja2.id === partido.resultado.ganador.id) {
-          ganadorNombre = partido.pareja2.jugador1.nombre + ' - ' + partido.pareja2.jugador2.nombre
+          ganadorNombre = partido.pareja2.jugador1.nombre_a_mostrar + ' - ' + partido.pareja2.jugador2.nombre_a_mostrar
         }
       }
       torneo.estado = 'Finalizado';
@@ -1593,9 +1593,9 @@ export class PartidosService {
         }
         const jg = await this.jugadorRepository.findOne({
           where: { id: participante.id },
-          select: ['nombre']
+          select: ['nombre_a_mostrar']
         })
-        jugador['nombre'] = jg.nombre
+        jugador['nombre'] = jg.nombre_a_mostrar
         jugador.puntos = participante.puntos
         jugador.porcentajeSetsGanados = participante.setsGanados / (participante.setsGanados + participante.setsPerdidos)
         jugador.porcentajeJuegosGanados = participante.juegosGanados / (participante.juegosGanados + participante.juegosPerdidos)

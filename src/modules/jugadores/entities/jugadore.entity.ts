@@ -29,7 +29,7 @@ export class Jugador {
   id: number;
 
   @Column()
-  nombre: string;
+  nombre_a_mostrar: string;
 
   @Column({ default: 0 })
   ranking: number;

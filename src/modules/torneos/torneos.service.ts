@@ -1408,22 +1408,22 @@ export class TorneosService {
         },
         jugador1: {
           id: partido.jugador1 ? partido.jugador1.id : undefined,
-          nombre: partido.jugador1 ? partido.jugador1.nombre : undefined,
+          nombre: partido.jugador1 ? partido.jugador1.nombre_a_mostrar : undefined,
         },
         jugador2: {
           id: partido.jugador2 ? partido.jugador2.id : undefined,
-          nombre: partido.jugador2 ? partido.jugador2.nombre : undefined,
+          nombre: partido.jugador2 ? partido.jugador2.nombre_a_mostrar : undefined,
         },
         pareja1: {
           id: partido.pareja1 ? partido.pareja1.id : undefined,
           nombre: partido.pareja1
-            ? partido.pareja1.jugador1.nombre + ' - ' + partido.pareja1.jugador2.nombre
+            ? partido.pareja1.jugador1.nombre_a_mostrar + ' - ' + partido.pareja1.jugador2.nombre_a_mostrar
             : undefined,
         },
         pareja2: {
           id: partido.pareja2 ? partido.pareja2.id : undefined,
           nombre: partido.pareja2
-            ? partido.pareja2.jugador1.nombre + ' - ' + partido.pareja2.jugador2.nombre
+            ? partido.pareja2.jugador1.nombre_a_mostrar + ' - ' + partido.pareja2.jugador2.nombre_a_mostrar
             : undefined,
         }
       }
