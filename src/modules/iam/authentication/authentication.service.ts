@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from "@nestjs/common";
+import {  Injectable } from "@nestjs/common";
 import { AuthenticationCommonService } from "./authentication.common.service";
 import { SigninPayload } from "../models/signin.model";
 import { PayloadToken } from "../models/token.model";
