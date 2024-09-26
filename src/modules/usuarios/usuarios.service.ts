@@ -252,4 +252,13 @@ export class UsuariosService {
       usuarios,
     };
   }
+
+  async contarUsuarios() {
+    const total = await this.usuarioRepository.count();
+
+    return {
+      message: `Hay un total de ${total} usuarios registrados`,
+      total,
+    };
+  }
 }

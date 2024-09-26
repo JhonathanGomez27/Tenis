@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import { JugadoresService } from './jugadores.service';
 import { CreateJugadorDto } from './dto/create-jugadore.dto';
-import { UpdateJugadorDto } from './dto/update-jugadore.dto';
 import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthAccessGuard } from '../iam/guards/jwt-auth.guard';
 import { RolesGuard } from '../iam/guards/roles.guard';
@@ -9,17 +8,17 @@ import { Roles } from '../iam/decorators';
 import { Role } from '../iam/models/roles.model';
 import { FiltersPaginatedQuery } from 'src/common/FiltersPaginatedQuery';
 import { FiltersJugadorDto } from './dto/filters.jugador.dto';
+import { rolEnum } from '../usuarios/entities/usuario.entity';
 
 @ApiTags('jugadores')
 @Controller('jugadores')
 export class JugadoresController {
-  constructor(private readonly jugadoresService: JugadoresService) { }
+  constructor(private readonly jugadoresService: JugadoresService) {}
 
   @Post()
   create(@Body() createJugadoreDto: CreateJugadorDto) {
     return this.jugadoresService.create(createJugadoreDto);
   }
-
 
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
@@ -34,9 +33,13 @@ export class JugadoresController {
   async getJugadores(
     @Query('nombre') nombre?: string,
     @Query('rama') rama?: string,
-    @Query('categoria') categoria?: string
+    @Query('categoria') categoria?: string,
   ) {
-    return this.jugadoresService.findJugadoresByFilters(nombre, rama, categoria);
+    return this.jugadoresService.findJugadoresByFilters(
+      nombre,
+      rama,
+      categoria,
+    );
   }
 
   // @Roles(Role.ADMIN)
@@ -53,8 +56,6 @@ export class JugadoresController {
   //   return this.jugadoresService.findJugadoresByFiltersPaginated(query.page, query.limit, nombre, rama, categoria);
   // }
 
-
-
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
   @Post('filtersPaginated')
@@ -63,18 +64,21 @@ export class JugadoresController {
   @ApiBody({
     type: FiltersJugadorDto,
     required: false,
-    description: 'filtros'
+    description: 'filtros',
   })
   async getJugadoresPaginated(
     @Query() query: FiltersPaginatedQuery,
-    @Body() filters: FiltersJugadorDto
+    @Body() filters: FiltersJugadorDto,
     // @Query('nombre') nombre?: string,
     // @Query('rama') rama?: string,
     // @Query('categoria') categoria?: string
   ) {
-    return this.jugadoresService.findJugadoresByFiltersPaginated(query.page, query.limit, filters);
+    return this.jugadoresService.findJugadoresByFiltersPaginated(
+      query.page,
+      query.limit,
+      filters,
+    );
   }
-
 
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
@@ -82,12 +86,11 @@ export class JugadoresController {
   @ApiQuery({
     name: 'id',
     type: Number,
-    required: true
+    required: true,
   })
   getById(@Query('id') id) {
-    return this.jugadoresService.getJugadorById(id)
+    return this.jugadoresService.getJugadorById(id);
   }
-
 
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
@@ -95,11 +98,16 @@ export class JugadoresController {
   @ApiQuery({
     name: 'userId',
     type: Number,
-    required: true
+    required: true,
   })
   getByUserId(@Query('userId') userId) {
-    return this.jugadoresService.getJugadorByUserId2(userId)
+    return this.jugadoresService.getJugadorByUserId2(userId);
   }
 
-
+  @Roles(rolEnum.ADMIN)
+  @UseGuards(JwtAuthAccessGuard, RolesGuard)
+  @Get('/contar')
+  contarJugadores() {
+    return this.jugadoresService.contarJugadores();
+  }
 }
