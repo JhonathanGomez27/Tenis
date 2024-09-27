@@ -153,15 +153,25 @@ export class UsuariosService {
       jugador.nombre_a_mostrar = undefined;
       additionalInfo = { jugador };
 
-      pareja = await this.parejasRep.findOne({ where: { jugador1: jugador } });
+      pareja = await this.parejasRep.findOne({
+        where: { jugador1: jugador },
+        relations: ['jugador2'],
+      });
 
       if (!pareja)
         pareja = await this.parejasRep.findOne({
           where: { jugador2: jugador },
+          relations: ['jugador1'],
         });
     }
 
-    const datos = { ...userFound, ...additionalInfo, pareja };
+    const datos = {
+      ...userFound,
+      ...additionalInfo,
+      pareja: { ...pareja, jugador_pareja: pareja.jugador1 ?? pareja.jugador2 },
+    };
+
+    pareja.jugador1 ? delete datos.pareja.jugador1 : delete pareja.jugador2;
 
     return datos;
   }
