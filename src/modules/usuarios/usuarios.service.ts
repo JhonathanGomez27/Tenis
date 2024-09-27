@@ -37,8 +37,7 @@ export class UsuariosService {
 
       if (usuarioGuardado.rol === rolEnum.USER) {
         const jugadorDto = {
-          nombre_a_mostrar:
-            createUsuarioDto.nombre_a_mostrar,
+          nombre_a_mostrar: createUsuarioDto.nombre_a_mostrar,
           //ranking: createUsuarioDto.ranking,
           rama: createUsuarioDto.rama,
           categoria: createUsuarioDto.categoria ?? null,
@@ -98,7 +97,14 @@ export class UsuariosService {
 
         if (editUsuarioDto.correo) userFound.correo = editUsuarioDto.correo;
 
-        if (editUsuarioDto.contrasena) {
+        if (editUsuarioDto.contrasena && editUsuarioDto.contrasena_anitgua) {
+          const isMatch = await this.hashingService.compare(
+            userFound.contrasena,
+            editUsuarioDto.contrasena_anitgua,
+          );
+
+          if (!isMatch) throw new UnauthorizedException('Incorrect password');
+
           userFound.contrasena = await this.hashingService.hash(
             editUsuarioDto.contrasena.trim(),
           );
@@ -185,7 +191,8 @@ export class UsuariosService {
 
       if (usuarioGuardado.rol === rolEnum.USER) {
         const jugadorDto = {
-          nombre_a_mostrar: createUsuarioDto.nombre + ' ' + createUsuarioDto.apellido,
+          nombre_a_mostrar:
+            createUsuarioDto.nombre + ' ' + createUsuarioDto.apellido,
           //ranking: createUsuarioDto.ranking,
           rama: dato.rama,
           categoria: categoria.A,
