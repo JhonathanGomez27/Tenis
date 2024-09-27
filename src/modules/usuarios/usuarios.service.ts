@@ -13,11 +13,13 @@ import { JugadoresService } from '../jugadores/jugadores.service';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { parse } from 'csv-parse';
 import { categoria } from '../jugadores/entities/jugadore.entity';
+import { Pareja } from '../parejas/entities/pareja.entity';
 
 @Injectable()
 export class UsuariosService {
   constructor(
     @InjectRepository(Usuario) private usuarioRepository: Repository<Usuario>,
+    @InjectRepository(Pareja) private readonly parejasRep: Repository<Pareja>,
     private readonly hashingService: HashingService,
     private readonly jugadoresService: JugadoresService,
   ) {}
@@ -143,15 +145,23 @@ export class UsuariosService {
     }
 
     let additionalInfo = {};
+    let pareja: Pareja;
 
     if (userFound.rol === rolEnum.USER) {
       const jugador = await this.jugadoresService.getJugadorByUserId(userFound);
-      jugador.id = undefined;
+      // jugador.id = undefined;
       jugador.nombre_a_mostrar = undefined;
       additionalInfo = { jugador };
+
+      pareja = await this.parejasRep.findOne({ where: { jugador1: jugador } });
+
+      if (!pareja)
+        pareja = await this.parejasRep.findOne({
+          where: { jugador2: jugador },
+        });
     }
 
-    const datos = { ...userFound, ...additionalInfo };
+    const datos = { ...userFound, ...additionalInfo, ...pareja };
 
     return datos;
   }

@@ -7,25 +7,22 @@ import { HashingService } from 'src/providers/hashing.service';
 import { BcryptService } from 'src/providers/bcrypt.service';
 import { JugadoresModule } from '../jugadores/jugadores.module';
 import { IamModule } from '../iam/iam.module';
-
+import { Pareja } from '../parejas/entities/pareja.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Usuario]),
+    TypeOrmModule.forFeature([Usuario, Pareja]),
     IamModule,
-    JugadoresModule
+    JugadoresModule,
   ],
   controllers: [UsuariosController],
   providers: [
     {
       provide: HashingService,
-      useClass: BcryptService
-      
+      useClass: BcryptService,
     },
-    UsuariosService
+    UsuariosService,
   ],
-  exports: [UsuariosService]
- 
- 
+  exports: [UsuariosService],
 })
 export class UsuariosModule {}
