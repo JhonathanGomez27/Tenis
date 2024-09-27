@@ -161,7 +161,7 @@ export class UsuariosService {
         });
     }
 
-    const datos = { ...userFound, ...additionalInfo, ...pareja };
+    const datos = { ...userFound, ...additionalInfo, pareja };
 
     return datos;
   }
