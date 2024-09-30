@@ -12,7 +12,7 @@ import { HashingService } from 'src/providers/hashing.service';
 import { JugadoresService } from '../jugadores/jugadores.service';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { parse } from 'csv-parse';
-import { categoria } from '../jugadores/entities/jugadore.entity';
+import { categoria, Jugador } from '../jugadores/entities/jugadore.entity';
 import { Pareja } from '../parejas/entities/pareja.entity';
 
 @Injectable()
@@ -144,7 +144,7 @@ export class UsuariosService {
     }
 
     let additionalInfo = {};
-    let pareja: Pareja;
+    let pare: Pareja;
 
     if (userFound.rol === rolEnum.USER) {
       const jugador = await this.jugadoresService.getJugadorByUserId(userFound);
@@ -152,25 +152,31 @@ export class UsuariosService {
       jugador.nombre_a_mostrar = undefined;
       additionalInfo = { jugador };
 
-      pareja = await this.parejasRep.findOne({
+      pare = await this.parejasRep.findOne({
         where: { jugador1: jugador },
         relations: ['jugador2'],
       });
 
-      if (!pareja)
-        pareja = await this.parejasRep.findOne({
+      if (!pare)
+        pare = await this.parejasRep.findOne({
           where: { jugador2: jugador },
           relations: ['jugador1'],
         });
     }
 
+    let jugador1: Jugador, jugador2: Jugador, pareja: {};
+    if (pare) {
+      ({ jugador1, jugador2, ...pareja } = pare);
+    }
+
     const datos = {
       ...userFound,
       ...additionalInfo,
-      pareja: { ...pareja, jugador_pareja: pareja.jugador1 ?? pareja.jugador2 },
+      pareja: {
+        ...pareja,
+        jugador_pareja: jugador1 ? jugador1 : jugador2 ? jugador2 : null,
+      },
     };
-
-    pareja.jugador1 ? delete datos.pareja.jugador1 : delete pareja.jugador2;
 
     return datos;
   }
