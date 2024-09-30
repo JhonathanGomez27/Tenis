@@ -67,6 +67,19 @@ export class UsuariosService {
         );
       }
 
+      if (editUsuarioDto.contrasena && editUsuarioDto.contrasena_anitgua) {
+        const isMatch = await this.hashingService.compare(
+          userFound.contrasena,
+          editUsuarioDto.contrasena_anitgua,
+        );
+
+        if (!isMatch) throw new UnauthorizedException('Incorrect password');
+
+        userFound.contrasena = await this.hashingService.hash(
+          editUsuarioDto.contrasena.trim(),
+        );
+      }
+
       if (userFound.rol === rolEnum.USER) {
         const jugador = await this.jugadoresService.getJugadorByUserId(
           userFound,
@@ -99,29 +112,15 @@ export class UsuariosService {
 
         if (editUsuarioDto.correo) userFound.correo = editUsuarioDto.correo;
 
-        if (editUsuarioDto.contrasena && editUsuarioDto.contrasena_anitgua) {
-          const isMatch = await this.hashingService.compare(
-            userFound.contrasena,
-            editUsuarioDto.contrasena_anitgua,
-          );
-
-          if (!isMatch) throw new UnauthorizedException('Incorrect password');
-
-          userFound.contrasena = await this.hashingService.hash(
-            editUsuarioDto.contrasena.trim(),
-          );
-        }
-
         //hacer el update de jugador
         await this.jugadoresService.actualizarJugador(jugador);
 
         //hacer el update de usuario
         await this.usuarioRepository.save(userFound);
-
-        return {
-          message: 'Jugador actualizado Correctamente',
-        };
       }
+      return {
+        message: 'Jugador actualizado Correctamente',
+      };
     } catch (error) {
       const message = handleDbError(error);
       return { message };
