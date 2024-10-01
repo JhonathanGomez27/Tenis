@@ -1,15 +1,20 @@
 // usuario.entity.ts
 import { Exclude } from 'class-transformer';
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
+import { File } from 'src/modules/files/entities/file.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 
 export enum rolEnum {
   USER = 'user',
-  ADMIN = 'admin'
-
+  ADMIN = 'admin',
 }
 
-@Entity({ name: 'usuarios'})
+@Entity({ name: 'usuarios' })
 export class Usuario {
   @PrimaryGeneratedColumn()
   id: number;
@@ -23,13 +28,17 @@ export class Usuario {
   @Column({
     type: 'enum',
     enum: rolEnum,
-    default: rolEnum.USER
+    default: rolEnum.USER,
   })
-  rol: 'admin' | 'user'; 
+  rol: 'admin' | 'user';
 
-  @Column({nullable: true}) 
+  @Column({ nullable: true })
   contrasena: string;
 
   @Column({ unique: true, nullable: true })
   correo: string;
+
+  @OneToOne(() => File, { nullable: true })
+  @JoinColumn({ name: 'imagen_perfil_id' })
+  imagen_perfil: File;
 }

@@ -18,6 +18,7 @@ import { GruposModule } from './modules/grupos/grupos.module';
 import { LlavesModule } from './modules/llaves/llaves.module';
 import { JornadasModule } from './modules/jornadas/jornadas.module';
 import { BracketModule } from './modules/bracket/bracket.module';
+import { FilesModule } from './modules/files/files.module';
 
 console.log(process.env.NODE_ENV);
 
@@ -45,6 +46,7 @@ console.log(process.env.NODE_ENV);
     GruposModule,
     LlavesModule,
     JornadasModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

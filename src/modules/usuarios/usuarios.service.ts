@@ -14,6 +14,7 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { parse } from 'csv-parse';
 import { categoria, Jugador } from '../jugadores/entities/jugadore.entity';
 import { Pareja } from '../parejas/entities/pareja.entity';
+import { FilesService } from '../files/files.service';
 
 @Injectable()
 export class UsuariosService {
@@ -22,6 +23,7 @@ export class UsuariosService {
     @InjectRepository(Pareja) private readonly parejasRep: Repository<Pareja>,
     private readonly hashingService: HashingService,
     private readonly jugadoresService: JugadoresService,
+    private readonly filesService: FilesService,
   ) {}
 
   async create(
@@ -128,8 +130,9 @@ export class UsuariosService {
   }
 
   async getMisDatos(usuario: Usuario) {
-    const userFound = await this.usuarioRepository.findOneBy({
-      id: usuario.id,
+    const userFound = await this.usuarioRepository.findOne({
+      where: { id: usuario.id },
+      relations: ['imagen_perfil'],
     });
     userFound.contrasena = undefined;
 
@@ -292,5 +295,29 @@ export class UsuariosService {
       message: `Hay un total de ${total} usuarios registrados`,
       total,
     };
+  }
+
+  async uploadProfileImage(id: number, file: Express.Multer.File) {
+    const usuario = await this.usuarioRepository.findOne({
+      where: { id },
+      relations: ['imagen_perfil'],
+    });
+
+    if (!usuario) throw new NotFoundException('Usuario no encontrado');
+
+    if (usuario.imagen_perfil)
+      await this.filesService.removeFile(usuario.imagen_perfil.id);
+
+    const newFile = await this.filesService.createFile({
+      filename: file.filename,
+      path: file.path,
+      mime_type: file.mimetype,
+      resource_id: usuario.id,
+      size: file.size,
+    });
+
+    return this.usuarioRepository.update(usuario.id, {
+      imagen_perfil: newFile,
+    });
   }
 }

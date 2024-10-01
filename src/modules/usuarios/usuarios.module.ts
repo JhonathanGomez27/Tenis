@@ -8,12 +8,14 @@ import { BcryptService } from 'src/providers/bcrypt.service';
 import { JugadoresModule } from '../jugadores/jugadores.module';
 import { IamModule } from '../iam/iam.module';
 import { Pareja } from '../parejas/entities/pareja.entity';
+import { FilesModule } from '../files/files.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Usuario, Pareja]),
     IamModule,
     JugadoresModule,
+    FilesModule,
   ],
   controllers: [UsuariosController],
   providers: [

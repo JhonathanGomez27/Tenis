@@ -19,6 +19,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { rolEnum } from './entities/usuario.entity';
 import { Roles } from '../iam/decorators';
 import { RolesGuard } from '../iam/guards/roles.guard';
+import { filterImage, getLimitFile, storage } from '../files/config_file';
 
 @Controller('usuarios')
 @ApiTags('usuarios')
@@ -69,5 +70,20 @@ export class UsuariosController {
   @Get('/contar')
   contarUsuarios() {
     return this.usuariosService.contarUsuarios();
+  }
+
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: getLimitFile(5, 'MB'),
+      fileFilter: filterImage,
+      storage: storage,
+    }),
+  )
+  @Patch('/subir-imagen/:id')
+  uploadImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('id') id: number,
+  ) {
+    return this.usuariosService.uploadProfileImage(id, file);
   }
 }
