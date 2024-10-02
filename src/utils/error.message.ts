@@ -1,6 +1,10 @@
 // utils/error-handling.ts
 
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { MiExcepcionPersonalizada } from './exception';
 
 export function handleDbError(error: any): string {
@@ -19,6 +23,9 @@ export function handleDbError(error: any): string {
     throw new NotFoundException(
       'El registro que intentas insertar hace referencia a una llave foranea que no existe ',
     );
+  }
+  if (error.status == '401') {
+    throw new UnauthorizedException(error.response.mensaje);
   } else {
     return 'Ha ocurrido un error en la base de datos.';
   }

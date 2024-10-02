@@ -14,8 +14,8 @@ export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
   @IsString()
   @Transform(({ value }: { value: string }) => value.trim())
   @IsOptional()
-  @MinLength(6)
-  contrasena_anitgua?: string;
+  // @MinLength(6)
+  contrasena_antigua?: string;
 
   @IsOptional()
   @IsPositive()

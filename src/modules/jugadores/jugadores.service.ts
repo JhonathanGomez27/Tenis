@@ -27,7 +27,9 @@ export class JugadoresService {
   }
 
   async getJugadorByUserId(usuario: Usuario) {
-    const jugador = await this.jugadorRepository.findOneBy({ userid: usuario });
+    const jugador = await this.jugadorRepository.findOneBy({
+      userid: { id: usuario.id },
+    });
     return jugador;
   }
 

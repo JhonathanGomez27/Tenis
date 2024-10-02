@@ -5,7 +5,7 @@ import {
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 
-export const PATH_FILES = join(__dirname, '..', '..', 'public');
+export const PATH_FILES = join(__dirname, '..', '..', '..', 'src', 'public');
 
 // Configuración de Multer
 export const storage = diskStorage({

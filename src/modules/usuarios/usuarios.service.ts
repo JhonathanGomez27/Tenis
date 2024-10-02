@@ -69,10 +69,10 @@ export class UsuariosService {
         );
       }
 
-      if (editUsuarioDto.contrasena && editUsuarioDto.contrasena_anitgua) {
+      if (editUsuarioDto.contrasena && editUsuarioDto.contrasena_antigua) {
         const isMatch = await this.hashingService.compare(
+          editUsuarioDto.contrasena_antigua,
           userFound.contrasena,
-          editUsuarioDto.contrasena_anitgua,
         );
 
         if (!isMatch) throw new UnauthorizedException('Incorrect password');
