@@ -37,11 +37,24 @@ export class FilesService {
   }
 
   async removeFile(id: string): Promise<void> {
-    const file = await this.filesRep.findOne({ where: { id } });
+    const file = await this.filesRep.findOne({
+      where: { id },
+      select: [
+        'id',
+        'filename',
+        'path',
+        'mime_type',
+        'size',
+        'resource_id',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+      ],
+    });
 
     if (file) {
-      await fs.unlink(path.resolve(file.path));
-      await this.filesRep.remove(file);
+      await fs.unlink(file.path);
+      // await this.filesRep.remove(file);
     }
   }
 }
