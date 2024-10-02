@@ -104,13 +104,13 @@ export class UsuariosService {
 
         if (editUsuarioDto.nombre_a_mostrar) {
           userFound.nombre_a_mostrar = editUsuarioDto.nombre_a_mostrar;
+          jugador.nombre_a_mostrar = editUsuarioDto.nombre_a_mostrar;
         }
 
-        if (editUsuarioDto.nombre) {
-          jugador.nombre_a_mostrar =
-            editUsuarioDto.nombre + ' ' + editUsuarioDto.nombre_a_mostrar;
-          userFound.nombre = editUsuarioDto.nombre;
-        }
+        if (editUsuarioDto.nombre) userFound.nombre = editUsuarioDto.nombre;
+
+        if (editUsuarioDto.apellido)
+          userFound.apellido = editUsuarioDto.apellido;
 
         if (editUsuarioDto.correo) userFound.correo = editUsuarioDto.correo;
 

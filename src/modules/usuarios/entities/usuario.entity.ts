@@ -23,6 +23,9 @@ export class Usuario {
   nombre: string;
 
   @Column()
+  apellido: string;
+
+  @Column()
   nombre_a_mostrar: string;
 
   @Column({

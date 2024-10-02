@@ -22,12 +22,20 @@ export class CreateUsuarioDto {
   readonly nombre: string;
 
   @ApiProperty({
-    name: 'apellido',
+    name: 'nombre_a_mostrar',
     type: String,
     required: true,
   })
   @IsString()
   readonly nombre_a_mostrar: string;
+
+  @ApiProperty({
+    name: 'apellido',
+    type: String,
+    required: true,
+  })
+  @IsString()
+  readonly apellido: string;
 
   @ApiProperty({
     name: 'correo',
