@@ -316,8 +316,10 @@ export class UsuariosService {
       size: file.size,
     });
 
-    return this.usuarioRepository.update(usuario.id, {
+    await this.usuarioRepository.update(usuario.id, {
       imagen_perfil: newFile,
     });
+
+    return newFile;
   }
 }
