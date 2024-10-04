@@ -3,7 +3,7 @@ import { CreateTorneoDto } from './dto/create-torneo.dto';
 import { UpdateTorneoDto } from './dto/update-torneo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Estado, Modalidad, Tipo, Torneo } from './entities/torneo.entity';
-import { EntityManager, Not, Repository, Transaction } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { handleDbError } from 'src/utils/error.message';
 import { MiExcepcionPersonalizada } from 'src/utils/exception';
 import { Grupo } from '../grupos/entities/grupo.entity';
@@ -67,6 +67,14 @@ export class TorneosService {
   async getTorneoById(id: number) {
     const torneo = await this.torneoRepository.findOneBy({ id: id });
     return torneo;
+  }
+  
+  async getTorneoByPlayerId(id: number) {
+    const inscripciones = await this.inscripcionRepository.find({  where: { jugador: { id } },
+      relations: ['torneo'],});
+
+    const torneos = inscripciones.map(inscripcion => inscripcion.torneo)
+    return torneos;
   }
 
   enumToJsonArray(enumObj: any): { nombre: string; descripcion: string }[] {
