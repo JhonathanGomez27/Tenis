@@ -140,6 +140,8 @@ export class JugadoresService {
       categoria_dobles: jugador.categoria_dobles,
       userid: {
         id: jugador.userid.id,
+        nombre: jugador.userid.nombre,
+        apellido: jugador.userid.apellido,
         rol: jugador.userid.rol,
         correo: jugador.userid.correo,
       },
