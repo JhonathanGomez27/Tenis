@@ -120,8 +120,8 @@ export class JugadoresService {
     }
 
     // Búsqueda por coincidencia parcial en el nombre
-    if (filters.nombre) {
-      whereConditions.nombre = ILike(`%${filters.nombre}%`);
+    if (filters.nombre_a_mostrar) {
+      whereConditions.nombre_a_mostrar = ILike(`%${filters.nombre_a_mostrar}%`);
     }
 
     const [jugadores, total] = await this.jugadorRepository.findAndCount({

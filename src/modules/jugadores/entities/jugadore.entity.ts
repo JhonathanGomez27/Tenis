@@ -28,7 +28,7 @@ export class Jugador {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   nombre_a_mostrar: string;
 
   @Column({ default: 0 })
