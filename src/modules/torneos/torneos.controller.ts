@@ -19,6 +19,7 @@ import { RolesGuard } from '../iam/guards/roles.guard';
 import { Roles } from '../iam/decorators';
 import { Role } from '../iam/models/roles.model';
 import { rolEnum } from '../usuarios/entities/usuario.entity';
+import { number } from 'joi';
 
 @ApiTags('torneos')
 @Controller('torneos')
@@ -36,10 +37,16 @@ export class TorneosController {
   @Roles(Role.USER)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
   @Get()
-  findAll() {
-    return this.torneosService.findAll();
-  }
+  findAll(@Request() req) {
+    const usrId = req.user.id;
+    const usrRole = req.user.rol;
 
+    if (usrRole === 'user') {
+      return this.torneosService.getTorneoByPlayerId(usrId);
+    } else {
+      return this.torneosService.findAll();
+    }
+  }
   // @Roles(Role.ADMIN && Role.USER)
   @Roles(Role.USER)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
