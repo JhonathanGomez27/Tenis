@@ -19,6 +19,7 @@ import { LlavesModule } from './modules/llaves/llaves.module';
 import { JornadasModule } from './modules/jornadas/jornadas.module';
 import { BracketModule } from './modules/bracket/bracket.module';
 import { FilesModule } from './modules/files/files.module';
+import { ResultadosSetsModule } from './modules/resultados-sets/resultados-sets.module';
 
 console.log(process.env.NODE_ENV);
 
@@ -47,6 +48,7 @@ console.log(process.env.NODE_ENV);
     LlavesModule,
     JornadasModule,
     FilesModule,
+    ResultadosSetsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

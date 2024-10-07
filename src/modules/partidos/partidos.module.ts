@@ -11,11 +11,13 @@ import { Inscripcion } from '../inscripciones/entities/inscripcione.entity';
 import { Pareja } from '../parejas/entities/pareja.entity';
 import { Jugador } from '../jugadores/entities/jugadore.entity';
 import { IamModule } from '../iam/iam.module';
+import { ResultadosSetsModule } from '../resultados-sets/resultados-sets.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Partido, Torneo, Grupo, Llave, Jornada, Inscripcion, Pareja, Jugador]),    
-    IamModule
+    IamModule,
+    ResultadosSetsModule
   ],
   controllers: [PartidosController],
   providers: [PartidosService],

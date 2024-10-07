@@ -199,10 +199,11 @@ export class TorneosController {
     return this.torneosService.obtenerTorneoByid(id);
   }
 
-  @Roles(rolEnum.ADMIN)
+  @Roles(rolEnum.USER)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
-  @Get('/contar')
-  contarTorneos() {
-    return this.torneosService.contarTorneos();
+  @Get('/infoToneos')
+  dashboardTorneos(@Request() req) {
+    const usrId = req.user.id;
+    return this.torneosService.dashboardTorneos(usrId);
   }
 }
