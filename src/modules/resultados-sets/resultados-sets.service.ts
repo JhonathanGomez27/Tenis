@@ -64,6 +64,15 @@ export class ResultadosSetsService {
       relations: ['perdedor'], 
     });
   }
+  async countCampeon(id: number) {
+    return this.resultadosSetRepository.count({
+      where: {
+        ganador: { id }, 
+        fase: 'final', 
+      },
+      relations: ['ganador'], 
+    });
+  }
 
   async countGanadosSingles(id: number) {
     return this.resultadosSetRepository.count({

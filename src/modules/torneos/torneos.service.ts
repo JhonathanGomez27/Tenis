@@ -1470,7 +1470,8 @@ export class TorneosService {
       ganador: { id }, 
     });
 
-    const partidosSubcampeon = await this.resultadosSetsService.countSubcampeonatos(id);
+    const torneosCampeon = await this.resultadosSetsService.countCampeon(id);
+    const torneosSubcampeon = await this.resultadosSetsService.countSubcampeonatos(id);
     const partidosGanadosSingles = await this.resultadosSetsService.countGanadosSingles(id);
     const partidosPerdidosSingles = await this.resultadosSetsService.countPerdidosSingles(id);
     const partidosGanadosPareja = await this.resultadosSetsService.countGanadosPareja(id);
@@ -1482,7 +1483,8 @@ export class TorneosService {
       totalTorneosEnProceso,
       torneosParticipados,
       partidosGanados,
-      partidosSubcampeon,
+      torneosCampeon,
+      torneosSubcampeon,
       partidosGanadosSingles,
       partidosPerdidosSingles,
       partidosGanadosPareja,
