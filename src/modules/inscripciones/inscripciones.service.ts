@@ -180,10 +180,8 @@ export class InscripcionesService {
               rama: i.jugador.rama,
               categoria: i.jugador.categoria,
               categoria_dobles: i.jugador.categoria_dobles,
-              userid: {
-                nombre: i.jugador.userid.nombre,
-                apellido: i.jugador.userid.apellido,
-              },
+              nombre: i.jugador.userid.nombre,
+              apellido: i.jugador.userid.apellido,
             }
           : undefined,
         pareja: i.pareja
