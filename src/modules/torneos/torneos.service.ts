@@ -17,6 +17,8 @@ import { number } from 'joi';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 import { Jugador } from '../jugadores/entities/jugadore.entity';
 import { Inscripcion } from '../inscripciones/entities/inscripcione.entity';
+import { ResultadosSet } from '../resultados-sets/entities/resultados-set.entity';
+import { ResultadosSetsService } from '../resultados-sets/resultados-sets.service';
 
 @Injectable()
 export class TorneosService {
@@ -29,6 +31,8 @@ export class TorneosService {
     @InjectRepository(Jugador) private jugadorRepository: Repository<Jugador>,
     @InjectRepository(Inscripcion)
     private inscripcionRepository: Repository<Inscripcion>,
+    private readonly resultadosSetsService: ResultadosSetsService, // Inyecta el servicio
+
   ) {}
 
   async create(createTorneoDto: CreateTorneoDto) {
@@ -1443,12 +1447,46 @@ export class TorneosService {
     return torneo;
   }
 
-  async contarTorneos() {
-    const total = await this.torneoRepository.count();
+  async dashboardTorneos(id: number) {
+    const inscripciones = await this.inscripcionRepository.find({
+      where: { jugador: { id } },
+      relations: ['torneo'], 
+    });
+  
+    const torneos = inscripciones.map(inscripcion => inscripcion.torneo);
+  
+    const torneosEnProceso = torneos
+    .filter(torneo => torneo.estado === 'En Proceso')
+    .map(torneo => ({
+      nombre: torneo.nombre,
+      fase_actual: torneo.fase_actual,
+    }));
 
+    const totalTorneosEnProceso = torneosEnProceso.length;
+  
+    const torneosParticipados = torneos.length;
+        
+    const partidosGanados = await this.resultadosSetsService.count({
+      ganador: { id }, 
+    });
+
+    const partidosSubcampeon = await this.resultadosSetsService.countSubcampeonatos(id);
+    const partidosGanadosSingles = await this.resultadosSetsService.countGanadosSingles(id);
+    const partidosPerdidosSingles = await this.resultadosSetsService.countPerdidosSingles(id);
+    const partidosGanadosPareja = await this.resultadosSetsService.countGanadosPareja(id);
+    const partidosPerdidosPareja = await this.resultadosSetsService.countPerdidosPareja(id);
+
+  
     return {
-      message: `Hay un total de ${total} torneos`,
-      total,
+      torneosEnProceso,
+      totalTorneosEnProceso,
+      torneosParticipados,
+      partidosGanados,
+      partidosSubcampeon,
+      partidosGanadosSingles,
+      partidosPerdidosSingles,
+      partidosGanadosPareja,
+      partidosPerdidosPareja,
     };
   }
 }

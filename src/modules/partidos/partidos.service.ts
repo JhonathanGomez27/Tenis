@@ -14,6 +14,8 @@ import { Inscripcion } from '../inscripciones/entities/inscripcione.entity';
 import { Pareja } from '../parejas/entities/pareja.entity';
 import { Jugador } from '../jugadores/entities/jugadore.entity';
 import { Usuario } from '../usuarios/entities/usuario.entity';
+import { ResultadosSetsService } from '../resultados-sets/resultados-sets.service';
+import { Modalidad } from '../resultados-sets/entities/resultados-set.entity';
 
 @Injectable()
 export class PartidosService {
@@ -21,6 +23,7 @@ export class PartidosService {
 
   constructor(
     @InjectRepository(Partido) private partidoRepository: Repository<Partido>,
+    private resultadosSetsService: ResultadosSetsService,
     @InjectRepository(Torneo) private torneoRepository: Repository<Torneo>,
     @InjectRepository(Grupo) private grupoRepository: Repository<Grupo>,
     @InjectRepository(Llave) private llaveRepository: Repository<Llave>,
@@ -28,6 +31,7 @@ export class PartidosService {
     @InjectRepository(Inscripcion) private inscripcionRepository: Repository<Inscripcion>,
     @InjectRepository(Pareja) private parejaRepository: Repository<Pareja>,
     @InjectRepository(Jugador) private jugadorRepository: Repository<Jugador>
+    
 
   ) { }
 
@@ -172,6 +176,31 @@ export class PartidosService {
       throw new MiExcepcionPersonalizada('No Se puede actualizar un partido de un Torneo Finalizado', 403);
     }
     const { sets, ganador, perdedor } = nuevoResultado;
+
+    let modalidad: Modalidad;
+    if (partido.jugador1 && partido.jugador2 && !partido.pareja1 && !partido.pareja2) {
+        modalidad = Modalidad.SINGLES; 
+    } else if (partido.pareja1 && partido.pareja2 && !partido.jugador1 && !partido.jugador2) {
+        modalidad = Modalidad.PAREJA; 
+    } else {
+        throw new MiExcepcionPersonalizada('No se puede determinar la modalidad del partido', 400);
+    }
+
+    for (const set of sets) {
+        const [puntosGanador, puntosPerdedor] = set.marcador.split('-').map(Number);
+
+        await this.resultadosSetsService.create({
+            id_torneo: partido.torneo.id,
+            id_partido: partido.id,
+            ganador: ganador.id,
+            perdedor: perdedor.id,
+            puntos_ganador: puntosGanador,
+            puntos_perdedor: puntosPerdedor,
+            modalidad: modalidad, 
+            fase: partido.torneo.fase_actual
+        });
+    }
+
 
     if (partido.torneo.tipo_torneo === Tipo.REGULAR) {
       if (partido.fase === 'grupos') {

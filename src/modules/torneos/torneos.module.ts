@@ -10,11 +10,13 @@ import { Jornada } from '../jornadas/entities/jornada.entity';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 import { Jugador } from '../jugadores/entities/jugadore.entity';
 import { Inscripcion } from '../inscripciones/entities/inscripcione.entity';
+import { ResultadosSetsModule } from '../resultados-sets/resultados-sets.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Torneo, Grupo, Partido, Jornada, Usuario, Jugador, Inscripcion]),
-    IamModule
+    IamModule,
+    ResultadosSetsModule
   ],
   controllers: [TorneosController],
   providers: [TorneosService],
