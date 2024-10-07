@@ -388,11 +388,11 @@ export class PartidosService {
               ' - ' +
               partido.pareja1.jugador2.nombre_a_mostrar
             : undefined,
-          nombres: partido.pareja1
-            ? `${partido.pareja1.jugador1.userid.nombre} - ${partido.pareja1.jugador2.userid.nombre}`
+          nombre_jugador1: partido.pareja1
+            ? `${partido.pareja1.jugador1.userid.nombre} ${partido.pareja1.jugador1.userid.apellido}`
             : undefined,
-          apellidos: partido.pareja1
-            ? `${partido.pareja1.jugador1.userid.apellido} - ${partido.pareja1.jugador2.userid.apellido}`
+          nombre_jugador2: partido.pareja1
+            ? `${partido.pareja1.jugador2.userid.nombre} ${partido.pareja1.jugador2.userid.apellido}`
             : undefined,
         },
         pareja2: {
@@ -402,11 +402,11 @@ export class PartidosService {
               ' - ' +
               partido.pareja2.jugador2.nombre_a_mostrar
             : undefined,
-          nombres: partido.pareja2
-            ? `${partido.pareja2.jugador1.userid.nombre} - ${partido.pareja2.jugador2.userid.nombre}`
+          nombre_jugador1: partido.pareja2
+            ? `${partido.pareja2.jugador1.userid.nombre} ${partido.pareja2.jugador1.userid.apellido}`
             : undefined,
-          apellidos: partido.pareja2
-            ? `${partido.pareja2.jugador1.userid.apellido} - ${partido.pareja2.jugador2.userid.apellido}`
+          nombre_jugador2: partido.pareja2
+            ? `${partido.pareja2.jugador2.userid.nombre} ${partido.pareja2.jugador2.userid.apellido}`
             : undefined,
         },
       };
