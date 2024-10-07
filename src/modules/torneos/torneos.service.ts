@@ -13,7 +13,7 @@ import {
   Retadores,
   TipoJornada,
 } from '../jornadas/entities/jornada.entity';
-import { number } from 'joi';
+import { any, number } from 'joi';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 import { Jugador } from '../jugadores/entities/jugadore.entity';
 import { Inscripcion } from '../inscripciones/entities/inscripcione.entity';
@@ -68,12 +68,14 @@ export class TorneosService {
     const torneo = await this.torneoRepository.findOneBy({ id: id });
     return torneo;
   }
-  
-  async getTorneoByPlayerId(id: number) {
-    const inscripciones = await this.inscripcionRepository.find({  where: { jugador: { id } },
-      relations: ['torneo'],});
 
-    const torneos = inscripciones.map(inscripcion => inscripcion.torneo)
+  async getTorneoByPlayerId(id: number) {
+    const inscripciones = await this.inscripcionRepository.find({
+      where: { jugador: { id } },
+      relations: ['torneo'],
+    });
+
+    const torneos = inscripciones.map((inscripcion) => inscripcion.torneo);
     return torneos;
   }
 
@@ -153,6 +155,7 @@ export class TorneosService {
       relations: [
         'inscripciones',
         'inscripciones.jugador',
+        'inscripciones.jugador.userid',
         'inscripciones.pareja',
       ],
     });
@@ -250,6 +253,11 @@ export class TorneosService {
 
       for (const grupo of grupos) {
         const grupoPersistido = await this.grupoRepository.save(grupo);
+
+        grupoPersistido.forEach((e: Grupo) => {
+          e.participantes;
+        });
+
         gruposResponse.push(grupoPersistido);
       }
 
