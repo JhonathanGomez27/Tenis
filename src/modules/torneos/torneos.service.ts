@@ -74,8 +74,14 @@ export class TorneosService {
   }
 
   async getTorneoByPlayerId(id: number) {
+    const jugador = await this.jugadorRepository.find({
+      where: {userid: {id}}
+    })
+
+    const id_jugador = jugador[0].id
+
     const inscripciones = await this.inscripcionRepository.find({
-      where: { jugador: { id } },
+      where: { jugador:{ id: id_jugador } },
       relations: ['torneo'],
     });
 
