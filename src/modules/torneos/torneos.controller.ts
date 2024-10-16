@@ -42,6 +42,7 @@ export class TorneosController {
     const usrRole = req.user.rol;
 
     if (usrRole === 'user') {
+      
       return this.torneosService.getTorneoByPlayerId(usrId);
     } else {
       return this.torneosService.findAll();
