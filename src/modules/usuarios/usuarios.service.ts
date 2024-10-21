@@ -197,30 +197,32 @@ export class UsuariosService {
       } else if (dato.rama === '2') {
         dato.rama = 'femenina';
       }
-      console.log(dato);
+
       const createUsuarioDto = {
         nombre: dato.nombre,
-        apellido: dato.Apellido,
+        apellido: dato.apellido,
+        nombre_a_mostrar: dato.nombre + ' ' + dato.apellido,
         rol: rolEnum.USER,
-        correo: null,
-        contrasena: null,
+        correo: dato.correo,
+        contrasena: dato.contrasenia,
       };
 
-      if (dato.id_jugador === '1') {
-        (createUsuarioDto.correo = 'admin@admin.com'),
-          (createUsuarioDto.contrasena = 'Abcd1234.');
-        createUsuarioDto.contrasena = await this.hashingService.hash(
-          createUsuarioDto.contrasena.trim(),
-        );
-      }
+      createUsuarioDto.contrasena = await this.hashingService.hash(createUsuarioDto.contrasena.trim());
+
+      // if (dato.id_jugador === '1') {
+      //   (createUsuarioDto.correo = 'admin@admin.com'),
+      //     (createUsuarioDto.contrasena = 'Abcd1234.');
+      //   createUsuarioDto.contrasena = await this.hashingService.hash(
+      //     createUsuarioDto.contrasena.trim(),
+      //   );
+      // }
 
       const usuario = this.usuarioRepository.create(createUsuarioDto);
       const usuarioGuardado = await this.usuarioRepository.save(usuario);
 
       if (usuarioGuardado.rol === rolEnum.USER) {
         const jugadorDto = {
-          nombre_a_mostrar:
-            createUsuarioDto.nombre + ' ' + createUsuarioDto.apellido,
+          nombre_a_mostrar: createUsuarioDto.nombre + ' ' + createUsuarioDto.apellido,
           //ranking: createUsuarioDto.ranking,
           rama: dato.rama,
           categoria: categoria.A,
