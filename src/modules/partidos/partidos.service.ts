@@ -29,10 +29,8 @@ export class PartidosService {
     @InjectRepository(Inscripcion)
     private inscripcionRepository: Repository<Inscripcion>,
     @InjectRepository(Pareja) private parejaRepository: Repository<Pareja>,
-    @InjectRepository(Jugador) private jugadorRepository: Repository<Jugador>
-    
-
-  ) { }
+    @InjectRepository(Jugador) private jugadorRepository: Repository<Jugador>,
+  ) {}
 
   generarBracketsPredefinidos(fase: string) {
     console.log(fase);
@@ -453,29 +451,43 @@ export class PartidosService {
     const { sets, ganador, perdedor } = nuevoResultado;
 
     let modalidad: Modalidad;
-    if (partido.jugador1 && partido.jugador2 && !partido.pareja1 && !partido.pareja2) {
-        modalidad = Modalidad.SINGLES; 
-    } else if (partido.pareja1 && partido.pareja2 && !partido.jugador1 && !partido.jugador2) {
-        modalidad = Modalidad.PAREJA; 
+    if (
+      partido.jugador1 &&
+      partido.jugador2 &&
+      !partido.pareja1 &&
+      !partido.pareja2
+    ) {
+      modalidad = Modalidad.SINGLES;
+    } else if (
+      partido.pareja1 &&
+      partido.pareja2 &&
+      !partido.jugador1 &&
+      !partido.jugador2
+    ) {
+      modalidad = Modalidad.PAREJA;
     } else {
-        throw new MiExcepcionPersonalizada('No se puede determinar la modalidad del partido', 400);
+      throw new MiExcepcionPersonalizada(
+        'No se puede determinar la modalidad del partido',
+        400,
+      );
     }
 
     for (const set of sets) {
-        const [puntosGanador, puntosPerdedor] = set.marcador.split('-').map(Number);
+      const [puntosGanador, puntosPerdedor] = set.marcador
+        .split('-')
+        .map(Number);
 
-        await this.resultadosSetsService.create({
-            id_torneo: partido.torneo.id,
-            id_partido: partido.id,
-            ganador: ganador.id,
-            perdedor: perdedor.id,
-            puntos_ganador: puntosGanador,
-            puntos_perdedor: puntosPerdedor,
-            modalidad: modalidad, 
-            fase: partido.torneo.fase_actual
-        });
+      await this.resultadosSetsService.create({
+        id_torneo: partido.torneo.id,
+        id_partido: partido.id,
+        ganador: ganador.id,
+        perdedor: perdedor.id,
+        puntos_ganador: puntosGanador,
+        puntos_perdedor: puntosPerdedor,
+        modalidad: modalidad,
+        fase: partido.torneo.fase_actual,
+      });
     }
-
 
     if (partido.torneo.tipo_torneo === Tipo.REGULAR) {
       if (partido.fase === 'grupos') {
@@ -1255,6 +1267,8 @@ export class PartidosService {
       );
     }
 
+    console.log(torneo.fase_actual);
+
     switch (torneo.fase_actual) {
       case 'grupos':
         if (torneo.tipo_torneo === 'regular') {
@@ -1274,7 +1288,7 @@ export class PartidosService {
 
   async sortearSiguienteFaseTorneoRegularFaseGrupos(torneo: Torneo) {
     const grupos = await this.grupoRepository.find({
-      where: { torneo: torneo },
+      where: { torneo: { id: torneo.id } },
       relations: ['partidos'],
     });
 
