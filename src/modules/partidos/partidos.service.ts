@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePartidoDto } from './dto/create-partido.dto';
-import { UpdatePartidoDto } from './dto/update-partido.dto';
 import { Partido } from './entities/partido.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -1267,8 +1265,6 @@ export class PartidosService {
       );
     }
 
-    console.log(torneo.fase_actual);
-
     switch (torneo.fase_actual) {
       case 'grupos':
         if (torneo.tipo_torneo === 'regular') {
@@ -1514,7 +1510,7 @@ export class PartidosService {
       where: { torneo: torneo },
     });
     const partidosJugadosLlaves = await this.partidoRepository.find({
-      where: { torneo: torneo, fase: torneo.fase_actual },
+      where: { torneo: { id: torneo.id } },
     });
     const todosFinalizados = partidosJugadosLlaves.every(
       (partido) => partido.finalizado,
@@ -1885,7 +1881,7 @@ export class PartidosService {
 
   async jugarFinal(torneo: Torneo) {
     const partidosJugadosLlaves = await this.partidoRepository.find({
-      where: { torneo: torneo, fase: torneo.fase_actual },
+      where: { torneo: { id: torneo.id }, fase: torneo.fase_actual },
       relations: [
         'jugador1',
         'jugador2',
@@ -2189,14 +2185,14 @@ export class PartidosService {
     //obtener la cantiadad maxima de inscripciones
 
     const fases = await this.llaveRepository.find({
-      where: { torneo: torneo },
+      where: { torneo: { id: torneo.id } },
       relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2'],
     });
 
     //obtener los finalistas
 
     const final = await this.partidoRepository.findOne({
-      where: { torneo: torneo, fase: 'final' },
+      where: { torneo: { id: torneo.id } },
       relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2'],
     });
 
