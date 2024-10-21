@@ -202,7 +202,7 @@ export class TorneosController {
 
   @Roles(rolEnum.USER)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
-  @Get('/infoToneos')
+  @Get('/infoTorneos')
   dashboardTorneos(@Request() req) {
     const usrId = req.user.id;
     return this.torneosService.dashboardTorneos(usrId);
