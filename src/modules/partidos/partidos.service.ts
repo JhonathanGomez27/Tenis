@@ -31,7 +31,7 @@ export class PartidosService {
   ) {}
 
   generarBracketsPredefinidos(fase: string) {
-    console.log(fase);
+    // console.log(fase);
     // Lógica para generar los brackets predefinidos según la fase
     const brackets = [];
 
@@ -1320,6 +1320,8 @@ export class PartidosService {
     // guardar las llaves en la bd
     const modalidad = torneo.modalidad;
     const fase = this.obtenerEtapa(llaves.length);
+
+    console.log(llaves);
     //return fase
     for (const llave of llaves) {
       let jugador1: any;
@@ -1329,6 +1331,7 @@ export class PartidosService {
       const generarBracketsPredefinidos =
         this.generarBracketsPredefinidos(fase);
       //let fase: any
+
       if (modalidad === 'singles') {
         jugador1 = llave.participante1.id;
         jugador2 = llave.participante2.id;
@@ -1543,16 +1546,25 @@ export class PartidosService {
       ganadores.push(participante);
     }
 
+    let semifinales:any = [];
+    for(const llave of partidosJugadosLlaves){
+      if(llave.fase === 'semifinales'){
+        semifinales.push(llave.resultado.ganador)
+      }
+    }
+
     //return {ganadores, llaves}
     const nuevaFase = this.obtenerSiguienteFase(torneo.fase_actual);
 
     // validar si la nueva fase es la final, no se hace todo el proceso de llaves sino que simplemente se obtiene el ganador de las dos llaves y se crea una llave final y un partido final y se retorna
+    // return {ganadores, semifinales};s
 
     if (nuevaFase === 'final') {
       //validar si es singles o dobles
+      // console.log(ganadores, nuevaFase);
       if (torneo.modalidad === 'singles') {
-        const jugador1 = ganadores[0].id;
-        const jugador2 = ganadores[1].id;
+        const jugador1 = semifinales[0].id;
+        const jugador2 = semifinales[1].id;
         const llaveCreada = this.llaveRepository.create({
           torneo: torneo,
           fase: nuevaFase,
@@ -1569,6 +1581,8 @@ export class PartidosService {
         const partidoGuardado = await this.partidoRepository.save(
           partidoCreado,
         );
+
+        // console.log(llaveCreada);
         torneo.fase_actual = 'final';
         await this.torneoRepository.save(torneo);
         return llaveGuardada;
@@ -2150,7 +2164,7 @@ export class PartidosService {
       const participante1 = participantesOrdenados[i];
       const participante2 =
         participantesOrdenados[participantesOrdenados.length - 1 - i];
-      console.log(participante1.id, 'vs', participante2.id);
+      // console.log(participante1.id, 'vs', participante2.id);
       const llave = {
         participante1,
         participante2, //borra lo siguiente
