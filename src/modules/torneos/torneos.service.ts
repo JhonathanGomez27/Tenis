@@ -1462,9 +1462,15 @@ export class TorneosService {
   }
 
   async dashboardTorneos(id: number) {
+    const jugador = await this.jugadorRepository.find({
+      where: {userid: {id}}
+    })
+
+    const id_jugador = jugador[0].id
+
     const inscripciones = await this.inscripcionRepository.find({
-      where: { jugador: { id } },
-      relations: ['torneo'], 
+      where: { jugador:{ id: id_jugador } },
+      relations: ['torneo'],
     });
   
     const torneos = inscripciones.map(inscripcion => inscripcion.torneo);
@@ -1481,15 +1487,15 @@ export class TorneosService {
     const torneosParticipados = torneos.length;
         
     const partidosGanados = await this.resultadosSetsService.count({
-      ganador: { id }, 
+      ganador: { id_jugador }, 
     });
 
-    const torneosCampeon = await this.resultadosSetsService.countCampeon(id);
-    const torneosSubcampeon = await this.resultadosSetsService.countSubcampeonatos(id);
-    const partidosGanadosSingles = await this.resultadosSetsService.countGanadosSingles(id);
-    const partidosPerdidosSingles = await this.resultadosSetsService.countPerdidosSingles(id);
-    const partidosGanadosPareja = await this.resultadosSetsService.countGanadosPareja(id);
-    const partidosPerdidosPareja = await this.resultadosSetsService.countPerdidosPareja(id);
+    const torneosCampeon = await this.resultadosSetsService.countCampeon(id_jugador);
+    const torneosSubcampeon = await this.resultadosSetsService.countSubcampeonatos(id_jugador);
+    const partidosGanadosSingles = await this.resultadosSetsService.countGanadosSingles(id_jugador);
+    const partidosPerdidosSingles = await this.resultadosSetsService.countPerdidosSingles(id_jugador);
+    const partidosGanadosPareja = await this.resultadosSetsService.countGanadosPareja(id_jugador);
+    const partidosPerdidosPareja = await this.resultadosSetsService.countPerdidosPareja(id_jugador);
 
   
     return {
