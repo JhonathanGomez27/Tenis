@@ -210,8 +210,8 @@ export class TorneosController {
 
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthAccessGuard, RolesGuard)
-  @Get('estadisticasTorneos')
-  estadisticasTorneos(@Query() query: any) {
-    return this.torneosService.estadisticasTorneos(query);
+  @Get('adminEstadisticasTorneos')
+  adminEstadisticasTorneos() {
+    return this.torneosService.adminEstadisticasTorneos();
   }
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateTorneoDto } from './dto/create-torneo.dto';
 import { UpdateTorneoDto } from './dto/update-torneo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Estado, Modalidad, Tipo, Torneo } from './entities/torneo.entity';
+import { Estado, Fases, Modalidad, Tipo, Torneo } from './entities/torneo.entity';
 import { Not, Repository } from 'typeorm';
 import { handleDbError } from 'src/utils/error.message';
 import { MiExcepcionPersonalizada } from 'src/utils/exception';
@@ -1512,37 +1512,25 @@ export class TorneosService {
     };
   }
 
-  async estadisticasTorneos(query: any): Promise<Torneo[]> {
-    const queryBuilder = this.torneoRepository.createQueryBuilder('torneo');
+  async adminEstadisticasTorneos() {
+    const stats = {
+        totalTorneosTipoRegular: await this.torneoRepository.count({ where: { tipo_torneo: Tipo.REGULAR } }),
+        totalTorneosTipoEscalera: await this.torneoRepository.count({ where: { tipo_torneo: Tipo.ESCALERA } }),
+        totalTorneosSingles: await this.torneoRepository.count({ where: { modalidad: Modalidad.SINGLES } }),
+        totalTorneosDobles: await this.torneoRepository.count({ where: { modalidad: Modalidad.DOBLES } }),
+        totalTorneosEstadoInicial: await this.torneoRepository.count({ where: { estado: Estado.INICIAL } }),
+        totalTorneosEstadoSorteo: await this.torneoRepository.count({ where: { estado: Estado.SORTEO } }),
+        totalTorneosEstadoProgramacion: await this.torneoRepository.count({ where: { estado: Estado.PROGRAMACION } }),
+        totalTorneosEstadoEnProceso: await this.torneoRepository.count({ where: { estado: Estado.PROCESO } }),
+        totalTorneosEstadoFinalizado: await this.torneoRepository.count({ where: { estado: Estado.FINALIZADO } }),
+        totalTorneosFaseGrupos: await this.torneoRepository.count({ where: { fase_actual: Fases.GRUPOS } }),
+        totalTorneosFaseOctavos: await this.torneoRepository.count({ where: { fase_actual: Fases.OCTAVOS } }),
+        totalTorneosFaseCuartos: await this.torneoRepository.count({ where: { fase_actual: Fases.CUARTOS } }),
+        totalTorneosFaseSemifinales: await this.torneoRepository.count({ where: { fase_actual: Fases.SEMIFINALES } }),
+        totalTorneosFaseFinal: await this.torneoRepository.count({ where: { fase_actual: Fases.FINAL } }),
+    };
 
-    if (query.nombre) {
-      queryBuilder.andWhere('torneo.nombre LIKE :nombre', { nombre: `%${query.nombre}%` });
-    }
-    if (query.tipo_torneo) {
-      queryBuilder.andWhere('torneo.tipo_torneo = :tipo_torneo', { tipo_torneo: query.tipo_torneo });
-    }
-    if (query.rama) {
-      queryBuilder.andWhere('torneo.rama = :rama', { rama: query.rama });
-    }
-    if (query.modalidad) {
-      queryBuilder.andWhere('torneo.modalidad = :modalidad', { modalidad: query.modalidad });
-    }
-    if (query.categoria) {
-      queryBuilder.andWhere('torneo.categoria = :categoria', { categoria: query.categoria });
-    }
-    if (query.fase_actual) {
-      queryBuilder.andWhere('torneo.fase_actual = :fase_actual', { fase_actual: query.fase_actual });
-    }
-    if (query.estado) {
-      queryBuilder.andWhere('torneo.estado = :estado', { estado: query.estado });
-    }
-    if (query.fecha_inicio) {
-      queryBuilder.andWhere('torneo.fecha_inicio >= :fecha_inicio', { fecha_inicio: query.fecha_inicio });
-    }
-    if (query.fecha_fin) {
-      queryBuilder.andWhere('torneo.fecha_fin <= :fecha_fin', { fecha_fin: query.fecha_fin });
-    }
+    return stats;
 
-    return await queryBuilder.getMany();
   }
 }
