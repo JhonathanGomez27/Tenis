@@ -12,7 +12,7 @@ export class CreateJugadorDto {
   readonly nombre_a_mostrar: string;
 
   @IsEnum(['masculina', 'femenina'])
-  readonly rama: 'masculina' | 'femenina';
+  readonly rama: 'masculina' | 'femenina' | 'mixta';
 
   @IsOptional()
   @IsEnum(['A', 'B+', 'B', 'C+', 'C', 'D'])

@@ -4,38 +4,38 @@ import { Partido } from 'src/modules/partidos/entities/partido.entity';
 import { Jugador } from 'src/modules/jugadores/entities/jugadore.entity';
 
 export enum Modalidad {
-    SINGLES = 'singles',
-    PAREJA = 'pareja',
+  SINGLES = 'singles',
+  PAREJA = 'pareja',
 }
 
 @Entity({ name: 'resultadosSets' })
 export class ResultadosSet {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @ManyToOne(() => Torneo)
-    torneo: Torneo;
-  
-    @ManyToOne(() => Partido)
-    partido: Partido;
-  
-    @ManyToOne(() => Jugador)
-    ganador: Jugador;
-  
-    @ManyToOne(() => Jugador)
-    perdedor: Jugador;
+  @ManyToOne(() => Torneo, (torneo) => torneo.resultadosSets)
+  torneo: Torneo;
 
-    @Column()
-    puntos_ganador: number;
+  @ManyToOne(() => Partido)
+  partido: Partido;
 
-    @Column()
-    puntos_perdedor: number;
+  @ManyToOne(() => Jugador)
+  ganador: Jugador;
 
-    @Column({
-        type: 'enum',
-        enum: Modalidad,
-    })
-    modalidad: Modalidad;
-    @Column()
-    fase: 'grupos' | 'octavos' | 'cuartos' | 'semifinales' | 'final' | 'otra';    
+  @ManyToOne(() => Jugador)
+  perdedor: Jugador;
+
+  @Column()
+  puntos_ganador: number;
+
+  @Column()
+  puntos_perdedor: number;
+
+  @Column({
+    type: 'enum',
+    enum: Modalidad,
+  })
+  modalidad: Modalidad;
+  @Column()
+  fase: 'grupos' | 'octavos' | 'cuartos' | 'semifinales' | 'final' | 'otra';
 }

@@ -38,7 +38,7 @@ export class Jugador {
     type: 'enum',
     enum: rama,
   })
-  rama: 'masculina' | 'femenina';
+  rama: 'masculina' | 'femenina' | 'mixta';
 
   @Column({
     type: 'enum',

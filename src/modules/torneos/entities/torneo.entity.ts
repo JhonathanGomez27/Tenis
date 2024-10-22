@@ -1,158 +1,156 @@
-import { Grupo } from "src/modules/grupos/entities/grupo.entity";
-import { Inscripcion } from "src/modules/inscripciones/entities/inscripcione.entity";
-import { Jornada } from "src/modules/jornadas/entities/jornada.entity";
-import { categoria, rama } from "src/modules/jugadores/entities/jugadore.entity";
-import { Llave } from "src/modules/llaves/entities/llave.entity";
-import { Partido } from "src/modules/partidos/entities/partido.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-
-
+import { Grupo } from 'src/modules/grupos/entities/grupo.entity';
+import { Inscripcion } from 'src/modules/inscripciones/entities/inscripcione.entity';
+import { Jornada } from 'src/modules/jornadas/entities/jornada.entity';
+import {
+  categoria,
+  rama,
+} from 'src/modules/jugadores/entities/jugadore.entity';
+import { Llave } from 'src/modules/llaves/entities/llave.entity';
+import { Partido } from 'src/modules/partidos/entities/partido.entity';
+import { ResultadosSet } from 'src/modules/resultados-sets/entities/resultados-set.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum Tipo {
-    REGULAR = 'regular',
-    ESCALERA = 'escalera'
+  REGULAR = 'regular',
+  ESCALERA = 'escalera',
 }
 
 export enum Modalidad {
-    SINGLES = 'singles',
-    DOBLES = 'dobles'
+  SINGLES = 'singles',
+  DOBLES = 'dobles',
 }
 
 export enum Estado {
-    INICIAL = 'Inicial',
-    SORTEO = 'Sorteo',
-    PROGRAMACION = 'Programacion',
-    PROCESO = 'En Proceso',
-    FINALIZADO = 'Finalizado'
+  INICIAL = 'Inicial',
+  SORTEO = 'Sorteo',
+  PROGRAMACION = 'Programacion',
+  PROCESO = 'En Proceso',
+  FINALIZADO = 'Finalizado',
 }
 
-
 export enum Fases {
-    GRUPOS = 'grupos',
-    OCTAVOS = 'octavos',
-    CUARTOS = 'cuartos',
-    SEMIFINALES = 'semifinales',
-    FINAL = 'final',
-    // OTRA = 'otra'
+  GRUPOS = 'grupos',
+  OCTAVOS = 'octavos',
+  CUARTOS = 'cuartos',
+  SEMIFINALES = 'semifinales',
+  FINAL = 'final',
+  // OTRA = 'otra'
 }
 
 @Entity({ name: 'torneos' })
 export class Torneo {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Column()
+  nombre: string;
 
-    @Column()
-    nombre: string;
+  @Column({
+    type: 'enum',
+    enum: Tipo,
+    //default: Tipo.REGULAR
+  })
+  tipo_torneo: 'regular' | 'escalera';
 
-    @Column({
-        type: 'enum',
-        enum: Tipo
-        //default: Tipo.REGULAR
-    })
-    tipo_torneo: 'regular' | 'escalera';
+  @Column({
+    type: 'enum',
+    enum: rama,
+  })
+  rama: 'masculina' | 'femenina' | 'mixta';
 
-    @Column({
-        type: 'enum',
-        enum: rama
-    })
-    rama: 'masculina' | 'femenina' | 'mixta';
+  @Column({
+    type: 'enum',
+    enum: Modalidad,
+    default: Modalidad.SINGLES,
+  })
+  modalidad: 'singles' | 'dobles';
 
-    @Column({
-        type: 'enum',
-        enum: Modalidad,
-        default: Modalidad.SINGLES
-    })
-    modalidad: 'singles' | 'dobles';
+  //@Column({ default: 4 })
+  // cantidad_grupos: number;
 
+  @Column({ default: 4 })
+  cantidad_grupos: number;
 
-    //@Column({ default: 4 })
-    // cantidad_grupos: number;
+  @Column({
+    type: 'enum',
+    enum: categoria,
+  })
+  categoria: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D';
 
-    @Column({ default: 4 })
-    cantidad_grupos: number;
+  @Column({
+    type: 'json',
+    transformer: {
+      to(value: any): string {
+        if (typeof value === 'object') {
+          value = JSON.stringify(value);
+        }
 
-    @Column({
-        type: 'enum',
-        enum: categoria
-    })
-    categoria: 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D'
+        return value;
+      },
+      from(value: string): any {
+        if (typeof value === 'string') {
+          try {
+            return JSON.parse(value);
+          } catch (e) {
+            return value;
+          }
+        }
 
-    @Column({
-        type: 'json',
-        transformer: {
-            to(value: any): string {
-                if (typeof value === 'object') {
-                    value = JSON.stringify(value);
-                }
-            
-                return value;
-            },
-            from(value: string): any {
-                if (typeof value === 'string') {
-                    try {
-                      return JSON.parse(value);
-                    } catch (e) {
-                      return value;
-                    }
-                }
+        return value;
+      },
+    },
+  })
+  configuracion_sets: any;
 
-                return value;
-            },
-        },
-    })
-    configuracion_sets: any;
+  @Column({
+    type: 'enum',
+    enum: Fases,
+  })
+  fase_actual:
+    | 'grupos'
+    | 'octavos'
+    | 'cuartos'
+    | 'semifinales'
+    | 'final'
+    | 'otra';
 
+  @Column({ type: 'datetime' })
+  fecha_inicio: Date;
 
-    @Column({
-        type: 'enum',
-        enum: Fases
-    })
-    fase_actual: 'grupos' | 'octavos' | 'cuartos' | 'semifinales' | 'final' | 'otra';
+  @Column({ type: 'datetime' })
+  fecha_fin: Date;
 
-    @Column({ type: "datetime" })
-    fecha_inicio: Date;
+  @Column({
+    type: 'enum',
+    enum: Estado,
+    default: Estado.INICIAL,
+  })
+  estado: 'Inicial' | 'En Proceso' | 'Finalizado' | 'Sorteo' | 'Programacion';
 
-    @Column({ type: "datetime" })
-    fecha_fin: Date;
+  @Column({ nullable: true })
+  cantidad_jornadas_regulares: number;
 
-    @Column({
-        type: 'enum',
-        enum: Estado,
-        default: Estado.INICIAL
-    })
-    estado: 'Inicial' | 'En Proceso' | 'Finalizado' | 'Sorteo' | 'Programacion'
+  @Column({ nullable: true })
+  cantidad_jornadas_cruzadas: number;
 
-    @Column({ nullable: true})
-    cantidad_jornadas_regulares: number;
+  @Column({ nullable: true, default: 1 })
+  jornada_actual: number;
 
-    @Column({ nullable: true})
-    cantidad_jornadas_cruzadas: number;
+  @OneToMany(() => Partido, (partido) => partido.torneo)
+  partidos: Partido[];
 
+  @OneToMany(() => Inscripcion, (inscripcion) => inscripcion.torneo)
+  inscripciones: Inscripcion[];
 
-    @Column({ nullable: true, default: 1})
-    jornada_actual: number
+  @OneToMany(() => Grupo, (grupo) => grupo.torneo)
+  grupos: Grupo[];
 
+  @OneToMany(() => Llave, (llave) => llave.torneo)
+  llaves: Llave[];
 
+  @OneToMany(() => Jornada, (jornada) => jornada.torneo)
+  jornadas: Jornada[];
 
-    @OneToMany(() => Partido, partido => partido.torneo)
-    partidos: Partido[];
-
-
-    @OneToMany(() => Inscripcion, inscripcion => inscripcion.torneo)
-    inscripciones: Inscripcion[];
-
-    @OneToMany(() => Grupo, grupo => grupo.torneo)
-    grupos: Grupo[];
-
-
-    @OneToMany(() => Llave, llave => llave.torneo)
-    llaves: Llave[];
-
-    
-    @OneToMany(() => Jornada, jornada => jornada.torneo)
-    jornadas: Jornada[];
-
-
-
+  @OneToMany(() => ResultadosSet, (resultadosSets) => resultadosSets.torneo)
+  resultadosSets: ResultadosSet[];
 }

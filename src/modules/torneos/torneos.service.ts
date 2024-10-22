@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { CreateTorneoDto } from './dto/create-torneo.dto';
 import { UpdateTorneoDto } from './dto/update-torneo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Estado, Fases, Modalidad, Tipo, Torneo } from './entities/torneo.entity';
+import {
+  Estado,
+  Fases,
+  Modalidad,
+  Tipo,
+  Torneo,
+} from './entities/torneo.entity';
 import { Not, Repository } from 'typeorm';
 import { handleDbError } from 'src/utils/error.message';
 import { MiExcepcionPersonalizada } from 'src/utils/exception';
@@ -15,7 +21,7 @@ import {
 } from '../jornadas/entities/jornada.entity';
 import { any, number } from 'joi';
 import { Usuario } from '../usuarios/entities/usuario.entity';
-import { Jugador } from '../jugadores/entities/jugadore.entity';
+import { Jugador, rama } from '../jugadores/entities/jugadore.entity';
 import { Inscripcion } from '../inscripciones/entities/inscripcione.entity';
 import { ResultadosSet } from '../resultados-sets/entities/resultados-set.entity';
 import { ResultadosSetsService } from '../resultados-sets/resultados-sets.service';
@@ -32,7 +38,6 @@ export class TorneosService {
     @InjectRepository(Inscripcion)
     private inscripcionRepository: Repository<Inscripcion>,
     private readonly resultadosSetsService: ResultadosSetsService, // Inyecta el servicio
-
   ) {}
 
   async create(createTorneoDto: CreateTorneoDto) {
@@ -75,13 +80,13 @@ export class TorneosService {
 
   async getTorneoByPlayerId(id: number) {
     const jugador = await this.jugadorRepository.find({
-      where: {userid: {id}}
-    })
+      where: { userid: { id } },
+    });
 
-    const id_jugador = jugador[0].id
+    const id_jugador = jugador[0].id;
 
     const inscripciones = await this.inscripcionRepository.find({
-      where: { jugador:{ id: id_jugador } },
+      where: { jugador: { id: id_jugador } },
       relations: ['torneo'],
     });
 
@@ -1463,41 +1468,47 @@ export class TorneosService {
 
   async dashboardTorneos(id: number) {
     const jugador = await this.jugadorRepository.find({
-      where: {userid: {id}}
-    })
+      where: { userid: { id } },
+    });
 
-    const id_jugador = jugador[0].id
+    const id_jugador = jugador[0].id;
 
     const inscripciones = await this.inscripcionRepository.find({
-      where: { jugador:{ id: id_jugador } },
+      where: { jugador: { id: id_jugador } },
       relations: ['torneo'],
     });
-  
-    const torneos = inscripciones.map(inscripcion => inscripcion.torneo);
-  
+
+    const torneos = inscripciones.map((inscripcion) => inscripcion.torneo);
+
     const torneosEnProceso = torneos
-    .filter(torneo => torneo.estado === 'En Proceso')
-    .map(torneo => ({
-      nombre: torneo.nombre,
-      fase_actual: torneo.fase_actual,
-    }));
+      .filter((torneo) => torneo.estado === 'En Proceso')
+      .map((torneo) => ({
+        nombre: torneo.nombre,
+        fase_actual: torneo.fase_actual,
+      }));
 
     const totalTorneosEnProceso = torneosEnProceso.length;
-  
+
     const torneosParticipados = torneos.length;
-        
+
     const partidosGanados = await this.resultadosSetsService.count({
-      ganador: { id_jugador }, 
+      ganador: { id_jugador },
     });
 
-    const torneosCampeon = await this.resultadosSetsService.countCampeon(id_jugador);
-    const torneosSubcampeon = await this.resultadosSetsService.countSubcampeonatos(id_jugador);
-    const partidosGanadosSingles = await this.resultadosSetsService.countGanadosSingles(id_jugador);
-    const partidosPerdidosSingles = await this.resultadosSetsService.countPerdidosSingles(id_jugador);
-    const partidosGanadosPareja = await this.resultadosSetsService.countGanadosPareja(id_jugador);
-    const partidosPerdidosPareja = await this.resultadosSetsService.countPerdidosPareja(id_jugador);
+    const torneosCampeon = await this.resultadosSetsService.countCampeon(
+      id_jugador,
+    );
+    const torneosSubcampeon =
+      await this.resultadosSetsService.countSubcampeonatos(id_jugador);
+    const partidosGanadosSingles =
+      await this.resultadosSetsService.countGanadosSingles(id_jugador);
+    const partidosPerdidosSingles =
+      await this.resultadosSetsService.countPerdidosSingles(id_jugador);
+    const partidosGanadosPareja =
+      await this.resultadosSetsService.countGanadosPareja(id_jugador);
+    const partidosPerdidosPareja =
+      await this.resultadosSetsService.countPerdidosPareja(id_jugador);
 
-  
     return {
       torneosEnProceso,
       totalTorneosEnProceso,
@@ -1513,24 +1524,135 @@ export class TorneosService {
   }
 
   async adminEstadisticasTorneos() {
-    const stats = {
-        totalTorneosTipoRegular: await this.torneoRepository.count({ where: { tipo_torneo: Tipo.REGULAR } }),
-        totalTorneosTipoEscalera: await this.torneoRepository.count({ where: { tipo_torneo: Tipo.ESCALERA } }),
-        totalTorneosSingles: await this.torneoRepository.count({ where: { modalidad: Modalidad.SINGLES } }),
-        totalTorneosDobles: await this.torneoRepository.count({ where: { modalidad: Modalidad.DOBLES } }),
-        totalTorneosEstadoInicial: await this.torneoRepository.count({ where: { estado: Estado.INICIAL } }),
-        totalTorneosEstadoSorteo: await this.torneoRepository.count({ where: { estado: Estado.SORTEO } }),
-        totalTorneosEstadoProgramacion: await this.torneoRepository.count({ where: { estado: Estado.PROGRAMACION } }),
-        totalTorneosEstadoEnProceso: await this.torneoRepository.count({ where: { estado: Estado.PROCESO } }),
-        totalTorneosEstadoFinalizado: await this.torneoRepository.count({ where: { estado: Estado.FINALIZADO } }),
-        totalTorneosFaseGrupos: await this.torneoRepository.count({ where: { fase_actual: Fases.GRUPOS } }),
-        totalTorneosFaseOctavos: await this.torneoRepository.count({ where: { fase_actual: Fases.OCTAVOS } }),
-        totalTorneosFaseCuartos: await this.torneoRepository.count({ where: { fase_actual: Fases.CUARTOS } }),
-        totalTorneosFaseSemifinales: await this.torneoRepository.count({ where: { fase_actual: Fases.SEMIFINALES } }),
-        totalTorneosFaseFinal: await this.torneoRepository.count({ where: { fase_actual: Fases.FINAL } }),
+    // const totalTorneosTipoRegular = await this.torneoRepository.count({
+    //   where: { tipo_torneo: Tipo.REGULAR },
+    // });
+
+    // const totalTorneosTipoEscalera = await this.torneoRepository.count({
+    //   where: { tipo_torneo: Tipo.ESCALERA },
+    // });
+
+    // const totalTorneosSingles = await this.torneoRepository.count({
+    //   where: { modalidad: Modalidad.SINGLES },
+    // });
+
+    // const totalTorneosDobles = await this.torneoRepository.count({
+    //   where: { modalidad: Modalidad.DOBLES },
+    // });
+
+    // const totalTorneosEstadoIicial = await this.torneoRepository.count({
+    //   where: { estado: Estado.INICIAL },
+    // });
+
+    // const totalTorneosEstadoSorteo = await this.torneoRepository.count({
+    //   where: { estado: Estado.SORTEO },
+    // });
+
+    // const totalTorneosEstadoProgramcion = await this.torneoRepository.count({
+    //   where: { estado: Estado.PROGRAMACION },
+    // });
+
+    // const totalTorneosEstadoEnProceso = await this.torneoRepository.count({
+    //   where: { estado: Estado.PROCESO },
+    // });
+
+    // const totalTorneosEstadoFinalizado = await this.torneoRepository.count({
+    //   where: { estado: Estado.FINALIZADO },
+    // });
+
+    // const totalTorneosFaseGrupos = await this.torneoRepository.count({
+    //   where: { fase_actual: Fases.GRUPOS },
+    // });
+
+    // const totalTorneosFaseOctavos = await this.torneoRepository.count({
+    //   where: { fase_actual: Fases.OCTAVOS },
+    // });
+
+    // const totalTorneosFaseCuartos = await this.torneoRepository.count({
+    //   where: { fase_actual: Fases.CUARTOS },
+    // });
+
+    // const totalTorneosFaseSemifinales = await this.torneoRepository.count({
+    //   where: { fase_actual: Fases.SEMIFINALES },
+    // });
+
+    // const totalTorneosFaseFinal = await this.torneoRepository.count({
+    //   where: { fase_actual: Fases.FINAL },
+    // });
+
+    // const totalJugadoresMasculinos = await this.jugadorRepository.count({
+    //   where: { rama: rama.MASCULINA },
+    // });
+
+    // const totalJugadorasFemeninas = await this.jugadorRepository.count({
+    //   where: { rama: rama.FEMENINA },
+    // });
+
+    // const totalJugadoresMixta = await this.jugadorRepository.count({
+    //   where: { rama: rama.MIXTA },
+    // });
+
+    const torneos = await this.torneoRepository.find({
+      relations: [
+        'partidos',
+        'resultadosSets',
+        'resultadosSets.ganador',
+        'resultadosSets.perdedor',
+      ],
+    });
+
+    const jugadoresMayorPuntaje = [];
+
+    const puntajes = [];
+    torneos.forEach((e) => {
+      e.resultadosSets.forEach((e) => {
+        const ganador = e.ganador;
+        const perdedor = e.perdedor;
+
+        let j = puntajes.find((e) => e.id === ganador.id);
+
+        if (!j) {
+          puntajes.push({ ...ganador, puntos: e.puntos_ganador });
+        } else {
+          const jugador = puntajes.find((e) => e.id === ganador.id);
+
+          jugador.puntos += e.puntos_ganador;
+
+          for (let i = 0; i < puntajes.length; i++) {
+            if (puntajes[i] === jugador.id) {
+              puntajes[i] = jugador;
+              break;
+            }
+          }
+        }
+
+        j = puntajes.find((e) => e.id === perdedor.id);
+
+        if (!j) {
+          puntajes.push({ ...perdedor, puntos: e.puntos_ganador });
+        } else {
+          const jugador = puntajes.find((e) => e.id === perdedor.id);
+
+          jugador.puntos += e.puntos_perdedor;
+
+          for (let i = 0; i < puntajes.length; i++) {
+            if (puntajes[i] === jugador.id) {
+              puntajes[i] = jugador;
+              break;
+            }
+          }
+        }
+      });
+
+      puntajes.sort((a, b) => b.puntos - a.puntos);
+    });
+
+    for (let i = 0; i < 5; i++) {
+      jugadoresMayorPuntaje.push(puntajes[i]);
+    }
+
+    return {
+      jugadoresMayorPuntaje,
     };
-
-    return stats;
-
   }
 }
