@@ -1511,4 +1511,40 @@ export class TorneosService {
       partidosPerdidosPareja,
     };
   }
+
+  async estadisticasTorneos(query: any): Promise<Torneo[]> {
+    const queryBuilder = this.torneoRepository.createQueryBuilder('torneo');
+
+    // Filtrado dinámico basado en query params
+    if (query.nombre) {
+      queryBuilder.andWhere('torneo.nombre LIKE :nombre', { nombre: `%${query.nombre}%` });
+    }
+    if (query.tipo_torneo) {
+      queryBuilder.andWhere('torneo.tipo_torneo = :tipo_torneo', { tipo_torneo: query.tipo_torneo });
+    }
+    if (query.rama) {
+      queryBuilder.andWhere('torneo.rama = :rama', { rama: query.rama });
+    }
+    if (query.modalidad) {
+      queryBuilder.andWhere('torneo.modalidad = :modalidad', { modalidad: query.modalidad });
+    }
+    if (query.categoria) {
+      queryBuilder.andWhere('torneo.categoria = :categoria', { categoria: query.categoria });
+    }
+    if (query.fase_actual) {
+      queryBuilder.andWhere('torneo.fase_actual = :fase_actual', { fase_actual: query.fase_actual });
+    }
+    if (query.estado) {
+      queryBuilder.andWhere('torneo.estado = :estado', { estado: query.estado });
+    }
+    if (query.fecha_inicio) {
+      queryBuilder.andWhere('torneo.fecha_inicio >= :fecha_inicio', { fecha_inicio: query.fecha_inicio });
+    }
+    if (query.fecha_fin) {
+      queryBuilder.andWhere('torneo.fecha_fin <= :fecha_fin', { fecha_fin: query.fecha_fin });
+    }
+
+    // Ejecutar la consulta
+    return await queryBuilder.getMany();
+  }
 }

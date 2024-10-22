@@ -207,4 +207,11 @@ export class TorneosController {
     const usrId = req.user.id;
     return this.torneosService.dashboardTorneos(usrId);
   }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthAccessGuard, RolesGuard)
+  @Get('estadisticasTorneos')
+  estadisticasTorneos(@Query() query: any) {
+    return this.torneosService.estadisticasTorneos(query);
+  }
 }
