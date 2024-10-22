@@ -33,7 +33,7 @@ export enum Fases {
     CUARTOS = 'cuartos',
     SEMIFINALES = 'semifinales',
     FINAL = 'final',
-    OTRA = 'otra'
+    // OTRA = 'otra'
 }
 
 @Entity({ name: 'torneos' })

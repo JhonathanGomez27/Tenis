@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePartidoDto } from './dto/create-partido.dto';
-import { UpdatePartidoDto } from './dto/update-partido.dto';
 import { Partido } from './entities/partido.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -33,7 +31,7 @@ export class PartidosService {
   ) {}
 
   generarBracketsPredefinidos(fase: string) {
-    console.log(fase);
+    // console.log(fase);
     // Lógica para generar los brackets predefinidos según la fase
     const brackets = [];
 
@@ -1267,8 +1265,6 @@ export class PartidosService {
       );
     }
 
-    console.log(torneo.fase_actual);
-
     switch (torneo.fase_actual) {
       case 'grupos':
         if (torneo.tipo_torneo === 'regular') {
@@ -1324,6 +1320,8 @@ export class PartidosService {
     // guardar las llaves en la bd
     const modalidad = torneo.modalidad;
     const fase = this.obtenerEtapa(llaves.length);
+
+    console.log(llaves);
     //return fase
     for (const llave of llaves) {
       let jugador1: any;
@@ -1333,6 +1331,7 @@ export class PartidosService {
       const generarBracketsPredefinidos =
         this.generarBracketsPredefinidos(fase);
       //let fase: any
+
       if (modalidad === 'singles') {
         jugador1 = llave.participante1.id;
         jugador2 = llave.participante2.id;
@@ -1514,7 +1513,7 @@ export class PartidosService {
       where: { torneo: torneo },
     });
     const partidosJugadosLlaves = await this.partidoRepository.find({
-      where: { torneo: torneo, fase: torneo.fase_actual },
+      where: { torneo: { id: torneo.id } },
     });
     const todosFinalizados = partidosJugadosLlaves.every(
       (partido) => partido.finalizado,
@@ -1547,16 +1546,25 @@ export class PartidosService {
       ganadores.push(participante);
     }
 
+    let semifinales:any = [];
+    for(const llave of partidosJugadosLlaves){
+      if(llave.fase === 'semifinales'){
+        semifinales.push(llave.resultado.ganador)
+      }
+    }
+
     //return {ganadores, llaves}
     const nuevaFase = this.obtenerSiguienteFase(torneo.fase_actual);
 
     // validar si la nueva fase es la final, no se hace todo el proceso de llaves sino que simplemente se obtiene el ganador de las dos llaves y se crea una llave final y un partido final y se retorna
+    // return {ganadores, semifinales};s
 
     if (nuevaFase === 'final') {
       //validar si es singles o dobles
+      // console.log(ganadores, nuevaFase);
       if (torneo.modalidad === 'singles') {
-        const jugador1 = ganadores[0].id;
-        const jugador2 = ganadores[1].id;
+        const jugador1 = semifinales[0].id;
+        const jugador2 = semifinales[1].id;
         const llaveCreada = this.llaveRepository.create({
           torneo: torneo,
           fase: nuevaFase,
@@ -1573,6 +1581,8 @@ export class PartidosService {
         const partidoGuardado = await this.partidoRepository.save(
           partidoCreado,
         );
+
+        // console.log(llaveCreada);
         torneo.fase_actual = 'final';
         await this.torneoRepository.save(torneo);
         return llaveGuardada;
@@ -1885,7 +1895,7 @@ export class PartidosService {
 
   async jugarFinal(torneo: Torneo) {
     const partidosJugadosLlaves = await this.partidoRepository.find({
-      where: { torneo: torneo, fase: torneo.fase_actual },
+      where: { torneo: { id: torneo.id }, fase: torneo.fase_actual },
       relations: [
         'jugador1',
         'jugador2',
@@ -2154,7 +2164,7 @@ export class PartidosService {
       const participante1 = participantesOrdenados[i];
       const participante2 =
         participantesOrdenados[participantesOrdenados.length - 1 - i];
-      console.log(participante1.id, 'vs', participante2.id);
+      // console.log(participante1.id, 'vs', participante2.id);
       const llave = {
         participante1,
         participante2, //borra lo siguiente
@@ -2189,14 +2199,14 @@ export class PartidosService {
     //obtener la cantiadad maxima de inscripciones
 
     const fases = await this.llaveRepository.find({
-      where: { torneo: torneo },
+      where: { torneo: { id: torneo.id } },
       relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2'],
     });
 
     //obtener los finalistas
 
     const final = await this.partidoRepository.findOne({
-      where: { torneo: torneo, fase: 'final' },
+      where: { torneo: { id: torneo.id } },
       relations: ['jugador1', 'jugador2', 'pareja1', 'pareja2'],
     });
 
