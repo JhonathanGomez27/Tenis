@@ -1515,7 +1515,6 @@ export class TorneosService {
   async estadisticasTorneos(query: any): Promise<Torneo[]> {
     const queryBuilder = this.torneoRepository.createQueryBuilder('torneo');
 
-    // Filtrado dinámico basado en query params
     if (query.nombre) {
       queryBuilder.andWhere('torneo.nombre LIKE :nombre', { nombre: `%${query.nombre}%` });
     }
@@ -1544,7 +1543,6 @@ export class TorneosService {
       queryBuilder.andWhere('torneo.fecha_fin <= :fecha_fin', { fecha_fin: query.fecha_fin });
     }
 
-    // Ejecutar la consulta
     return await queryBuilder.getMany();
   }
 }
