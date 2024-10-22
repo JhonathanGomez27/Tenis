@@ -103,6 +103,18 @@ export class ResultadosSetsService {
       relations: ['ganador'], 
     });
   }
+  async Top5JugadoresConMasTorneosGanados() {
+      return this.resultadosSetRepository
+          .createQueryBuilder('resultadosSet')
+          .select('jugador.nombre_a_mostrar', 'jugador_nombre_a_mostrar')
+          .addSelect('COUNT(resultadosSet.id)', 'torneosGanados')
+          .innerJoin('resultadosSet.ganador', 'jugador')
+          .where('resultadosSet.fase = :fase', { fase: 'final' })  
+          .groupBy('jugador.id')
+          .orderBy('torneosGanados', 'DESC')  
+          .limit(5)  
+          .getRawMany();
+  }
   
   async countPerdidosPareja(id: number) {
     return this.resultadosSetRepository.count({

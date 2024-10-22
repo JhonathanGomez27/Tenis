@@ -1524,73 +1524,22 @@ export class TorneosService {
   }
 
   async adminEstadisticasTorneos() {
-    // const totalTorneosTipoRegular = await this.torneoRepository.count({
-    //   where: { tipo_torneo: Tipo.REGULAR },
-    // });
-
-    // const totalTorneosTipoEscalera = await this.torneoRepository.count({
-    //   where: { tipo_torneo: Tipo.ESCALERA },
-    // });
-
-    // const totalTorneosSingles = await this.torneoRepository.count({
-    //   where: { modalidad: Modalidad.SINGLES },
-    // });
-
-    // const totalTorneosDobles = await this.torneoRepository.count({
-    //   where: { modalidad: Modalidad.DOBLES },
-    // });
-
-    // const totalTorneosEstadoIicial = await this.torneoRepository.count({
-    //   where: { estado: Estado.INICIAL },
-    // });
-
-    // const totalTorneosEstadoSorteo = await this.torneoRepository.count({
-    //   where: { estado: Estado.SORTEO },
-    // });
-
-    // const totalTorneosEstadoProgramcion = await this.torneoRepository.count({
-    //   where: { estado: Estado.PROGRAMACION },
-    // });
-
-    // const totalTorneosEstadoEnProceso = await this.torneoRepository.count({
-    //   where: { estado: Estado.PROCESO },
-    // });
-
-    // const totalTorneosEstadoFinalizado = await this.torneoRepository.count({
-    //   where: { estado: Estado.FINALIZADO },
-    // });
-
-    // const totalTorneosFaseGrupos = await this.torneoRepository.count({
-    //   where: { fase_actual: Fases.GRUPOS },
-    // });
-
-    // const totalTorneosFaseOctavos = await this.torneoRepository.count({
-    //   where: { fase_actual: Fases.OCTAVOS },
-    // });
-
-    // const totalTorneosFaseCuartos = await this.torneoRepository.count({
-    //   where: { fase_actual: Fases.CUARTOS },
-    // });
-
-    // const totalTorneosFaseSemifinales = await this.torneoRepository.count({
-    //   where: { fase_actual: Fases.SEMIFINALES },
-    // });
-
-    // const totalTorneosFaseFinal = await this.torneoRepository.count({
-    //   where: { fase_actual: Fases.FINAL },
-    // });
-
-    // const totalJugadoresMasculinos = await this.jugadorRepository.count({
-    //   where: { rama: rama.MASCULINA },
-    // });
-
-    // const totalJugadorasFemeninas = await this.jugadorRepository.count({
-    //   where: { rama: rama.FEMENINA },
-    // });
-
-    // const totalJugadoresMixta = await this.jugadorRepository.count({
-    //   where: { rama: rama.MIXTA },
-    // });
+    const stats = {
+      totalTorneosTipoRegular: await this.torneoRepository.count({ where: { tipo_torneo: Tipo.REGULAR } }),
+      totalTorneosTipoEscalera: await this.torneoRepository.count({ where: { tipo_torneo: Tipo.ESCALERA } }),
+      totalTorneosSingles: await this.torneoRepository.count({ where: { modalidad: Modalidad.SINGLES } }),
+      totalTorneosDobles: await this.torneoRepository.count({ where: { modalidad: Modalidad.DOBLES } }),
+      totalTorneosEstadoInicial: await this.torneoRepository.count({ where: { estado: Estado.INICIAL } }),
+      totalTorneosEstadoSorteo: await this.torneoRepository.count({ where: { estado: Estado.SORTEO } }),
+      totalTorneosEstadoProgramacion: await this.torneoRepository.count({ where: { estado: Estado.PROGRAMACION } }),
+      totalTorneosEstadoEnProceso: await this.torneoRepository.count({ where: { estado: Estado.PROCESO } }),
+      totalTorneosEstadoFinalizado: await this.torneoRepository.count({ where: { estado: Estado.FINALIZADO } }),
+      totalTorneosFaseGrupos: await this.torneoRepository.count({ where: { fase_actual: Fases.GRUPOS } }),
+      totalTorneosFaseOctavos: await this.torneoRepository.count({ where: { fase_actual: Fases.OCTAVOS } }),
+      totalTorneosFaseCuartos: await this.torneoRepository.count({ where: { fase_actual: Fases.CUARTOS } }),
+      totalTorneosFaseSemifinales: await this.torneoRepository.count({ where: { fase_actual: Fases.SEMIFINALES } }),
+      totalTorneosFaseFinal: await this.torneoRepository.count({ where: { fase_actual: Fases.FINAL } }),
+  };
 
     const torneos = await this.torneoRepository.find({
       relations: [
@@ -1651,8 +1600,12 @@ export class TorneosService {
       jugadoresMayorPuntaje.push(puntajes[i]);
     }
 
+    const top5JugadoresConMasTorneosGanados = await this.resultadosSetsService.Top5JugadoresConMasTorneosGanados();
+
     return {
+      stats,
       jugadoresMayorPuntaje,
+      top5JugadoresConMasTorneosGanados
     };
   }
 }
